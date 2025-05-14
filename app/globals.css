@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%; /* Gris claro neutro (#F9FAFB) */
+    --foreground: 215 28% 17%; /* Azul gris oscuro (#1E293B) */
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+    --primary: 168 76% 60%; /* Verde menta sofisticado (#34D399) */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 218 100% 65%; /* Azul vibrante (#3B82F6) */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 210 20% 92%;
+    --muted-foreground: 215 16% 50%;
+    --accent: 40 100% 66%; /* Amarillo dorado (#FACC15) */
+    --accent-foreground: 215 28% 17%;
+    --destructive: 355 90% 60%; /* Rojo coral fuerte (#EF4444) */
+    --destructive-foreground: 210 40% 98%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 168 76% 60%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 215 28% 17%; /* Azul gris oscuro (#1E293B) */
+    --foreground: 210 40% 98%; /* Gris muy claro (#F1F5F9) */
+    --card: 215 28% 17%;
+    --card-foreground: 210 40% 98%;
+    --popover: 215 28% 17%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 168 76% 60%;
+    --primary-foreground: 215 28% 17%;
+    --secondary: 218 100% 65%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 25% 26%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 40 100% 66%;
+    --accent-foreground: 215 28% 17%;
+    --destructive: 355 70% 40%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 25% 26%;
+    --input: 215 25% 26%;
+    --ring: 168 76% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.prose {
+  @apply text-foreground;
+  max-width: 65ch;
+}
+
+.prose p {
+  @apply mb-4 leading-7;
+}
+
+.prose ul {
+  @apply my-6 ml-6 list-disc [&>li]:mt-2;
+}
+
+@layer components {
+  .filter-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+  }
+
+  .filter-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .filter-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .filter-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--primary) / 0.3);
+    border-radius: 20px;
+  }
+
+  .filter-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--primary) / 0.5);
+  }
+}
