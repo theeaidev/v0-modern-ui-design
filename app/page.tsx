@@ -467,23 +467,6 @@ export default function Home() {
                       strokeLinejoin="round"
                       className="h-5 w-5"
                     >
-                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                    </svg>
-                    <span className="sr-only">Twitter</span>
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-full">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5"
-                    >
                       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -523,23 +506,6 @@ export default function Home() {
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                   </svg>
                   <span className="sr-only">Facebook</span>
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                  </svg>
-                  <span className="sr-only">Twitter</span>
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <svg
@@ -1006,3 +972,241 @@ const testimonials = [
     text: "Gracias a esta plataforma he podido expandir mi negocio a nuevas áreas. El sistema de mensajería con los clientes potenciales funciona de maravilla.",
   },
 ]
+
+// Contact Section
+const ContactSection = () => {
+  return (
+    <section id="contact" className="py-16 md:py-24 bg-muted/50">
+      <div className="container">
+        <div className="flex flex-col items-center text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Contacto</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            ¿Tienes alguna pregunta sobre cómo publicar tu anuncio? Estamos aquí para ayudarte.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <label htmlFor="name" className="block text-sm font-medium">
+                Nombre
+              </label>
+              <Input id="name" placeholder="Tu nombre" />
+            </div>
+            <div className="space-y-4">
+              <label htmlFor="email" className="block text-sm font-medium">
+                Correo electrónico
+              </label>
+              <Input id="email" type="email" placeholder="tu@email.com" />
+            </div>
+            <div className="space-y-4">
+              <label htmlFor="message" className="block text-sm font-medium">
+                Mensaje
+              </label>
+              <Textarea id="message" placeholder="¿En qué podemos ayudarte?" rows={5} />
+            </div>
+            <Button className="w-full md:w-auto">Enviar mensaje</Button>
+          </div>
+          <div className="space-y-6">
+            <div className="aspect-video w-full bg-muted rounded-lg overflow-hidden">
+              {/* Map placeholder */}
+              <div className="w-full h-full bg-muted flex items-center justify-center">
+                <MapPin className="h-12 w-12 text-muted-foreground/50" />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <h3 className="font-medium">Dirección</h3>
+                  <p className="text-muted-foreground">Calle Principal 123, Ciudad, CP 12345</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Phone className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <h3 className="font-medium">Teléfono</h3>
+                  <p className="text-muted-foreground">+34 123 456 789</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <h3 className="font-medium">Email</h3>
+                  <p className="text-muted-foreground">info@serviciosdirectorio.com</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <Button variant="outline" size="icon" className="rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                </svg>
+                <span className="sr-only">Facebook</span>
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+                <span className="sr-only">Instagram</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Footer Section
+const FooterSection = () => {
+  return (
+    <footer className="border-t bg-muted/30">
+      <div className="container py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Directorio Latinos</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              La plataforma líder para publicar y encontrar anuncios de servicios profesionales desde 2020.
+            </p>
+            <div className="flex gap-4">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                </svg>
+                <span className="sr-only">Facebook</span>
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+                <span className="sr-only">Instagram</span>
+              </Button>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Enlaces</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  Inicio
+                </Link>
+              </li>
+              <li>
+                <Link href="#services" className="text-sm text-muted-foreground hover:text-foreground">
+                  Servicios
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  Tienda
+                </Link>
+              </li>
+              <li>
+                <Link href="#about" className="text-sm text-muted-foreground hover:text-foreground">
+                  Quiénes somos
+                </Link>
+              </li>
+              <li>
+                <Link href="#contact" className="text-sm text-muted-foreground hover:text-foreground">
+                  Contacto
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  Publicar anuncio
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  Iniciar sesión
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Contacto</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                <span className="text-sm text-muted-foreground">Calle Principal 123, Ciudad, CP 12345</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Phone className="h-5 w-5 text-primary mt-0.5" />
+                <span className="text-sm text-muted-foreground">+34 123 456 789</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-primary mt-0.5" />
+                <span className="text-sm text-muted-foreground">info@serviciosdirectorio.com</span>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Suscríbete</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Suscríbete a nuestras novedades y recibe alertas sobre nuevos anuncios en tu área.
+            </p>
+            <div className="flex gap-2">
+              <Input placeholder="Tu email" className="max-w-[220px]" />
+              <Button>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="border-t mt-8 pt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Directorio Latinos. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+  )
+}
