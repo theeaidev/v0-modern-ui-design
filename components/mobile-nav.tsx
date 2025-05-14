@@ -42,8 +42,8 @@ export function MobileNav({ currentPath = "" }: MobileNavProps) {
         <SheetHeader className="mb-6">
           <SheetTitle>
             <div className="flex items-center gap-2">
-              <Image src="/placeholder.svg?height=32&width=32" alt="Logo" width={32} height={32} />
-              <span className="text-xl font-bold">ServiciosDirectorio</span>
+              <Image src="/logo.png" alt="Directorio Latinos Logo" width={32} height={32} className="rounded-sm" />
+              <span className="text-xl font-bold">Directorio Latinos</span>
             </div>
           </SheetTitle>
         </SheetHeader>

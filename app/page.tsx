@@ -80,13 +80,11 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-8 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border">
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold mb-2">¿Ofreces algún servicio?</h2>
-                <p className="text-muted-foreground">
-                  Publica tu anuncio y llega a miles de clientes potenciales
-                </p>
+                <p className="text-muted-foreground">Publica tu anuncio y llega a miles de clientes potenciales</p>
               </div>
               <Button size="lg" className="whitespace-nowrap gap-2">
                 <PlusCircle className="h-5 w-5" />
-                Publicar anuncio 
+                Publicar anuncio
               </Button>
             </div>
           </div>
@@ -504,7 +502,7 @@ export default function Home() {
         <div className="container py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">ServiciosDirectorio</h3>
+              <h3 className="text-lg font-semibold mb-4">Directorio Latinos</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 La plataforma líder para publicar y encontrar anuncios de servicios profesionales desde 2020.
               </p>
@@ -636,7 +634,7 @@ export default function Home() {
           </div>
           <div className="border-t mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ServiciosDirectorio. Todos los derechos reservados.
+              © {new Date().getFullYear()} Directorio Latinos. Todos los derechos reservados.
             </p>
           </div>
         </div>

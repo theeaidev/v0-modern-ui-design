@@ -60,27 +60,26 @@ export default function TiendaPage() {
                 Elige el plan que mejor se adapte a tus necesidades y comienza a publicar tus anuncios
               </p>
               <div className="flex flex-wrap justify-center gap-4 my-6">
-                            <div className="flex flex-wrap justify-center gap-3">
-                <Badge
-                  variant="outline"
-                  className="bg-green-100 text-green-700 border-green-200 hover:bg-green-200 transition-colors font-medium px-3 py-1.5"
-                >
-                  Publicación inmediata
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 transition-colors font-medium px-3 py-1.5"
-                >
-                  Visibilidad garantizada
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200 transition-colors font-medium px-3 py-1.5"
-                >
-                  Soporte personalizado
-                </Badge>
-              </div>
-
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Badge
+                    variant="outline"
+                    className="bg-green-100 text-green-700 border-green-200 hover:bg-green-200 transition-colors font-medium px-3 py-1.5"
+                  >
+                    Publicación inmediata
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 transition-colors font-medium px-3 py-1.5"
+                  >
+                    Visibilidad garantizada
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200 transition-colors font-medium px-3 py-1.5"
+                  >
+                    Soporte personalizado
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
@@ -691,7 +690,7 @@ export default function TiendaPage() {
         <div className="container py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">ServiciosDirectorio</h3>
+              <h3 className="text-lg font-semibold mb-4">Directorio Latinos</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 La plataforma líder para publicar y encontrar anuncios de servicios profesionales desde 2020.
               </p>
@@ -849,7 +848,7 @@ export default function TiendaPage() {
           </div>
           <div className="border-t mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ServiciosDirectorio. Todos los derechos reservados.
+              © {new Date().getFullYear()} Directorio Latinos. Todos los derechos reservados.
             </p>
           </div>
         </div>

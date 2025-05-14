@@ -290,7 +290,7 @@ export default function ServiciosPage() {
     "Vizcaya",
     "Zamora",
     "Zaragoza",
-    "Online"
+    "Online",
   ]
 
   // Get unique categories and subcategories
@@ -325,7 +325,7 @@ export default function ServiciosPage() {
       "Vivienda en Haití",
       "Vivienda en Guayana Francesa",
     ],
-    Otros: []
+    Otros: [],
   }
 
   return (
@@ -826,7 +826,7 @@ export default function ServiciosPage() {
         <div className="container py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">ServiciosDirectorio</h3>
+              <h3 className="text-lg font-semibold mb-4">Directorio Latinos</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 La plataforma líder para publicar y encontrar anuncios de servicios profesionales desde 2020.
               </p>
@@ -985,7 +985,7 @@ export default function ServiciosPage() {
           </div>
           <div className="border-t mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ServiciosDirectorio. Todos los derechos reservados.
+              © {new Date().getFullYear()} Directorio Latinos. Todos los derechos reservados.
             </p>
           </div>
         </div>

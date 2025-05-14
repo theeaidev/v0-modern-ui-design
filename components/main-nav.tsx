@@ -15,8 +15,8 @@ export function MainNav() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/placeholder.svg?height=32&width=32" alt="Logo" width={32} height={32} />
-          <span className="text-xl font-bold">ServiciosDirectorio</span>
+          <Image src="/logo.png" alt="Directorio Latinos Logo" width={40} height={40} className="rounded-sm" />
+          <span className="text-xl font-bold">Directorio Latinos</span>
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/" className={`text-sm font-medium ${pathname === "/" ? "text-primary" : "hover:text-primary"}`}>
