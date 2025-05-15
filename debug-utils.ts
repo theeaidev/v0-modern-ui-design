@@ -19,6 +19,19 @@ export const debugError = (location: string, error: any) => {
 export const isClient = typeof window !== "undefined"
 export const isServer = !isClient
 
+// Add a new utility function to safely get window location
+export const getSafeWindowLocation = () => {
+  if (typeof window === "undefined") {
+    return {
+      origin: "https://example.com", // Fallback for SSR
+      pathname: "/",
+      search: "",
+      hash: "",
+    }
+  }
+  return window.location
+}
+
 // Log environment information
 export const logEnvironmentInfo = () => {
   debugLog("Environment", {

@@ -301,9 +301,13 @@ export function AdCard({
               <div className="grid grid-cols-2 gap-4 py-4">
                 <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                      `${window.location.origin}/servicios/${id}`,
-                    )}`}
+                    href={
+                      typeof window !== "undefined"
+                        ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                            `${window.location.origin}/servicios/${id}`,
+                          )}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -326,9 +330,13 @@ export function AdCard({
                 </Button>
                 <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(
-                      `¡Mira este anuncio en Directorio Latino! ${title} - ${window.location.origin}/servicios/${id}`,
-                    )}`}
+                    href={
+                      typeof window !== "undefined"
+                        ? `https://wa.me/?text=${encodeURIComponent(
+                            `¡Mira este anuncio en Directorio Latino! ${title} - ${window.location.origin}/servicios/${id}`,
+                          )}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
