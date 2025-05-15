@@ -4,7 +4,21 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { Check, Upload, Clock, AlertCircle, Calendar, ImageIcon, Film, MessageCircle, Tag, X } from "lucide-react"
+import {
+  Check,
+  Upload,
+  Clock,
+  AlertCircle,
+  Calendar,
+  ImageIcon,
+  Film,
+  MessageCircle,
+  Tag,
+  X,
+  CreditCard,
+  Building,
+  Phone,
+} from "lucide-react"
 
 import { MainNav } from "@/components/main-nav"
 import { Button } from "@/components/ui/button"
@@ -15,6 +29,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,11 +41,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { SiteFooter } from "@/components/site-footer"
 
 export default function TiendaPage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<string>("bizum")
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -213,6 +230,12 @@ export default function TiendaPage() {
                       <Check className="h-5 w-5 text-blue-500 mr-2 mt-0.5 shrink-0" />
                       <span>
                         <strong>1 vídeo</strong> de máximo <strong>60 segundos</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-blue-500 mr-2 mt-0.5 shrink-0" />
+                      <span>
+                        <strong>Anuncio destacado</strong> por 1 semana
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -443,7 +466,7 @@ export default function TiendaPage() {
                       <Check className="h-4 w-4 mx-auto text-blue-500" />
                     </td>
                   </tr>
-                  <tr>
+                  <tr className="border-b">
                     <td className="p-4 flex items-center">
                       <Tag className="h-4 w-4 mr-2 text-muted-foreground" />
                       Descuento en ferias
@@ -452,6 +475,16 @@ export default function TiendaPage() {
                       <X className="h-4 w-4 mx-auto text-red-500" />
                     </td>
                     <td className="p-4 text-center">25% descuento</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 flex items-center">
+                      <Check className="h-4 w-4 mr-2 text-muted-foreground" />
+                      Anuncio destacado
+                    </td>
+                    <td className="p-4 text-center">
+                      <X className="h-4 w-4 mx-auto text-red-500" />
+                    </td>
+                    <td className="p-4 text-center">1 semana</td>
                   </tr>
                 </tbody>
               </table>
@@ -465,33 +498,6 @@ export default function TiendaPage() {
             <div className="max-w-3xl mx-auto">
               <div className="bg-muted/30 rounded-lg p-6 border">
                 <h2 className="text-2xl font-bold mb-4">Método de pago</h2>
-
-                <div className="flex items-start mb-6">
-                  <div className="bg-blue-100 p-2 rounded-full mr-4">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="text-blue-500"
-                    >
-                      <path
-                        d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                      <circle cx="12" cy="16" r="1" fill="currentColor" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">De momento, los pagos se realizan por Bizum</h3>
-                    <p className="text-muted-foreground">
-                      Una vez confirmado el pago, el anuncio se activa automáticamente por 3 meses.
-                    </p>
-                  </div>
-                </div>
 
                 {selectedPlan && (
                   <div className="bg-background rounded-lg p-6 border mb-6">
@@ -516,15 +522,97 @@ export default function TiendaPage() {
                         <span className="font-bold text-lg">{selectedPlan === "basica" ? "15 €" : "30 €"}</span>
                       </div>
                       <Separator />
-                      <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+
+                      {/* Payment Methods */}
+                      <div className="pt-4">
+                        <h4 className="font-medium mb-3">Selecciona un método de pago:</h4>
+                        <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="gap-4">
+                          <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50 transition-colors">
+                            <RadioGroupItem value="bizum" id="bizum" />
+                            <Label htmlFor="bizum" className="flex items-center cursor-pointer">
+                              <Phone className="h-5 w-5 mr-2 text-blue-600" />
+                              <span>Bizum</span>
+                            </Label>
+                          </div>
+
+                          <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50 transition-colors">
+                            <RadioGroupItem value="paypal" id="paypal" />
+                            <Label htmlFor="paypal" className="flex items-center cursor-pointer">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-5 w-5 mr-2 text-blue-700"
+                              >
+                                <path d="M7 11l5-5 5 5" />
+                                <path d="M7 13l5 5 5-5" />
+                              </svg>
+                              <span>PayPal</span>
+                            </Label>
+                          </div>
+
+                          <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50 transition-colors">
+                            <RadioGroupItem value="transfer" id="transfer" />
+                            <Label htmlFor="transfer" className="flex items-center cursor-pointer">
+                              <Building className="h-5 w-5 mr-2 text-gray-600" />
+                              <span>Transferencia bancaria</span>
+                            </Label>
+                          </div>
+
+                          <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50 transition-colors">
+                            <RadioGroupItem value="subscription" id="subscription" />
+                            <Label htmlFor="subscription" className="flex items-center cursor-pointer">
+                              <CreditCard className="h-5 w-5 mr-2 text-green-600" />
+                              <span>Suscripción automática (tarjeta)</span>
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+
+                      {/* Payment Instructions based on selected method */}
+                      <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mt-4">
                         <div className="flex">
                           <AlertCircle className="h-5 w-5 text-amber-500 mr-2 shrink-0" />
                           <div>
-                            <p className="text-sm text-amber-800">
-                              Para completar tu pago, realiza una transferencia por Bizum al número{" "}
-                              <strong>600 123 456</strong> con el concepto{" "}
-                              <strong>"Anuncio {selectedPlan === "basica" ? "Básico" : "Premium"}"</strong>
-                            </p>
+                            {paymentMethod === "bizum" && (
+                              <p className="text-sm text-amber-800">
+                                Para completar tu pago, realiza una transferencia por Bizum al número{" "}
+                                <strong>600 123 456</strong> con el concepto{" "}
+                                <strong>"Anuncio {selectedPlan === "basica" ? "Básico" : "Premium"}"</strong>
+                              </p>
+                            )}
+                            {paymentMethod === "paypal" && (
+                              <p className="text-sm text-amber-800">
+                                Serás redirigido a PayPal para completar el pago de{" "}
+                                <strong>{selectedPlan === "basica" ? "15 €" : "30 €"}</strong> al confirmar.
+                              </p>
+                            )}
+                            {paymentMethod === "transfer" && (
+                              <p className="text-sm text-amber-800">
+                                Realiza una transferencia bancaria a la siguiente cuenta:
+                                <br />
+                                <strong>IBAN: ES12 3456 7890 1234 5678 9012</strong>
+                                <br />
+                                <strong>Beneficiario: Directorio Latinos SL</strong>
+                                <br />
+                                <strong>
+                                  Concepto: Anuncio {selectedPlan === "basica" ? "Básico" : "Premium"} - Tu nombre
+                                </strong>
+                              </p>
+                            )}
+                            {paymentMethod === "subscription" && (
+                              <p className="text-sm text-amber-800">
+                                Se realizará un cargo mensual de{" "}
+                                <strong>{selectedPlan === "basica" ? "5 €" : "10 €"}</strong> a tu tarjeta. Puedes
+                                cancelar la suscripción en cualquier momento desde tu perfil.
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -534,39 +622,75 @@ export default function TiendaPage() {
 
                 {selectedPlan && !paymentConfirmed ? (
                   <div className="space-y-6">
-                    <div className="space-y-4">
-                      <Label htmlFor="payment-proof">Comprobante de pago (opcional)</Label>
-                      <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                        <Input id="payment-proof" type="file" className="hidden" onChange={handleFileChange} />
-                        <Label htmlFor="payment-proof" className="cursor-pointer">
-                          <div className="flex flex-col items-center">
-                            <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                            <span className="text-sm font-medium mb-1">
-                              {paymentProof ? paymentProof.name : "Subir comprobante de Bizum"}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              Arrastra y suelta o haz clic para seleccionar
-                            </span>
-                          </div>
-                        </Label>
+                    {(paymentMethod === "bizum" || paymentMethod === "transfer") && (
+                      <div className="space-y-4">
+                        <Label htmlFor="payment-proof">Comprobante de pago (opcional)</Label>
+                        <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                          <Input id="payment-proof" type="file" className="hidden" onChange={handleFileChange} />
+                          <Label htmlFor="payment-proof" className="cursor-pointer">
+                            <div className="flex flex-col items-center">
+                              <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                              <span className="text-sm font-medium mb-1">
+                                {paymentProof
+                                  ? paymentProof.name
+                                  : `Subir comprobante de ${paymentMethod === "bizum" ? "Bizum" : "transferencia"}`}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                Arrastra y suelta o haz clic para seleccionar
+                              </span>
+                            </div>
+                          </Label>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {paymentMethod === "subscription" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <Label htmlFor="card-name">Nombre en la tarjeta</Label>
+                            <Input id="card-name" placeholder="Nombre completo" />
+                          </div>
+                          <div>
+                            <Label htmlFor="card-number">Número de tarjeta</Label>
+                            <Input id="card-number" placeholder="1234 5678 9012 3456" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="expiry">Fecha de caducidad</Label>
+                              <Input id="expiry" placeholder="MM/AA" />
+                            </div>
+                            <div>
+                              <Label htmlFor="cvc">CVC</Label>
+                              <Input id="cvc" placeholder="123" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button className="w-full">He realizado el pago</Button>
+                        <Button className="w-full">
+                          {paymentMethod === "subscription" || paymentMethod === "paypal"
+                            ? "Proceder al pago"
+                            : "He realizado el pago"}
+                        </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Confirmar pago</AlertDialogTitle>
                           <AlertDialogDescription>
-                            ¿Has realizado el pago por Bizum? Al confirmar, nuestro equipo verificará tu pago y activará
-                            tu anuncio lo antes posible.
+                            {paymentMethod === "subscription"
+                              ? "¿Confirmas la suscripción automática? Se realizará un cargo mensual a tu tarjeta."
+                              : paymentMethod === "paypal"
+                                ? "Serás redirigido a PayPal para completar el pago."
+                                : `¿Has realizado el pago por ${paymentMethod === "bizum" ? "Bizum" : "transferencia bancaria"}? Al confirmar, nuestro equipo verificará tu pago y activará tu anuncio lo antes posible.`}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={handlePaymentConfirm}>Confirmar pago</AlertDialogAction>
+                          <AlertDialogAction onClick={handlePaymentConfirm}>Confirmar</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -578,7 +702,11 @@ export default function TiendaPage() {
                     </div>
                     <h3 className="text-lg font-medium text-green-800 mb-2">¡Pago confirmado!</h3>
                     <p className="text-green-700 mb-4">
-                      Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve.
+                      {paymentMethod === "subscription"
+                        ? "Tu suscripción ha sido activada correctamente. Tu anuncio ya está activo."
+                        : paymentMethod === "paypal"
+                          ? "El pago con PayPal ha sido procesado correctamente. Tu anuncio ya está activo."
+                          : "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."}
                     </p>
                     <Button variant="outline" asChild>
                       <Link href="/servicios">Ver anuncios</Link>
@@ -647,8 +775,8 @@ export default function TiendaPage() {
                   <AccordionTrigger className="px-4">¿Qué métodos de pago aceptan?</AccordionTrigger>
                   <AccordionContent className="px-4">
                     <p>
-                      Actualmente solo aceptamos pagos a través de Bizum. Estamos trabajando para implementar más
-                      métodos de pago en el futuro próximo, como tarjetas de crédito y PayPal.
+                      Aceptamos pagos a través de Bizum, PayPal, transferencia bancaria y suscripción automática con
+                      tarjeta de crédito o débito.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
@@ -686,157 +814,7 @@ export default function TiendaPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30">
-        <div className="container py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Directorio Latinos</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                La plataforma líder para publicar y encontrar anuncios de servicios profesionales desde 2020.
-              </p>
-              <div className="flex gap-4">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                  </svg>
-                  <span className="sr-only">Facebook</span>
-                </Button>
-
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                  </svg>
-                  <span className="sr-only">Instagram</span>
-                </Button>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Enlaces</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-                    Inicio
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/servicios" className="text-sm text-muted-foreground hover:text-foreground">
-                    Servicios
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tienda" className="text-sm text-muted-foreground hover:text-foreground">
-                    Tienda
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/#about" className="text-sm text-muted-foreground hover:text-foreground">
-                    Quiénes somos
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/#contact" className="text-sm text-muted-foreground hover:text-foreground">
-                    Contacto
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Contacto</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-primary mt-0.5"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  <span className="text-sm text-muted-foreground">+34 123 456 789</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-primary mt-0.5"
-                  >
-                    <rect width="20" height="14" x="2" y="5" rx="2" />
-                    <path d="m22 5-10 7L2 5" />
-                  </svg>
-                  <span className="text-sm text-muted-foreground">info@serviciosdirectorio.com</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Suscríbete</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Suscríbete a nuestras novedades y recibe alertas sobre nuevos anuncios en tu área.
-              </p>
-              <div className="flex gap-2">
-                <Input placeholder="Tu email" className="max-w-[220px]" />
-                <Button>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div className="border-t mt-8 pt-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Directorio Latinos. Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

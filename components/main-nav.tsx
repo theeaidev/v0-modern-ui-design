@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, Briefcase } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { MobileNav } from "@/components/mobile-nav"
@@ -27,6 +27,20 @@ export function MainNav() {
             className={`text-sm font-medium ${pathname === "/servicios" ? "text-primary" : "hover:text-primary"}`}
           >
             Servicios
+          </Link>
+          <Link
+            href="/servicios?categoria=Empleo"
+            className={`text-sm font-medium relative group flex items-center gap-1 ${
+              pathname.includes("categoria=Empleo") ? "text-primary" : "hover:text-primary"
+            }`}
+          >
+            <Briefcase className="h-4 w-4" />
+            <span>Empleo</span>
+            <span
+              className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                pathname.includes("categoria=Empleo") ? "w-full" : "w-0 group-hover:w-full"
+              }`}
+            ></span>
           </Link>
           <Link href="/tienda" className="text-sm font-medium hover:text-primary">
             Tienda

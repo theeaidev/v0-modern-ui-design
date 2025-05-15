@@ -3,124 +3,105 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { PlusCircle } from "lucide-react"
+import { Menu, X, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 
 interface MobileNavProps {
-  currentPath?: string
+  currentPath: string
 }
 
-export function MobileNav({ currentPath = "" }: MobileNavProps) {
-  const [open, setOpen] = useState(false)
+export function MobileNav({ currentPath }: MobileNavProps) {
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="md:hidden" aria-label="Abrir menú">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-6 w-6"
-          >
-            <line x1="4" x2="20" y1="12" y2="12" />
-            <line x1="4" x2="20" y1="6" y2="6" />
-            <line x1="4" x2="20" y1="18" y2="18" />
-          </svg>
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-        <SheetHeader className="mb-6">
-          <SheetTitle>
-            <div className="flex items-center gap-2">
-              <Image src="/logo.png" alt="Directorio Latinos Logo" width={32} height={32} className="rounded-sm" />
+    <div className="md:hidden">
+      <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+        <Menu className="h-6 w-6" />
+        <span className="sr-only">Abrir menú</span>
+      </Button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-white shadow-lg">
+          <div className="container flex h-16 items-center justify-between">
+            <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+              <Image src="/logo.png" alt="Directorio Latinos Logo" width={40} height={40} className="rounded-sm" />
               <span className="text-xl font-bold">Directorio Latinos</span>
-            </div>
-          </SheetTitle>
-        </SheetHeader>
-        <nav className="flex flex-col gap-4">
-          <SheetClose asChild>
-            <Link
-              href="/"
-              className={`flex items-center py-2 px-3 rounded-md hover:bg-muted ${
-                currentPath === "/" ? "font-medium text-primary" : ""
-              }`}
-            >
-              Inicio
             </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/servicios"
-              className={`flex items-center py-2 px-3 rounded-md hover:bg-muted ${
-                currentPath === "/servicios" ? "font-medium text-primary" : ""
-              }`}
-            >
-              Servicios
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link href="/tienda" className="flex items-center py-2 px-3 rounded-md hover:bg-muted">
-              Tienda
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/#about"
-              className="flex items-center py-2 px-3 rounded-md hover:bg-muted"
-              onClick={() => {
-                // Cerrar el menú y desplazarse a la sección correspondiente
-                if (currentPath === "/") {
-                  setTimeout(() => {
-                    document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
-                  }, 100)
-                }
-              }}
-            >
-              Quiénes somos
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/#contact"
-              className="flex items-center py-2 px-3 rounded-md hover:bg-muted"
-              onClick={() => {
-                // Cerrar el menú y desplazarse a la sección correspondiente
-                if (currentPath === "/") {
-                  setTimeout(() => {
-                    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
-                  }, 100)
-                }
-              }}
-            >
-              Contacto
-            </Link>
-          </SheetClose>
-          <Separator className="my-2" />
-          <SheetClose asChild>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="#">Iniciar sesión</Link>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <X className="h-6 w-6 text-gray-500" />
+              <span className="sr-only">Cerrar menú</span>
             </Button>
-          </SheetClose>
-          <SheetClose asChild>
-            <Button className="gap-2 mt-2" asChild>
-              <Link href="#">
+          </div>
+          <div className="container py-4">
+            <nav className="flex flex-col space-y-6">
+              <Link
+                href="/"
+                className={`text-lg font-medium ${
+                  currentPath === "/" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Inicio
+              </Link>
+              <Link
+                href="/servicios"
+                className={`text-lg font-medium ${
+                  currentPath === "/servicios" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Servicios
+              </Link>
+              <Link
+                href="/tienda"
+                className={`text-lg font-medium ${
+                  currentPath === "/tienda" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Tienda
+              </Link>
+              <Link
+                href="/#about"
+                className={`text-lg font-medium ${
+                  currentPath === "/#about" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Quiénes somos
+              </Link>
+              <Link
+                href="/#contact"
+                className={`text-lg font-medium ${
+                  currentPath === "/#contact" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                Contacto
+              </Link>
+
+              <div className="border-t my-4"></div>
+
+              <Button
+                variant="outline"
+                className="w-full justify-center border-gray-300 text-gray-800"
+                onClick={() => setIsOpen(false)}
+              >
+                Iniciar sesión
+              </Button>
+
+              <Button
+                className="w-full justify-center gap-2 bg-emerald-400 hover:bg-emerald-500 text-white"
+                onClick={() => setIsOpen(false)}
+              >
                 <PlusCircle className="h-4 w-4" />
                 Publicar anuncio gratis
-              </Link>
-            </Button>
-          </SheetClose>
-        </nav>
-      </SheetContent>
-    </Sheet>
+              </Button>
+            </nav>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
