@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { isClient } from "@/debug-utils"
 
 export interface AdCardProps {
   id: number
@@ -89,6 +90,12 @@ export function AdCard({
   const whatsappMessage = encodeURIComponent(
     `Hola ${title}, he visto tu anuncio en Directorio Latino, necesito información.`,
   )
+
+  // Safe way to get origin
+  const getOrigin = () => {
+    if (!isClient) return "https://example.com"
+    return window.location.origin
+  }
 
   return (
     <Card className="overflow-hidden group transition-all duration-300 hover:shadow-lg h-full flex flex-col">
@@ -301,13 +308,9 @@ export function AdCard({
               <div className="grid grid-cols-2 gap-4 py-4">
                 <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
-                    href={
-                      typeof window !== "undefined"
-                        ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                            `${window.location.origin}/servicios/${id}`,
-                          )}`
-                        : "#"
-                    }
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                      `${getOrigin()}/servicios/${id}`,
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -330,13 +333,9 @@ export function AdCard({
                 </Button>
                 <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
-                    href={
-                      typeof window !== "undefined"
-                        ? `https://wa.me/?text=${encodeURIComponent(
-                            `¡Mira este anuncio en Directorio Latino! ${title} - ${window.location.origin}/servicios/${id}`,
-                          )}`
-                        : "#"
-                    }
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `¡Mira este anuncio en Directorio Latino! ${title} - ${getOrigin()}/servicios/${id}`,
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -358,7 +357,7 @@ export function AdCard({
                     href={`mailto:?subject=${encodeURIComponent(
                       `Anuncio en Directorio Latino: ${title}`,
                     )}&body=${encodeURIComponent(
-                      `¡Mira este anuncio en Directorio Latino!\n\n${title}\n\n${description}\n\n${window.location.origin}/servicios/${id}`,
+                      `¡Mira este anuncio en Directorio Latino!\n\n${title}\n\n${description}\n\n${getOrigin()}/servicios/${id}`,
                     )}`}
                   >
                     <Mail className="h-5 w-5" />
@@ -369,7 +368,9 @@ export function AdCard({
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/servicios/${id}`)
+                    if (isClient) {
+                      navigator.clipboard.writeText(`${getOrigin()}/servicios/${id}`)
+                    }
                   }}
                 >
                   <svg
