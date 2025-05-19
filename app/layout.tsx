@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import DebugApp from "./_debug-app"
 import { debugLog } from "@/debug-utils"
+import { AuthProvider } from "@/contexts/auth-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,7 +27,9 @@ export default function RootLayout({
         <link rel="icon" href="/logo.png" sizes="any" />
       </head>
       <body className={inter.className}>
-        <DebugApp>{children}</DebugApp>
+        <AuthProvider>
+          <DebugApp>{children}</DebugApp>
+        </AuthProvider>
       </body>
     </html>
   )

@@ -7,9 +7,12 @@ import { PlusCircle, Briefcase } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { MobileNav } from "@/components/mobile-nav"
+import { UserDropdown } from "@/components/user-dropdown"
+import { useAuth } from "@/contexts/auth-context"
 
 export function MainNav() {
   const pathname = usePathname()
+  const { user, isLoading } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -61,12 +64,18 @@ export function MainNav() {
           </Link>
         </nav>
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="ghost" size="sm">
-            Iniciar sesión
-          </Button>
-          <Button variant="default" size="sm" className="gap-2">
-            <PlusCircle className="h-4 w-4" />
-            Publicar anuncio gratis
+          {user ? (
+            <UserDropdown />
+          ) : (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/login">Iniciar sesión</Link>
+            </Button>
+          )}
+          <Button variant="default" size="sm" className="gap-2" asChild>
+            <Link href={user ? "/dashboard/publicar" : "/login"}>
+              <PlusCircle className="h-4 w-4" />
+              Publicar anuncio gratis
+            </Link>
           </Button>
         </div>
 
