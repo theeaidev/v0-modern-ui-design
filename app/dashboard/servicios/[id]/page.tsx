@@ -125,13 +125,12 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
                     </p>
                   </div>
                 )}
-              </div>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="stats" className="space-y-4 pt-6">
-              <div>
-                <h3 className="text-lg font-medium">Estadísticas</h3>
-                <p className="text-muted-foreground">
+              <TabsContent value="stats" className="space-y-4 pt-6">
+                <div>
+                  <h3 className="text-lg font-medium">Estadísticas</h3>
+                  <p className="text-muted-foreground">
                     Aquí irán las estadísticas del anuncio.
                   </p>
                 </div>
@@ -163,7 +162,7 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
             </Card>
           </div>
         </div>
-    
+      </div>
     )
   } catch (error) {
     notFound()
