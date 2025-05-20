@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getSupabaseBrowserClient } from "@/lib/supabase"
+import { getProfileData } from "@/app/actions/profile-actions"
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth()
@@ -27,7 +27,7 @@ export default function DashboardPage() {
     }
   }, [user, isLoading, router])
 
-  // Fetch profile data
+  // Fetch profile data using server action
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return
@@ -36,21 +36,18 @@ export default function DashboardPage() {
         setProfileLoading(true)
         setProfileError(null)
 
-        // Get the Supabase client
-        const supabase = getSupabaseBrowserClient()
-
-        // Fetch the profile with error handling
-        const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle()
+        // Use the server action to get profile data
+        const { profile, error } = await getProfileData(user.id)
 
         if (error) {
           console.error("Error fetching profile:", error)
-          setProfileError(error.message)
+          setProfileError(error)
           // Continue with default profile data
         }
 
         // If we have data, use it. Otherwise, create a default profile object
         setProfileData(
-          data || {
+          profile || {
             id: user.id,
             full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
             email: user.email,
