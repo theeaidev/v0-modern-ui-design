@@ -36,7 +36,9 @@ export async function getServiceListings({
     let query = supabase.from("service_listings").select(
       `
         *,
-        images:service_images(*)
+        images:service_images(*),
+        category:categories(*),
+        subcategory:subcategories(*)
       `,
       { count: "exact" }
     );
@@ -98,6 +100,15 @@ export async function getServiceListings({
     if (error) {
       throw new Error(error.message);
     }
+
+    // Minimal join test
+    const minimalTest = await supabase
+      .from("service_listings")
+      .select("*, category:categories(*), subcategory:subcategories(*)");
+    console.log(
+      "Minimal join test result:",
+      JSON.stringify(minimalTest, null, 2)
+    );
 
     return {
       listings: data,

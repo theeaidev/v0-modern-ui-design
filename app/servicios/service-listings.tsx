@@ -30,20 +30,32 @@ export async function ServiceListings({
       sort,
     });
 
+    console.log("Database listings:", JSON.stringify(listings, null, 2));
     // Map database listings to AdCard props
     const dbListings = listings.map((listing) => {
-      // Get the first image or use a placeholder
+      console.log("Listing in map:", listing);
+      // Defensive: handle id as string or number
+      const id =
+        typeof listing.id === "string"
+          ? Number.parseInt(listing.id)
+          : listing.id;
+      // Defensive: handle missing category/subcategory
+      const category =
+        listing.category?.name || listing.category_id?.toString() || "";
+      const subcategory =
+        listing.subcategory?.name || listing.subcategory_id?.toString() || "";
+      // Defensive: handle missing images
       const imageUrl =
         listing.images && listing.images.length > 0
           ? listing.images[0].url
           : "/placeholder.svg?height=300&width=400";
 
       return {
-        id: Number.parseInt(listing.id),
-        title: listing.title,
-        category: listing.category_id.toString(), // We'll need to map this to a category name in a real implementation
-        subcategory: listing.subcategory_id?.toString() || "",
-        description: listing.description,
+        id,
+        title: listing.title || "",
+        category,
+        subcategory,
+        description: listing.description || "",
         image: imageUrl,
         badge: listing.is_featured ? "Destacado" : null,
         price: listing.price || "",
