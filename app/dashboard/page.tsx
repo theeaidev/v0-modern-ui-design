@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getProfileData } from "@/app/actions/profile-actions"
+import { getSupabaseBrowserClient } from "@/lib/supabase"
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth()
@@ -22,18 +22,26 @@ export default function DashboardPage() {
   const [profileError, setProfileError] = useState<string | null>(null)
   const [fetchAttempted, setFetchAttempted] = useState(false)
 
+  console.log("[DASHBOARD] Rendering dashboard, user:", !!user, "isLoading:", isLoading)
+
   // Redirect if not logged in
   useEffect(() => {
+    console.log("[DASHBOARD] Auth check effect, user:", !!user, "isLoading:", isLoading)
     if (!isLoading && !user) {
+      console.log("[DASHBOARD] No user, redirecting to login")
       router.push("/login")
     }
   }, [user, isLoading, router])
 
-  // Fetch profile data using server action
+  // Fetch profile data directly from Supabase (no server action)
   useEffect(() => {
     const fetchProfileData = async () => {
-      if (!user) return
+      if (!user) {
+        console.log("[DASHBOARD] No user, skipping profile fetch")
+        return
+      }
 
+      console.log("[DASHBOARD] Fetching profile data for user:", user.id)
       try {
         setProfileLoading(true)
         setProfileError(null)
@@ -45,27 +53,36 @@ export default function DashboardPage() {
           email: user.email,
         }
 
-        // Try to fetch profile from server action
+        console.log("[DASHBOARD] Default profile created:", defaultProfile)
+
+        // Try to fetch profile directly from Supabase
         try {
-          const { profile, error } = await getProfileData(user.id)
+          console.log("[DASHBOARD] Getting Supabase browser client")
+          const supabase = getSupabaseBrowserClient()
+          console.log("[DASHBOARD] Supabase browser client obtained")
+
+          console.log("[DASHBOARD] Fetching profile from Supabase")
+          const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle()
+          console.log("[DASHBOARD] Profile fetch result:", !!data, "error:", !!error)
 
           if (error) {
-            console.error("Error fetching profile:", error)
-            setProfileError(error)
+            console.error("[DASHBOARD] Error fetching profile:", error)
+            setProfileError(error.message)
             // Use default profile
             setProfileData(defaultProfile)
           } else {
             // Use fetched profile or default if null
-            setProfileData(profile || defaultProfile)
+            console.log("[DASHBOARD] Setting profile data:", data || defaultProfile)
+            setProfileData(data || defaultProfile)
           }
-        } catch (actionError) {
-          console.error("Error calling server action:", actionError)
-          setProfileError(actionError instanceof Error ? actionError.message : "Failed to fetch profile")
+        } catch (fetchError) {
+          console.error("[DASHBOARD] Error fetching from Supabase:", fetchError)
+          setProfileError(fetchError instanceof Error ? fetchError.message : "Failed to fetch profile")
           // Use default profile on error
           setProfileData(defaultProfile)
         }
       } catch (err) {
-        console.error("Unexpected error in dashboard:", err)
+        console.error("[DASHBOARD] Unexpected error in dashboard:", err)
         setProfileError(err instanceof Error ? err.message : "Unknown error")
         // Set a minimal default profile
         setProfileData({
@@ -76,16 +93,19 @@ export default function DashboardPage() {
       } finally {
         setProfileLoading(false)
         setFetchAttempted(true)
+        console.log("[DASHBOARD] Profile fetch completed")
       }
     }
 
     if (user && !fetchAttempted) {
+      console.log("[DASHBOARD] Starting profile fetch")
       fetchProfileData()
     }
   }, [user, fetchAttempted])
 
   // Show loading state
   if (isLoading || (profileLoading && !fetchAttempted)) {
+    console.log("[DASHBOARD] Showing loading state")
     return (
       <div className="flex min-h-screen flex-col">
         <MainNav />
@@ -99,8 +119,11 @@ export default function DashboardPage() {
 
   // Redirect if not logged in
   if (!user) {
+    console.log("[DASHBOARD] No user, returning null (will redirect)")
     return null // Will redirect in useEffect
   }
+
+  console.log("[DASHBOARD] Rendering dashboard content")
 
   // Format date safely
   const formatDate = (timestamp: string) => {
