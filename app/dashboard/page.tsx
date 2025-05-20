@@ -20,7 +20,9 @@ export default function DashboardPage() {
   const [profileData, setProfileData] = useState<any>(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
+  const [fetchAttempted, setFetchAttempted] = useState(false)
 
+  // Redirect if not logged in
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/login")
@@ -36,43 +38,54 @@ export default function DashboardPage() {
         setProfileLoading(true)
         setProfileError(null)
 
-        // Use the server action to get profile data
-        const { profile, error } = await getProfileData(user.id)
-
-        if (error) {
-          console.error("Error fetching profile:", error)
-          setProfileError(error)
-          // Continue with default profile data
-        }
-
-        // If we have data, use it. Otherwise, create a default profile object
-        setProfileData(
-          profile || {
-            id: user.id,
-            full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
-            email: user.email,
-          },
-        )
-      } catch (err) {
-        console.error("Unexpected error fetching profile:", err)
-        setProfileError(err instanceof Error ? err.message : "Unknown error")
-        // Continue with default profile data
-        setProfileData({
+        // Create a default profile with user data
+        const defaultProfile = {
           id: user.id,
           full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
+          email: user.email,
+        }
+
+        // Try to fetch profile from server action
+        try {
+          const { profile, error } = await getProfileData(user.id)
+
+          if (error) {
+            console.error("Error fetching profile:", error)
+            setProfileError(error)
+            // Use default profile
+            setProfileData(defaultProfile)
+          } else {
+            // Use fetched profile or default if null
+            setProfileData(profile || defaultProfile)
+          }
+        } catch (actionError) {
+          console.error("Error calling server action:", actionError)
+          setProfileError(actionError instanceof Error ? actionError.message : "Failed to fetch profile")
+          // Use default profile on error
+          setProfileData(defaultProfile)
+        }
+      } catch (err) {
+        console.error("Unexpected error in dashboard:", err)
+        setProfileError(err instanceof Error ? err.message : "Unknown error")
+        // Set a minimal default profile
+        setProfileData({
+          id: user.id,
+          full_name: user.email?.split("@")[0] || "Usuario",
           email: user.email,
         })
       } finally {
         setProfileLoading(false)
+        setFetchAttempted(true)
       }
     }
 
-    if (user) {
+    if (user && !fetchAttempted) {
       fetchProfileData()
     }
-  }, [user])
+  }, [user, fetchAttempted])
 
-  if (isLoading || profileLoading) {
+  // Show loading state
+  if (isLoading || (profileLoading && !fetchAttempted)) {
     return (
       <div className="flex min-h-screen flex-col">
         <MainNav />
@@ -84,12 +97,15 @@ export default function DashboardPage() {
     )
   }
 
+  // Redirect if not logged in
   if (!user) {
     return null // Will redirect in useEffect
   }
 
-  // Format date
+  // Format date safely
   const formatDate = (timestamp: string) => {
+    if (!timestamp) return "Fecha desconocida"
+
     try {
       const date = new Date(timestamp)
       return new Intl.DateTimeFormat("es-ES", {

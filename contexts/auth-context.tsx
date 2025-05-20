@@ -36,35 +36,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [authInitialized, setAuthInitialized] = useState(false)
   const supabase = getSupabaseBrowserClient()
 
+  // Initialize auth state
   useEffect(() => {
-    // Only run this effect once to avoid multiple subscriptions
-    const fetchSession = async () => {
+    const initializeAuth = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession()
+        setIsLoading(true)
 
-        if (error) {
-          console.error("Error getting session:", error)
+        // Get the current session
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+
+        if (sessionError) {
+          console.error("Error getting session:", sessionError)
           setIsLoading(false)
+          setAuthInitialized(true)
           return
         }
 
-        setSession(data.session)
-        setUser(data.session?.user ?? null)
-      } catch (err) {
-        console.error("Unexpected error in auth context:", err)
-      } finally {
+        if (sessionData?.session) {
+          setSession(sessionData.session)
+          setUser(sessionData.session.user)
+        }
+
         setIsLoading(false)
+        setAuthInitialized(true)
+      } catch (error) {
+        console.error("Error initializing auth:", error)
+        setIsLoading(false)
+        setAuthInitialized(true)
       }
     }
 
-    fetchSession()
+    if (!authInitialized) {
+      initializeAuth()
+    }
+  }, [authInitialized, supabase.auth])
 
-    // Set up auth state change listener
+  // Set up auth state change listener
+  useEffect(() => {
+    if (!authInitialized) return
+
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event)
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
@@ -74,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [authInitialized, supabase.auth])
 
   const signUp = async (email: string, password: string) => {
     try {
