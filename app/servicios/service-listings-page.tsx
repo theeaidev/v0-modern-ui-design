@@ -1,12 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
-import { useSearchParams } from "next/navigation";
-
 import type React from "react";
 
-import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Check, ChevronDown, Filter, MapPin, Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -39,13 +36,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { AdCard } from "@/components/ad-card";
-
-// Reemplazar todo el header con el componente MainNav
-// Primero, añadir este import
 import { MainNav } from "@/components/main-nav";
 import { SiteFooter } from "@/components/site-footer";
-import { ServiceListingsPage } from "./service-listings-page";
-import ServiceListingsLoading from "@/app/servicios/service-listings-loading";
+import { ServiceListings } from "./service-listings";
+import { serviciosData } from "./sample-data";
 
 // Define types for our filters and services
 type Ciudad = string;
@@ -59,36 +53,14 @@ interface FilterState {
   searchTerm: string;
 }
 
-interface Servicio {
-  id: number;
-  title: string;
-  category: string;
-  subcategory: string;
-  description: string;
-  image: string;
-  badge: string | null;
-  price: string;
-  location: string;
-  phone?: string;
-  whatsapp?: string;
-  website?: string;
-  email?: string;
-  address?: string;
-  coordinates?: { lat: number; lng: number };
-  verified?: boolean;
-  isNew?: boolean;
-  publishedAt: Date;
-}
+export function ServiceListingsPage() {
+  // Get initial data from server component
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [allServices, setAllServices] = useState<typeof serviciosData>([]);
+  const [totalListings, setTotalListings] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
-export default function ServiciosPage() {
-  return (
-    <Suspense fallback={<ServiceListingsLoading />}>
-      <ServiceListingsPage />
-    </Suspense>
-  );
-}
-
-function ServiceListingsPageContent() {
   // State for filters and search
   const [filters, setFilters] = useState<FilterState>({
     ciudades: [],
@@ -98,8 +70,9 @@ function ServiceListingsPageContent() {
   });
 
   // State for filtered services
-  const [filteredServices, setFilteredServices] =
-    useState<Servicio[]>(serviciosData);
+  const [filteredServices, setFilteredServices] = useState<
+    typeof serviciosData
+  >([]);
 
   // State for active tab (mobile)
   const [activeTab, setActiveTab] = useState("todos");
@@ -107,12 +80,72 @@ function ServiceListingsPageContent() {
   // State for sheet open (mobile filters)
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // Añadir estado para el menú móvil
-  // Modificar la declaración de estados al inicio de la función del componente
+  // State for mobile menu
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // State for loading
+  const [isLoading, setIsLoading] = useState(true);
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Load initial data
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        setIsLoading(true);
+        const categoria = searchParams.get("categoria");
+        const page = Number.parseInt(searchParams.get("page") || "1");
+
+        // Fetch initial data
+        const { listings, total, totalPages } = await ServiceListings({
+          page,
+          category_id: categoria ? getCategoryIdByName(categoria) : undefined,
+        });
+
+        setAllServices(listings);
+        setFilteredServices(listings);
+        setTotalListings(total);
+        setTotalPages(totalPages);
+        setCurrentPage(page);
+        setInitialDataLoaded(true);
+
+        // Set initial filters based on URL
+        if (categoria && !filters.categorias.includes(categoria)) {
+          setFilters((prev) => ({
+            ...prev,
+            categorias: [categoria],
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading initial data:", error);
+        // Fallback to sample data
+        setAllServices(serviciosData);
+        setFilteredServices(serviciosData);
+        setTotalListings(serviciosData.length);
+        setTotalPages(Math.ceil(serviciosData.length / 12));
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadInitialData();
+  }, [searchParams]);
+
+  // Helper function to get category ID by name (simplified)
+  function getCategoryIdByName(name: string): number | undefined {
+    const categoryMap: Record<string, number> = {
+      Restaurantes: 1,
+      Servicios: 2,
+      Empleo: 3,
+      Formación: 4,
+      Productos: 5,
+      Comunidad: 6,
+      Inmobiliaria: 7,
+    };
+
+    return categoryMap[name];
+  }
 
   // Add this useEffect to handle URL parameters
   useEffect(() => {
@@ -146,6 +179,8 @@ function ServiceListingsPageContent() {
 
   // Update URL when categories change
   useEffect(() => {
+    if (!initialDataLoaded) return;
+
     // Skip the initial render
     if (filters.categorias.length === 1) {
       // Use replace instead of push to avoid adding to history stack
@@ -159,7 +194,7 @@ function ServiceListingsPageContent() {
       router.replace("/servicios", { scroll: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.categorias]);
+  }, [filters.categorias, initialDataLoaded]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,9 +327,24 @@ function ServiceListingsPageContent() {
     }
   };
 
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    router.replace(
+      `/servicios?page=${page}${
+        filters.categorias.length ? `&categoria=${filters.categorias[0]}` : ""
+      }`,
+      {
+        scroll: true,
+      }
+    );
+  };
+
   // Filter services based on filters and search term
   useEffect(() => {
-    let results = [...serviciosData];
+    if (!initialDataLoaded) return;
+
+    let results = [...allServices];
 
     // Filter by search term
     if (filters.searchTerm) {
@@ -330,7 +380,7 @@ function ServiceListingsPageContent() {
     }
 
     setFilteredServices(results);
-  }, [filters]);
+  }, [filters, allServices, initialDataLoaded]);
 
   // Get unique cities from data
   const uniqueCities = [
@@ -429,7 +479,6 @@ function ServiceListingsPageContent() {
   };
 
   // Contenido de la página
-
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -965,7 +1014,16 @@ function ServiceListingsPageContent() {
               </div>
 
               {/* Results Grid */}
-              {filteredServices.length > 0 ? (
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-96 animate-pulse bg-muted rounded-lg"
+                    />
+                  ))}
+                </div>
+              ) : filteredServices.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredServices.map((servicio) => (
                     <AdCard
@@ -1014,10 +1072,15 @@ function ServiceListingsPageContent() {
               )}
 
               {/* Pagination - Only show if we have results */}
-              {filteredServices.length > 0 && (
+              {filteredServices.length > 0 && totalPages > 1 && (
                 <div className="flex justify-center mt-12">
                   <nav className="flex items-center gap-1">
-                    <Button variant="outline" size="icon" disabled>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -1034,26 +1097,45 @@ function ServiceListingsPageContent() {
                       </svg>
                       <span className="sr-only">Página anterior</span>
                     </Button>
+
+                    {Array.from({ length: Math.min(5, totalPages) }).map(
+                      (_, i) => {
+                        // Show pages around current page
+                        let pageNum = i + 1;
+                        if (totalPages > 5) {
+                          if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                        }
+
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant="outline"
+                            size="sm"
+                            className={
+                              currentPage === pageNum
+                                ? "bg-primary text-primary-foreground"
+                                : ""
+                            }
+                            onClick={() => handlePageChange(pageNum)}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      }
+                    )}
+
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="bg-primary text-primary-foreground"
+                      size="icon"
+                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
                     >
-                      1
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      2
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      3
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      4
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      5
-                    </Button>
-                    <Button variant="outline" size="icon">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -1084,253 +1166,4 @@ function ServiceListingsPageContent() {
   );
 }
 
-// Sample data for services
-const serviciosData = [
-  {
-    id: 1,
-    title: "Restaurante El Sabor Latino",
-    category: "Restaurantes",
-    subcategory: "Comida colombiana",
-    description:
-      "Auténtica comida colombiana con los mejores sabores tradicionales. Arepas, bandeja paisa y mucho más.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: "Destacado",
-    price: "Menú 12€",
-    location: "Madrid",
-    phone: "+34 612 345 678",
-    whatsapp: "+34612345678",
-    website: "www.saborlatino.es",
-    email: "info@saborlatino.es",
-    address: "Calle Gran Vía 41, Madrid",
-    coordinates: { lat: 40.4256, lng: -3.6868 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás
-  },
-  {
-    id: 2,
-    title: "Peluquería Latina Style",
-    category: "Servicios",
-    subcategory: "Peluquería",
-    description:
-      "Cortes, peinados, tratamientos y coloración para todo tipo de cabello. Especialistas en cabello latino.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "Desde 15€",
-    location: "Barcelona",
-    phone: "+34 623 456 789",
-    whatsapp: "+34623456789",
-    website: "latinastyle.com",
-    email: "contacto@latinastyle.com",
-    address: "Av. Diagonal 405, Barcelona",
-    coordinates: { lat: 41.3975, lng: 2.1702 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás
-  },
-  {
-    id: 3,
-    title: "Asesoría de Extranjería",
-    category: "Servicios",
-    subcategory: "Extranjería",
-    description:
-      "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: "Verificado",
-    price: "Consulta 40€",
-    location: "Madrid",
-    phone: "+34 634 567 890",
-    whatsapp: "+34634567890",
-    website: "asesoriainmigracion.es",
-    email: "info@asesoriainmigracion.es",
-    address: "Calle Alcalá 120, Madrid",
-    coordinates: { lat: 40.423, lng: -3.673 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás
-  },
-  {
-    id: 4,
-    title: "Empleo: Camarero/a",
-    category: "Empleo",
-    subcategory: "Tiempo completo",
-    description:
-      "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: "Urgente",
-    price: "1.200€/mes",
-    location: "Valencia",
-    phone: "+34 645 678 901",
-    whatsapp: "+34645678901",
-    email: "empleo@restaurantelatino.es",
-    address: "Calle de la Paz 15, Valencia",
-    coordinates: { lat: 39.4702, lng: -0.3768 },
-    verified: false,
-    isNew: true,
-    publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás
-  },
-  {
-    id: 5,
-    title: "Curso de Cocina Dominicana",
-    category: "Formación",
-    subcategory: "Cursos",
-    description:
-      "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: "Nuevo",
-    price: "120€",
-    location: "Barcelona",
-    phone: "+34 656 789 012",
-    whatsapp: "+34656789012",
-    website: "cocinadominicana.es",
-    email: "cursos@cocinadominicana.es",
-    address: "Rambla de Catalunya 60, Barcelona",
-    coordinates: { lat: 41.392, lng: 2.165 },
-    verified: false,
-    isNew: true,
-    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás
-  },
-  {
-    id: 6,
-    title: "Productos Típicos Mexicanos",
-    category: "Productos",
-    subcategory: "Alimentos",
-    description:
-      "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "Varios",
-    location: "Online",
-    phone: "+34 667 890 123",
-    whatsapp: "+34667890123",
-    website: "productosmexicanos.es",
-    email: "info@productosmexicanos.es",
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 días atrás
-  },
-  {
-    id: 7,
-    title: "Masajes Terapéuticos",
-    category: "Servicios",
-    subcategory: "Masajes",
-    description:
-      "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "35€/sesión",
-    location: "Sevilla",
-    phone: "+34 678 901 234",
-    whatsapp: "+34678901234",
-    website: "masajesterapeuticos.es",
-    email: "citas@masajesterapeuticos.es",
-    address: "Av. de la Constitución 20, Sevilla",
-    coordinates: { lat: 37.3886, lng: -5.9953 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 días atrás
-  },
-  {
-    id: 8,
-    title: "Empleo: Limpieza de Hogar",
-    category: "Empleo",
-    subcategory: "Por horas",
-    description:
-      "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "10€/hora",
-    location: "Madrid",
-    phone: "+34 689 012 345",
-    whatsapp: "+34689012345",
-    email: "empleo.limpieza@gmail.com",
-    address: "Barrio Salamanca, Madrid",
-    verified: false,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 días atrás
-  },
-  {
-    id: 9,
-    title: "Taller de Baile Latino",
-    category: "Formación",
-    subcategory: "Talleres",
-    description:
-      "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: "Popular",
-    price: "50€/mes",
-    location: "Barcelona",
-    phone: "+34 690 123 456",
-    whatsapp: "+34690123456",
-    website: "bailelatino.es",
-    email: "info@bailelatino.es",
-    address: "Carrer de Balmes 150, Barcelona",
-    coordinates: { lat: 41.395, lng: 2.1527 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 días atrás
-  },
-  {
-    id: 10,
-    title: "Artesanía Peruana",
-    category: "Productos",
-    subcategory: "Artesanía",
-    description:
-      "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "Varios",
-    location: "Madrid",
-    phone: "+34 601 234 567",
-    whatsapp: "+34601234567",
-    website: "artesaniasperuanas.es",
-    email: "ventas@artesaniasperuanas.es",
-    address: "Calle Fuencarral 70, Madrid",
-    coordinates: { lat: 40.426, lng: -3.702 },
-    verified: false,
-    isNew: true,
-    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 días atrás
-  },
-  {
-    id: 11,
-    title: "Restaurante Sabor Venezolano",
-    category: "Restaurantes",
-    subcategory: "Comida venezolana",
-    description:
-      "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "Menú 10€",
-    location: "Valencia",
-    phone: "+34 612 345 678",
-    whatsapp: "+34612345678",
-    website: "saborvenezolano.es",
-    email: "info@saborvenezolano.es",
-    address: "Av. del Puerto 45, Valencia",
-    coordinates: { lat: 39.465, lng: -0.335 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), // 25 días atrás
-  },
-  {
-    id: 12,
-    title: "Certificación de Español",
-    category: "Formación",
-    subcategory: "Certificaciones",
-    description:
-      "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
-    image: "/placeholder.svg?height=300&width=400",
-    badge: "Certificado",
-    price: "200€/curso",
-    location: "Málaga",
-    phone: "+34 623 456 789",
-    whatsapp: "+34623456789",
-    website: "certificacionespanol.es",
-    email: "info@certificacionespanol.es",
-    address: "Paseo Marítimo 25, Málaga",
-    coordinates: { lat: 36.7213, lng: -4.4214 },
-    verified: true,
-    isNew: false,
-    publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000), // 18 días atrás
-  },
-];
+export default ServiceListingsPage;
