@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useContext, useEffect, useState } from "react"
 import type { User, Session } from "@supabase/supabase-js"
 import { getSupabaseBrowserClient } from "@/lib/supabase"
@@ -40,22 +39,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
-    const setData = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession()
-      if (error) {
-        console.error(error)
-        setIsLoading(false)
-        return
-      }
+    // Only run this effect once to avoid multiple subscriptions
+    const fetchSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession()
 
-      setSession(session)
-      setUser(session?.user ?? null)
-      setIsLoading(false)
+        if (error) {
+          console.error("Error getting session:", error)
+          setIsLoading(false)
+          return
+        }
+
+        setSession(data.session)
+        setUser(data.session?.user ?? null)
+      } catch (err) {
+        console.error("Unexpected error in auth context:", err)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
+    fetchSession()
+
+    // Set up auth state change listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -64,38 +70,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false)
     })
 
-    setData()
-
+    // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe()
     }
   }, [])
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    return { data, error }
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+      return { data, error }
+    } catch (err) {
+      console.error("Error during sign up:", err)
+      return { data: null, error: err }
+    }
   }
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { data, error }
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      return { data, error }
+    } catch (err) {
+      console.error("Error during sign in:", err)
+      return { data: null, error: err }
+    }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error("Error during sign out:", err)
+    }
   }
 
   const resetPassword = async (email: string) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-    return { data, error }
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      return { data, error }
+    } catch (err) {
+      console.error("Error during password reset:", err)
+      return { data: null, error: err }
+    }
   }
 
   const value = {

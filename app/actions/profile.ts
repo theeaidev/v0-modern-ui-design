@@ -1,84 +1,121 @@
 "use server"
+
+import { createServerClient } from "@/lib/supabase-server"
 import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
-import type { ProfileFormData } from "@/types/profile"
 
-// Get the authenticated user's profile
 export async function getProfile() {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    },
-  )
+  try {
+    const supabase = createServerClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    // Get the current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
 
-  if (!user) {
-    return { error: "Not authenticated", profile: null }
+    if (userError || !user) {
+      console.error("Error fetching user or user not found:", userError)
+      return { profile: null, error: userError || new Error("User not found") }
+    }
+
+    // Get the user's profile
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single()
+
+    if (profileError && profileError.code !== "PGRST116") {
+      console.error("Error fetching profile:", profileError)
+      return { profile: null, error: profileError }
+    }
+
+    // If profile doesn't exist, return a default profile with the user ID
+    return {
+      profile: profile || { id: user.id },
+      error: null,
+    }
+  } catch (error) {
+    console.error("Unexpected error in getProfile:", error)
+    return { profile: null, error }
   }
-
-  const { data: profile, error } = await supabase.from("profiles").select("*").eq("id", user.id).single()
-
-  if (error) {
-    console.error("Error fetching profile:", error)
-    return { error: error.message, profile: null }
-  }
-
-  return { profile, error: null }
 }
 
-// Update the authenticated user's profile
-export async function updateProfile(formData: ProfileFormData) {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
+export async function updateProfile(formData: FormData) {
+  try {
+    const supabase = createServerClient()
+
+    // Get the current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      console.error("Error fetching user or user not found:", userError)
+      return { success: false, error: userError || "User not found" }
+    }
+
+    // Extract profile data from form
+    const profileData = {
+      id: user.id,
+      full_name: formData.get("full_name") as string,
+      phone: formData.get("phone") as string,
+      address: formData.get("address") as string,
+      city: formData.get("city") as string,
+      postal_code: formData.get("postal_code") as string,
+      country: (formData.get("country") as string) || "España",
+      bio: formData.get("bio") as string,
+      website: formData.get("website") as string,
+      is_business: formData.get("is_business") === "true",
+    }
+
+    // Add business data if is_business is true
+    if (profileData.is_business) {
+      Object.assign(profileData, {
+        business_name: formData.get("business_name") as string,
+        business_type: formData.get("business_type") as string,
+        business_description: formData.get("business_description") as string,
+        business_website: formData.get("business_website") as string,
+        business_phone: formData.get("business_phone") as string,
+        business_address: formData.get("business_address") as string,
+        business_city: formData.get("business_city") as string,
+        business_postal_code: formData.get("business_postal_code") as string,
+        business_country: (formData.get("business_country") as string) || "España",
+      })
+    }
+
+    // Update the profile
+    const { error: updateError } = await supabase.from("profiles").upsert(profileData, { onConflict: "id" })
+
+    if (updateError) {
+      console.error("Error updating profile:", updateError)
+      return { success: false, error: updateError }
+    }
+
+    // Update user metadata in auth
+    const { error: updateUserError } = await supabase.auth.updateUser({
+      data: {
+        full_name: profileData.full_name,
+        is_business: profileData.is_business,
       },
-    },
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: "Not authenticated", success: false }
-  }
-
-  // Update the profile
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      ...formData,
-      updated_at: new Date().toISOString(),
     })
-    .eq("id", user.id)
 
-  if (error) {
-    console.error("Error updating profile:", error)
-    return { error: error.message, success: false }
+    if (updateUserError) {
+      console.error("Error updating user metadata:", updateUserError)
+      // Continue anyway as the profile was updated successfully
+    }
+
+    // Revalidate the profile page
+    revalidatePath("/dashboard")
+    revalidatePath("/dashboard/profile")
+
+    return { success: true, error: null }
+  } catch (error) {
+    console.error("Unexpected error in updateProfile:", error)
+    return { success: false, error }
   }
-
-  // Revalidate the profile page to show updated data
-  revalidatePath("/dashboard")
-  revalidatePath("/dashboard/profile")
-
-  return { error: null, success: true }
 }
 
 // Upload avatar image

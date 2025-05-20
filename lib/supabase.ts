@@ -1,27 +1,34 @@
-import { createClient } from "@supabase/supabase-js"
+import { createBrowserClient } from "@supabase/ssr"
+import type { Database } from "@/types/supabase"
 
-// Create a single supabase client for the browser
-const createBrowserClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+// Create a single instance of the Supabase client for the browser
+let browserClient: ReturnType<typeof createBrowserClient<Database>> | null = null
 
-  return createClient(supabaseUrl, supabaseAnonKey)
-}
-
-// Singleton pattern to avoid multiple instances
-let browserClient: ReturnType<typeof createBrowserClient> | null = null
-
-export const getSupabaseBrowserClient = () => {
-  if (!browserClient) {
-    browserClient = createBrowserClient()
+export function getSupabaseBrowserClient() {
+  // For server-side rendering, create a new instance each time
+  if (typeof window === "undefined") {
+    return createBrowserClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    )
   }
+
+  // For client-side, use singleton pattern
+  if (!browserClient) {
+    try {
+      browserClient = createBrowserClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      )
+    } catch (error) {
+      console.error("Error creating Supabase browser client:", error)
+      // Return a new instance as fallback
+      return createBrowserClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      )
+    }
+  }
+
   return browserClient
-}
-
-// Server-side client (for server components and API routes)
-export const getSupabaseServerClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string
-
-  return createClient(supabaseUrl, supabaseServiceKey)
 }

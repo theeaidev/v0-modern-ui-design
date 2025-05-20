@@ -1,10 +1,9 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react"
 
@@ -23,8 +22,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { signIn } = useAuth()
+  const { user, signIn, isLoading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get("redirectedFrom") || "/dashboard"
+
+  // If user is already logged in, redirect to dashboard
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push("/dashboard")
+    }
+  }, [user, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,20 +40,18 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { error } = await signIn(email, password)
+      const { error: signInError } = await signIn(email, password)
 
-      if (error) {
-        setError(error.message)
+      if (signInError) {
+        setError(signInError.message)
+        setIsLoading(false)
         return
       }
 
-      // Redirect to home page or dashboard
-      router.push("/")
-      router.refresh()
+      // Redirect will happen automatically via the useEffect above
     } catch (err) {
       setError("An unexpected error occurred. Please try again.")
       console.error(err)
-    } finally {
       setIsLoading(false)
     }
   }
@@ -82,7 +88,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={isLoading || authLoading}
                 />
               </div>
             </div>
@@ -104,7 +110,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={isLoading || authLoading}
                 />
                 <Button
                   type="button"
@@ -112,7 +118,7 @@ export default function LoginPage() {
                   size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
+                  disabled={isLoading || authLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -124,7 +130,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || authLoading}>
               {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
           </form>
@@ -140,7 +146,7 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button variant="outline" className="w-full" disabled={isLoading || authLoading}>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -161,7 +167,7 @@ export default function LoginPage() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full" disabled={isLoading}>
+              <Button variant="outline" className="w-full" disabled={isLoading || authLoading}>
                 <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
                 </svg>

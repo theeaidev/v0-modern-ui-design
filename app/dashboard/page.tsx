@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { User, Mail, Calendar, MapPin, Phone, Globe, Briefcase, Building, Edit } from "lucide-react"
@@ -12,10 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { getSupabaseBrowserClient } from "@/lib/supabase"
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
+  const [profileData, setProfileData] = useState<any>(null)
+  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -23,7 +27,55 @@ export default function DashboardPage() {
     }
   }, [user, isLoading, router])
 
-  if (isLoading) {
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) return
+
+      try {
+        setProfileLoading(true)
+        setProfileError(null)
+
+        // Get the Supabase client
+        const supabase = getSupabaseBrowserClient()
+
+        // Fetch the profile with error handling
+        const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle()
+
+        if (error) {
+          console.error("Error fetching profile:", error)
+          setProfileError(error.message)
+          // Continue with default profile data
+        }
+
+        // If we have data, use it. Otherwise, create a default profile object
+        setProfileData(
+          data || {
+            id: user.id,
+            full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
+            email: user.email,
+          },
+        )
+      } catch (err) {
+        console.error("Unexpected error fetching profile:", err)
+        setProfileError(err instanceof Error ? err.message : "Unknown error")
+        // Continue with default profile data
+        setProfileData({
+          id: user.id,
+          full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
+          email: user.email,
+        })
+      } finally {
+        setProfileLoading(false)
+      }
+    }
+
+    if (user) {
+      fetchProfileData()
+    }
+  }, [user])
+
+  if (isLoading || profileLoading) {
     return (
       <div className="flex min-h-screen flex-col">
         <MainNav />
@@ -41,18 +93,34 @@ export default function DashboardPage() {
 
   // Format date
   const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp)
-    return new Intl.DateTimeFormat("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(date)
+    try {
+      const date = new Date(timestamp)
+      return new Intl.DateTimeFormat("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(date)
+    } catch (error) {
+      return "Fecha desconocida"
+    }
   }
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
-    if (!user?.email) return "U"
-    return user.email.charAt(0).toUpperCase()
+    if (profileData?.full_name) {
+      return profileData.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    }
+
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase()
+    }
+
+    return "U"
   }
 
   return (
@@ -71,18 +139,27 @@ export default function DashboardPage() {
             </Button>
           </div>
 
+          {profileError && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded mb-6">
+              <p className="font-medium">Hubo un problema al cargar tu perfil</p>
+              <p className="text-sm">
+                Algunos datos pueden no mostrarse correctamente. Puedes intentar recargar la página.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
               <Card>
                 <CardHeader className="flex flex-col items-center">
                   <Avatar className="h-24 w-24 mb-4">
                     <AvatarImage
-                      src={user?.user_metadata?.avatar_url || "/placeholder.svg"}
-                      alt={user?.email || "User"}
+                      src={profileData?.avatar_url || "/placeholder.svg"}
+                      alt={profileData?.full_name || user?.email || "User"}
                     />
                     <AvatarFallback className="text-2xl">{getUserInitials()}</AvatarFallback>
                   </Avatar>
-                  <CardTitle>{user?.user_metadata?.name || "Usuario"}</CardTitle>
+                  <CardTitle>{profileData?.full_name || user?.email?.split("@")[0] || "Usuario"}</CardTitle>
                   <CardDescription className="flex items-center">
                     <Mail className="h-4 w-4 mr-1" />
                     {user.email}
@@ -118,7 +195,7 @@ export default function DashboardPage() {
                     <Phone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium">Teléfono</p>
-                      <p className="text-sm text-muted-foreground">{user.user_metadata?.phone || "No especificado"}</p>
+                      <p className="text-sm text-muted-foreground">{profileData?.phone || "No especificado"}</p>
                     </div>
                   </div>
 
@@ -127,10 +204,8 @@ export default function DashboardPage() {
                     <div>
                       <p className="text-sm font-medium">Dirección</p>
                       <p className="text-sm text-muted-foreground">
-                        {user.user_metadata?.address
-                          ? `${user.user_metadata.address}, ${user.user_metadata.city || ""} ${
-                              user.user_metadata.postal_code || ""
-                            }`
+                        {profileData?.address
+                          ? `${profileData.address}, ${profileData.city || ""} ${profileData.postal_code || ""}`
                           : "No especificada"}
                       </p>
                     </div>
@@ -141,14 +216,14 @@ export default function DashboardPage() {
                     <div>
                       <p className="text-sm font-medium">Sitio web</p>
                       <p className="text-sm text-muted-foreground">
-                        {user.user_metadata?.website ? (
+                        {profileData?.website ? (
                           <a
-                            href={user.user_metadata.website}
+                            href={profileData.website}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                           >
-                            {user.user_metadata.website.replace(/^https?:\/\//, "")}
+                            {profileData.website.replace(/^https?:\/\//, "")}
                           </a>
                         ) : (
                           "No especificado"
@@ -168,14 +243,14 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {user.user_metadata?.bio && (
+                    {profileData?.bio && (
                       <div>
                         <h3 className="text-lg font-medium mb-2">Biografía</h3>
-                        <p className="text-muted-foreground">{user.user_metadata.bio}</p>
+                        <p className="text-muted-foreground">{profileData.bio}</p>
                       </div>
                     )}
 
-                    {user.user_metadata?.is_business && (
+                    {profileData?.is_business && (
                       <div>
                         <h3 className="text-lg font-medium mb-2 flex items-center">
                           <Briefcase className="h-5 w-5 mr-2 text-primary" />
@@ -185,10 +260,10 @@ export default function DashboardPage() {
                           <CardHeader className="pb-2">
                             <div className="flex items-center justify-between">
                               <div>
-                                <CardTitle>{user.user_metadata.business_name || "Mi negocio"}</CardTitle>
-                                <CardDescription>{user.user_metadata.business_type || "Negocio"}</CardDescription>
+                                <CardTitle>{profileData.business_name || "Mi negocio"}</CardTitle>
+                                <CardDescription>{profileData.business_type || "Negocio"}</CardDescription>
                               </div>
-                              {user.user_metadata.is_verified && (
+                              {profileData.is_verified && (
                                 <Badge variant="outline" className="border-green-500 text-green-600">
                                   Verificado
                                 </Badge>
@@ -196,48 +271,47 @@ export default function DashboardPage() {
                             </div>
                           </CardHeader>
                           <CardContent className="space-y-4 pt-0">
-                            {user.user_metadata.business_description && (
-                              <p className="text-sm text-muted-foreground">{user.user_metadata.business_description}</p>
+                            {profileData.business_description && (
+                              <p className="text-sm text-muted-foreground">{profileData.business_description}</p>
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {user.user_metadata.business_phone && (
+                              {profileData.business_phone && (
                                 <div className="flex items-start gap-3">
                                   <Phone className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                                   <div>
                                     <p className="text-xs text-muted-foreground">Teléfono</p>
-                                    <p className="text-sm">{user.user_metadata.business_phone}</p>
+                                    <p className="text-sm">{profileData.business_phone}</p>
                                   </div>
                                 </div>
                               )}
 
-                              {user.user_metadata.business_website && (
+                              {profileData.business_website && (
                                 <div className="flex items-start gap-3">
                                   <Globe className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                                   <div>
                                     <p className="text-xs text-muted-foreground">Sitio web</p>
                                     <a
-                                      href={user.user_metadata.business_website}
+                                      href={profileData.business_website}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-sm text-primary hover:underline"
                                     >
-                                      {user.user_metadata.business_website.replace(/^https?:\/\//, "")}
+                                      {profileData.business_website.replace(/^https?:\/\//, "")}
                                     </a>
                                   </div>
                                 </div>
                               )}
 
-                              {user.user_metadata.business_address && (
+                              {profileData.business_address && (
                                 <div className="flex items-start gap-3 md:col-span-2">
                                   <Building className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                                   <div>
                                     <p className="text-xs text-muted-foreground">Dirección</p>
                                     <p className="text-sm">
-                                      {user.user_metadata.business_address}
-                                      {user.user_metadata.business_city && `, ${user.user_metadata.business_city}`}
-                                      {user.user_metadata.business_postal_code &&
-                                        ` ${user.user_metadata.business_postal_code}`}
+                                      {profileData.business_address}
+                                      {profileData.business_city && `, ${profileData.business_city}`}
+                                      {profileData.business_postal_code && ` ${profileData.business_postal_code}`}
                                     </p>
                                   </div>
                                 </div>
@@ -259,7 +333,7 @@ export default function DashboardPage() {
                         <User className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                         <p className="text-muted-foreground">No has publicado ningún anuncio todavía</p>
                         <Button className="mt-4" asChild>
-                          <Link href="/dashboard/publicar">Publicar anuncio</Link>
+                          <Link href="/dashboard/servicios/nuevo">Publicar anuncio</Link>
                         </Button>
                       </div>
                     </div>
