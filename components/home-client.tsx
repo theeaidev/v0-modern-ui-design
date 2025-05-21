@@ -393,6 +393,7 @@ export default function HomeClient() {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               Publica y encuentra servicios cerca de ti
             </h1>
+            
             <p className="text-xl text-muted-foreground max-w-2xl">
               La plataforma líder para anunciar tus servicios profesionales o encontrar exactamente lo que necesitas
             </p>
@@ -422,6 +423,19 @@ export default function HomeClient() {
                 Coaching
               </Badge>
             </div>
+            <Link href="https://www.innnova.es/" target="_blank" rel="noopener" aria-label="Innnova">
+            <svg width="210" height="40" viewBox="0 0 210 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="INNNOVA logo">
+                <text x="0" y="32" fontFamily="'Inter', 'Montserrat', Arial, sans-serif" fontWeight="bold" fontSize="32" letterSpacing="2">
+                  <tspan fill="url(#barra-roja)">I</tspan><tspan fill="#fff">NNNOVA</tspan>
+                </text>
+                <defs>
+                  <linearGradient id="barra-roja" x1="0" y1="5" x2="0" y2="35" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#FF1414"/>
+                    <stop offset="1" stopColor="#FF4D4D"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </Link>
           </div>
         </div>
       </section>
