@@ -85,7 +85,7 @@ export interface Database {
           verification_date?: string
           preferences?: Json
         }
-      },
+      }
       categories: {
         Row: {
           id: string
@@ -114,7 +114,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
-      },
+      }
       subcategories: {
         Row: {
           id: string

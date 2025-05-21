@@ -304,7 +304,7 @@ const categories = [
 export default function HomeClient() {
   const [featuredListings, setFeaturedListings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  
+
   useEffect(() => {
     async function fetchFeaturedListings() {
       try {
@@ -314,24 +314,19 @@ export default function HomeClient() {
           limit: 8,
           sort: "newest",
         })
-        
+
         // Map database listings to AdCard props
         const dbListings = listings.map((listing: any) => {
           // Defensive: handle id as string or number
-          const id =
-            typeof listing.id === "string"
-              ? Number.parseInt(listing.id)
-              : listing.id;
+          const id = typeof listing.id === "string" ? Number.parseInt(listing.id) : listing.id
           // Defensive: handle missing category/subcategory
-          const category =
-            listing.category?.name || listing.category_id?.toString() || "";
-          const subcategory =
-            listing.subcategory?.name || listing.subcategory_id?.toString() || "";
+          const category = listing.category?.name || listing.category_id?.toString() || ""
+          const subcategory = listing.subcategory?.name || listing.subcategory_id?.toString() || ""
           // Defensive: handle missing images
           const imageUrl =
             listing.images && listing.images.length > 0
               ? listing.images[0].url
-              : "/placeholder.svg?height=300&width=400";
+              : "/placeholder.svg?height=300&width=400"
 
           return {
             id,
@@ -349,27 +344,25 @@ export default function HomeClient() {
             email: listing.contact_email || undefined,
             address: listing.address || undefined,
             verified: listing.is_verified,
-            isNew:
-              new Date(listing.created_at) >
-              new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days
+            isNew: new Date(listing.created_at) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days
             publishedAt: new Date(listing.created_at),
-          };
-        });
-        
+          }
+        })
+
         // Combine database listings with sample data
-        const combinedListings = [...dbListings, ...services];
-        setFeaturedListings(combinedListings);
+        const combinedListings = [...dbListings, ...services]
+        setFeaturedListings(combinedListings)
       } catch (error) {
-        console.error("Error fetching featured listings:", error);
+        console.error("Error fetching featured listings:", error)
         // Use sample data as fallback if there's an error
-        setFeaturedListings(services);
+        setFeaturedListings(services)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    
-    fetchFeaturedListings();
-  }, []);
+
+    fetchFeaturedListings()
+  }, [])
 
   useEffect(() => {
     debugLog("Home client component mounted")
@@ -459,49 +452,50 @@ export default function HomeClient() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {isLoading ? (
-              // Loading state - show skeleton cards
-              Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden animate-pulse">
-                  <div className="aspect-[4/3] bg-muted"></div>
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
-                    <div className="h-3 bg-muted rounded w-full"></div>
-                    <div className="h-4 bg-muted rounded w-1/3 mt-4"></div>
+            {isLoading
+              ? // Loading state - show skeleton cards
+                Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden animate-pulse"
+                  >
+                    <div className="aspect-[4/3] bg-muted"></div>
+                    <div className="p-4 space-y-2">
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                      <div className="h-3 bg-muted rounded w-full"></div>
+                      <div className="h-4 bg-muted rounded w-1/3 mt-4"></div>
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              // Loaded state - show real listings combined with sample data
-              featuredListings.map((service) => (
-                <ErrorBoundary
-                  key={service.id}
-                  fallback={<div className="p-4 border rounded">Error rendering service card</div>}
-                >
-                  <AdCard
+                ))
+              : // Loaded state - show real listings combined with sample data
+                featuredListings.map((service) => (
+                  <ErrorBoundary
                     key={service.id}
-                    id={service.id}
-                    title={service.title}
-                    category={service.category}
-                    description={service.description}
-                    image={service.image}
-                    badge={service.badge}
-                    price={service.price}
-                    location={service.location}
-                    phone={service.phone}
-                    whatsapp={service.whatsapp}
-                    website={service.website}
-                    email={service.email}
-                    address={service.address}
-                    coordinates={service.coordinates}
-                    verified={service.verified}
-                    isNew={service.isNew}
-                    publishedAt={service.publishedAt}
-                  />
-                </ErrorBoundary>
-              ))
-            )}
+                    fallback={<div className="p-4 border rounded">Error rendering service card</div>}
+                  >
+                    <AdCard
+                      key={service.id}
+                      id={service.id}
+                      title={service.title}
+                      category={service.category}
+                      description={service.description}
+                      image={service.image}
+                      badge={service.badge}
+                      price={service.price}
+                      location={service.location}
+                      phone={service.phone}
+                      whatsapp={service.whatsapp}
+                      website={service.website}
+                      email={service.email}
+                      address={service.address}
+                      coordinates={service.coordinates}
+                      verified={service.verified}
+                      isNew={service.isNew}
+                      publishedAt={service.publishedAt}
+                    />
+                  </ErrorBoundary>
+                ))}
           </div>
           <div className="flex justify-center mt-12">
             <Button variant="outline" size="lg" className="gap-2">

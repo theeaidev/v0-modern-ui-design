@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Heart, MapPin, Star, CheckCircle2 } from "lucide-react"
+import { Heart, MapPin, Star, CheckCircle2, Clock } from "lucide-react"
 import type { ServiceListing, ServiceImage } from "@/types/service"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -105,6 +105,12 @@ export function ServiceListingCard({ listing, showActions = true }: ServiceListi
               {listing.category && (
                 <Badge variant="outline" className="text-xs">
                   {listing.category.name}
+                </Badge>
+              )}
+              {listing.status === "pending_approval" && (
+                <Badge variant="outline" className="ml-2 border-yellow-500 text-yellow-600 text-xs">
+                  <Clock className="mr-1 h-3 w-3" />
+                  Pendiente
                 </Badge>
               )}
               {listing.is_verified && (

@@ -1,6 +1,6 @@
-import { MainNav } from "@/components/main-nav";
-import { SiteFooter } from "@/components/site-footer";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MainNav } from "@/components/main-nav"
+import { SiteFooter } from "@/components/site-footer"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ServiceListingsLoading() {
   return (
@@ -14,8 +14,8 @@ export default function ServiceListingsLoading() {
           <div className="container py-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Servicios</h1>
             <p className="text-muted-foreground max-w-3xl">
-              Encuentra servicios latinos, oportunidades de empleo, formación y
-              productos filtrando por ciudad y categoría.
+              Encuentra servicios latinos, oportunidades de empleo, formación y productos filtrando por ciudad y
+              categoría.
             </p>
           </div>
         </div>
@@ -69,5 +69,5 @@ export default function ServiceListingsLoading() {
       {/* Footer */}
       <SiteFooter />
     </div>
-  );
+  )
 }

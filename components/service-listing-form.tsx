@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 import type { ServiceListing, Category, Subcategory } from "@/types/service"
 import {
@@ -49,7 +50,7 @@ const formSchema = z.object({
   contact_email: z.string().email("Introduce un email válido").optional(),
   contact_whatsapp: z.string().optional(),
   contact_website: z.string().url("Introduce una URL válida").optional(),
-  status: z.enum(["draft", "active", "paused"]),
+  status: z.enum(["draft", "pending_approval", "active", "paused", "rejected"]),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -93,6 +94,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
   // Watch for category changes to load subcategories
   const watchedCategoryId = form.watch("category_id")
+  const watchedStatus = form.watch("status")
 
   // Load categories on component mount
   useEffect(() => {
@@ -136,19 +138,35 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true)
 
+    // If user selected "active", change it to "pending_approval" for new listings
+    if (mode === "create" && values.status === "active") {
+      values.status = "pending_approval"
+    }
+
     try {
       if (mode === "create") {
         const result = await createServiceListing(values)
         toast({
           title: "Anuncio creado",
-          description: "Tu anuncio ha sido creado correctamente",
+          description:
+            values.status === "pending_approval"
+              ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
+              : "Tu anuncio ha sido guardado como borrador.",
         })
-        router.push(`/dashboard/servicios/${result.data.id}`)
+        router.push(`/dashboard/servicios/success?id=${result.data.id}`)
       } else if (mode === "edit" && listing) {
+        // For edits, if changing from draft to active, set to pending_approval
+        if (listing.status === "draft" && values.status === "active") {
+          values.status = "pending_approval"
+        }
+
         await updateServiceListing(listing.id, values)
         toast({
           title: "Anuncio actualizado",
-          description: "Tu anuncio ha sido actualizado correctamente",
+          description:
+            values.status === "pending_approval"
+              ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
+              : "Tu anuncio ha sido actualizado correctamente.",
         })
         router.push(`/dashboard/servicios/${listing.id}`)
       }
@@ -156,7 +174,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
       console.error("Error submitting form:", error)
       toast({
         title: "Error",
-        description: "Ha ocurrido un error al guardar el anuncio",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error al guardar el anuncio",
         variant: "destructive",
       })
     } finally {
@@ -344,7 +362,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                         <FormControl>
                           <RadioGroupItem value="active" />
                         </FormControl>
-                        <FormLabel className="font-normal">Publicado</FormLabel>
+                        <FormLabel className="font-normal">Publicar</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-2 space-y-0">
                         <FormControl>
@@ -365,6 +383,17 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                 </FormItem>
               )}
             />
+
+            {watchedStatus === "active" && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Información importante</AlertTitle>
+                <AlertDescription>
+                  Tu anuncio será revisado por nuestro equipo antes de ser publicado. Este proceso puede tardar hasta 24
+                  horas.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={() => router.back()}>

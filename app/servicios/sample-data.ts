@@ -47,8 +47,7 @@ export const serviciosData = [
     title: "Asesoría de Extranjería",
     category: "Servicios",
     subcategory: "Extranjería",
-    description:
-      "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
+    description: "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Verificado",
     price: "Consulta 40€",
@@ -68,8 +67,7 @@ export const serviciosData = [
     title: "Empleo: Camarero/a",
     category: "Empleo",
     subcategory: "Tiempo completo",
-    description:
-      "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
+    description: "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Urgente",
     price: "1.200€/mes",
@@ -88,8 +86,7 @@ export const serviciosData = [
     title: "Curso de Cocina Dominicana",
     category: "Formación",
     subcategory: "Cursos",
-    description:
-      "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
+    description: "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Nuevo",
     price: "120€",
@@ -109,8 +106,7 @@ export const serviciosData = [
     title: "Productos Típicos Mexicanos",
     category: "Productos",
     subcategory: "Alimentos",
-    description:
-      "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
+    description: "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
@@ -128,8 +124,7 @@ export const serviciosData = [
     title: "Masajes Terapéuticos",
     category: "Servicios",
     subcategory: "Masajes",
-    description:
-      "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
+    description: "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "35€/sesión",
@@ -149,8 +144,7 @@ export const serviciosData = [
     title: "Empleo: Limpieza de Hogar",
     category: "Empleo",
     subcategory: "Por horas",
-    description:
-      "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
+    description: "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "10€/hora",
@@ -168,8 +162,7 @@ export const serviciosData = [
     title: "Taller de Baile Latino",
     category: "Formación",
     subcategory: "Talleres",
-    description:
-      "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
+    description: "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Popular",
     price: "50€/mes",
@@ -189,8 +182,7 @@ export const serviciosData = [
     title: "Artesanía Peruana",
     category: "Productos",
     subcategory: "Artesanía",
-    description:
-      "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
+    description: "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
@@ -210,8 +202,7 @@ export const serviciosData = [
     title: "Restaurante Sabor Venezolano",
     category: "Restaurantes",
     subcategory: "Comida venezolana",
-    description:
-      "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
+    description: "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Menú 10€",
@@ -231,8 +222,7 @@ export const serviciosData = [
     title: "Certificación de Español",
     category: "Formación",
     subcategory: "Certificaciones",
-    description:
-      "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
+    description: "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Certificado",
     price: "200€/curso",
@@ -247,4 +237,4 @@ export const serviciosData = [
     isNew: false,
     publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000), // 18 días atrás
   },
-];
+]
