@@ -5,6 +5,7 @@ import "./globals.css"
 import DebugApp from "./_debug-app"
 import { debugLog } from "@/debug-utils"
 import { AuthProvider } from "@/contexts/auth-context"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -29,7 +30,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <DebugApp>{children}</DebugApp>
+          <Analytics />
         </AuthProvider>
+       
       </body>
     </html>
   )
