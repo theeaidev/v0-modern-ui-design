@@ -474,10 +474,15 @@ export async function getCategories() {
     const { data, error } = await supabase.from("categories").select("*").order("name")
 
     if (error) {
+      console.error("Error fetching categories:", error)
       throw new Error(error.message)
     }
 
-    return data
+    if (!data || data.length === 0) {
+      console.warn("No categories found in the database")
+    }
+
+    return data || []
   } catch (error) {
     console.error("Error fetching categories:", error)
     throw error
@@ -489,13 +494,22 @@ export async function getSubcategories(categoryId: number) {
   try {
     const supabase = createServerClient()
 
+    if (!categoryId) {
+      return []
+    }
+
     const { data, error } = await supabase.from("subcategories").select("*").eq("category_id", categoryId).order("name")
 
     if (error) {
+      console.error("Error fetching subcategories:", error)
       throw new Error(error.message)
     }
 
-    return data
+    if (!data || data.length === 0) {
+      console.warn(`No subcategories found for category ID ${categoryId}`)
+    }
+
+    return data || []
   } catch (error) {
     console.error("Error fetching subcategories:", error)
     throw error

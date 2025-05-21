@@ -64,6 +64,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+  const [isLoadingSubcategories, setIsLoadingSubcategories] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
   const [activeTab, setActiveTab] = useState("basic")
@@ -99,9 +101,16 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   // Load categories on component mount
   useEffect(() => {
     async function loadCategories() {
+      setIsLoadingCategories(true)
       try {
         const data = await getCategories()
+        console.log("Categories loaded:", data)
         setCategories(data)
+
+        // If we have a listing with a category, load its subcategories
+        if (listing?.category_id) {
+          loadSubcategoriesForCategory(listing.category_id)
+        }
       } catch (error) {
         console.error("Error loading categories:", error)
         toast({
@@ -109,29 +118,38 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
           description: "No se pudieron cargar las categorías",
           variant: "destructive",
         })
+      } finally {
+        setIsLoadingCategories(false)
       }
     }
 
     loadCategories()
-  }, [toast])
+  }, [toast, listing])
+
+  // Function to load subcategories for a specific category
+  async function loadSubcategoriesForCategory(categoryId: number) {
+    if (!categoryId) return
+
+    setIsLoadingSubcategories(true)
+    try {
+      const data = await getSubcategories(categoryId)
+      console.log(`Subcategories loaded for category ${categoryId}:`, data)
+      setSubcategories(data)
+    } catch (error) {
+      console.error("Error loading subcategories:", error)
+      setSubcategories([])
+    } finally {
+      setIsLoadingSubcategories(false)
+    }
+  }
 
   // Load subcategories when category changes
   useEffect(() => {
-    async function loadSubcategories() {
-      if (watchedCategoryId) {
-        try {
-          const data = await getSubcategories(watchedCategoryId)
-          setSubcategories(data)
-        } catch (error) {
-          console.error("Error loading subcategories:", error)
-          setSubcategories([])
-        }
-      } else {
-        setSubcategories([])
-      }
+    if (watchedCategoryId) {
+      loadSubcategoriesForCategory(watchedCategoryId)
+    } else {
+      setSubcategories([])
     }
-
-    loadSubcategories()
   }, [watchedCategoryId])
 
   // Handle form submission
@@ -253,18 +271,31 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                     <Select
                       onValueChange={(value) => field.onChange(Number.parseInt(value))}
                       value={field.value ? field.value.toString() : undefined}
+                      disabled={isLoadingCategories}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una categoría" />
+                          <SelectValue
+                            placeholder={isLoadingCategories ? "Cargando categorías..." : "Selecciona una categoría"}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
+                        {isLoadingCategories ? (
+                          <SelectItem value="loading" disabled>
+                            Cargando categorías...
                           </SelectItem>
-                        ))}
+                        ) : categories.length > 0 ? (
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No hay categorías disponibles
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -281,19 +312,41 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                     <Select
                       onValueChange={(value) => field.onChange(Number.parseInt(value))}
                       value={field.value ? field.value.toString() : undefined}
-                      disabled={!watchedCategoryId || subcategories.length === 0}
+                      disabled={!watchedCategoryId || isLoadingSubcategories}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una subcategoría" />
+                          <SelectValue
+                            placeholder={
+                              !watchedCategoryId
+                                ? "Primero selecciona una categoría"
+                                : isLoadingSubcategories
+                                  ? "Cargando subcategorías..."
+                                  : "Selecciona una subcategoría"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {subcategories.map((subcategory) => (
-                          <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
-                            {subcategory.name}
+                        {!watchedCategoryId ? (
+                          <SelectItem value="none" disabled>
+                            Primero selecciona una categoría
                           </SelectItem>
-                        ))}
+                        ) : isLoadingSubcategories ? (
+                          <SelectItem value="loading" disabled>
+                            Cargando subcategorías...
+                          </SelectItem>
+                        ) : subcategories.length > 0 ? (
+                          subcategories.map((subcategory) => (
+                            <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
+                              {subcategory.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No hay subcategorías disponibles
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
