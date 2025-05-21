@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect, Suspense } from "react";
-import { Check, ChevronDown, Filter, MapPin, Search, X } from "lucide-react";
+import { useState, useEffect, Suspense } from "react"
+import { Check, ChevronDown, Filter, MapPin, Search, X } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,64 +20,52 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { AdCard } from "@/components/ad-card";
+} from "@/components/ui/dropdown-menu"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Separator } from "@/components/ui/separator"
+import { AdCard } from "@/components/ad-card"
 
 // Reemplazar todo el header con el componente MainNav
 // Primero, añadir este import
-import { MainNav } from "@/components/main-nav";
-import { SiteFooter } from "@/components/site-footer";
-import { ServiceListingsPage } from "./service-listings-page";
-import ServiceListingsLoading from "@/app/servicios/service-listings-loading";
+import { MainNav } from "@/components/main-nav"
+import { SiteFooter } from "@/components/site-footer"
+import { ServiceListingsPage } from "./service-listings-page"
+import ServiceListingsLoading from "@/app/servicios/service-listings-loading"
 
 // Define types for our filters and services
-type Ciudad = string;
-type Categoria = string;
-type Subcategoria = string;
+type Ciudad = string
+type Categoria = string
+type Subcategoria = string
 
 interface FilterState {
-  ciudades: Ciudad[];
-  categorias: Categoria[];
-  subcategorias: Subcategoria[];
-  searchTerm: string;
+  ciudades: Ciudad[]
+  categorias: Categoria[]
+  subcategorias: Subcategoria[]
+  searchTerm: string
 }
 
 interface Servicio {
-  id: number;
-  title: string;
-  category: string;
-  subcategory: string;
-  description: string;
-  image: string;
-  badge: string | null;
-  price: string;
-  location: string;
-  phone?: string;
-  whatsapp?: string;
-  website?: string;
-  email?: string;
-  address?: string;
-  coordinates?: { lat: number; lng: number };
-  verified?: boolean;
-  isNew?: boolean;
-  publishedAt: Date;
+  id: number
+  title: string
+  category: string
+  subcategory: string
+  description: string
+  image: string
+  badge: string | null
+  price: string
+  location: string
+  phone?: string
+  whatsapp?: string
+  website?: string
+  email?: string
+  address?: string
+  coordinates?: { lat: number; lng: number }
+  verified?: boolean
+  isNew?: boolean
+  publishedAt: Date
 }
 
 export default function ServiciosPage() {
@@ -85,7 +73,7 @@ export default function ServiciosPage() {
     <Suspense fallback={<ServiceListingsLoading />}>
       <ServiceListingsPage />
     </Suspense>
-  );
+  )
 }
 
 function ServiceListingsPageContent() {
@@ -95,38 +83,37 @@ function ServiceListingsPageContent() {
     categorias: [],
     subcategorias: [],
     searchTerm: "",
-  });
+  })
 
   // State for filtered services
-  const [filteredServices, setFilteredServices] =
-    useState<Servicio[]>(serviciosData);
+  const [filteredServices, setFilteredServices] = useState<Servicio[]>(serviciosData)
 
   // State for active tab (mobile)
-  const [activeTab, setActiveTab] = useState("todos");
+  const [activeTab, setActiveTab] = useState("todos")
 
   // State for sheet open (mobile filters)
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   // Añadir estado para el menú móvil
   // Modificar la declaración de estados al inicio de la función del componente
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   // Add this useEffect to handle URL parameters
   useEffect(() => {
-    const categoria = searchParams.get("categoria");
+    const categoria = searchParams.get("categoria")
     if (categoria && !filters.categorias.includes(categoria)) {
       // Update filters based on URL parameter
       setFilters((prev) => ({
         ...prev,
         categorias: [categoria],
-      }));
+      }))
 
       // Update active tab for mobile view
       if (categoria.toLowerCase() === "empleo") {
-        setActiveTab("empleo");
+        setActiveTab("empleo")
       } else {
         // Map other categories to their respective tabs
         const categoryToTabMap: Record<string, string> = {
@@ -136,13 +123,13 @@ function ServiceListingsPageContent() {
           Productos: "productos",
           Comunidad: "comunidad",
           Inmobiliaria: "inmobiliaria",
-        };
+        }
 
-        setActiveTab(categoryToTabMap[categoria] || "todos");
+        setActiveTab(categoryToTabMap[categoria] || "todos")
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams.get("categoria")]);
+  }, [searchParams.get("categoria")])
 
   // Update URL when categories change
   useEffect(() => {
@@ -151,23 +138,20 @@ function ServiceListingsPageContent() {
       // Use replace instead of push to avoid adding to history stack
       router.replace(`/servicios?categoria=${filters.categorias[0]}`, {
         scroll: false,
-      });
-    } else if (
-      filters.categorias.length === 0 &&
-      searchParams.has("categoria")
-    ) {
-      router.replace("/servicios", { scroll: false });
+      })
+    } else if (filters.categorias.length === 0 && searchParams.has("categoria")) {
+      router.replace("/servicios", { scroll: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.categorias]);
+  }, [filters.categorias])
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({
       ...prev,
       searchTerm: e.target.value,
-    }));
-  };
+    }))
+  }
 
   // Handle city filter change
   const handleCiudadChange = (ciudad: Ciudad) => {
@@ -177,78 +161,75 @@ function ServiceListingsPageContent() {
         return {
           ...prev,
           ciudades: [],
-        };
+        }
       }
 
       // Toggle the selected city
       const newCiudades = prev.ciudades.includes(ciudad)
         ? prev.ciudades.filter((c) => c !== ciudad)
-        : [...prev.ciudades, ciudad];
+        : [...prev.ciudades, ciudad]
 
       return {
         ...prev,
         ciudades: newCiudades,
-      };
-    });
-  };
+      }
+    })
+  }
 
   // Handle category filter change
   const handleCategoriaChange = (categoria: Categoria) => {
     setFilters((prev) => {
       const newCategorias = prev.categorias.includes(categoria)
         ? prev.categorias.filter((c) => c !== categoria)
-        : [...prev.categorias, categoria];
+        : [...prev.categorias, categoria]
 
       return {
         ...prev,
         categorias: newCategorias,
-      };
-    });
+      }
+    })
 
     // Update mobile tab if a category is selected
     if (!activeTab.includes(categoria.toLowerCase()) && categoria !== "") {
-      setActiveTab(categoria.toLowerCase());
+      setActiveTab(categoria.toLowerCase())
     }
-  };
+  }
 
   // Handle subcategory filter change
   const handleSubcategoriaChange = (subcategoria: Subcategoria) => {
     setFilters((prev) => {
       const newSubcategorias = prev.subcategorias.includes(subcategoria)
         ? prev.subcategorias.filter((s) => s !== subcategoria)
-        : [...prev.subcategorias, subcategoria];
+        : [...prev.subcategorias, subcategoria]
 
       return {
         ...prev,
         subcategorias: newSubcategorias,
-      };
-    });
-  };
+      }
+    })
+  }
 
   // Remove a specific filter
-  const removeFilter = (
-    type: "ciudad" | "categoria" | "subcategoria",
-    value: string
-  ) => {
+  const removeFilter = (type: "ciudad" | "categoria" | "subcategoria", value: string) => {
     setFilters((prev) => {
       if (type === "ciudad") {
         return {
           ...prev,
           ciudades: prev.ciudades.filter((c) => c !== value),
-        };
+        }
       } else if (type === "categoria") {
         return {
           ...prev,
           categorias: prev.categorias.filter((c) => c !== value),
-        };
+        }
       } else {
         return {
           ...prev,
           subcategorias: prev.subcategorias.filter((s) => s !== value),
-        };
+        }
       }
-    });
-  };
+    })
+  }
 
   // Clear all filters
   const clearAllFilters = () => {
@@ -257,20 +238,20 @@ function ServiceListingsPageContent() {
       categorias: [],
       subcategorias: [],
       searchTerm: "",
-    });
-    setActiveTab("todos");
-  };
+    })
+    setActiveTab("todos")
+  }
 
   // Handle tab change (mobile)
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    setActiveTab(value)
 
     // Update category filters based on tab
     if (value === "todos") {
       setFilters((prev) => ({
         ...prev,
         categorias: [],
-      }));
+      }))
     } else {
       const categoryMap: Record<string, string> = {
         restaurantes: "Restaurantes",
@@ -280,57 +261,51 @@ function ServiceListingsPageContent() {
         productos: "Productos",
         comunidad: "Comunidad",
         inmobiliaria: "Inmobiliaria",
-      };
+      }
 
-      const category = categoryMap[value];
+      const category = categoryMap[value]
       if (category) {
         setFilters((prev) => ({
           ...prev,
           categorias: [category],
-        }));
+        }))
       }
     }
-  };
+  }
 
   // Filter services based on filters and search term
   useEffect(() => {
-    let results = [...serviciosData];
+    let results = [...serviciosData]
 
     // Filter by search term
     if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
+      const searchLower = filters.searchTerm.toLowerCase()
       results = results.filter(
         (service) =>
           service.title.toLowerCase().includes(searchLower) ||
           service.description.toLowerCase().includes(searchLower) ||
           service.category.toLowerCase().includes(searchLower) ||
-          service.subcategory.toLowerCase().includes(searchLower)
-      );
+          service.subcategory.toLowerCase().includes(searchLower),
+      )
     }
 
     // Filter by cities
     if (filters.ciudades.length > 0) {
-      results = results.filter((service) =>
-        filters.ciudades.includes(service.location)
-      );
+      results = results.filter((service) => filters.ciudades.includes(service.location))
     }
 
     // Filter by categories
     if (filters.categorias.length > 0) {
-      results = results.filter((service) =>
-        filters.categorias.includes(service.category)
-      );
+      results = results.filter((service) => filters.categorias.includes(service.category))
     }
 
     // Filter by subcategories
     if (filters.subcategorias.length > 0) {
-      results = results.filter((service) =>
-        filters.subcategorias.includes(service.subcategory)
-      );
+      results = results.filter((service) => filters.subcategorias.includes(service.subcategory))
     }
 
-    setFilteredServices(results);
-  }, [filters]);
+    setFilteredServices(results)
+  }, [filters])
 
   // Get unique cities from data
   const uniqueCities = [
@@ -385,17 +360,11 @@ function ServiceListingsPageContent() {
     "Zamora",
     "Zaragoza",
     "Online",
-  ];
+  ]
 
   // Get unique categories and subcategories
   const categoriesMap: Record<string, string[]> = {
-    Restaurantes: [
-      "Comida dominicana",
-      "Comida colombiana",
-      "Comida mexicana",
-      "Comida peruana",
-      "Comida venezolana",
-    ],
+    Restaurantes: ["Comida dominicana", "Comida colombiana", "Comida mexicana", "Comida peruana", "Comida venezolana"],
     Servicios: ["Peluquería", "Masajes", "Extranjería", "Limpieza", "Mudanzas"],
     Empleo: ["Tiempo completo", "Medio tiempo", "Por horas"],
     Formación: ["Cursos", "Talleres", "Certificaciones"],
@@ -426,7 +395,7 @@ function ServiceListingsPageContent() {
       "Vivienda en Guayana Francesa",
     ],
     Otros: [],
-  };
+  }
 
   // Contenido de la página
 
@@ -441,8 +410,8 @@ function ServiceListingsPageContent() {
           <div className="container py-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Servicios</h1>
             <p className="text-muted-foreground max-w-3xl">
-              Encuentra servicios latinos, oportunidades de empleo, formación y
-              productos filtrando por ciudad y categoría.
+              Encuentra servicios latinos, oportunidades de empleo, formación y productos filtrando por ciudad y
+              categoría.
             </p>
           </div>
         </div>
@@ -482,9 +451,7 @@ function ServiceListingsPageContent() {
                         className="flex items-center cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                       >
                         <div className="w-5 h-5 mr-2 flex items-center justify-center">
-                          {filters.ciudades.length === 0 && (
-                            <Check className="h-4 w-4 text-primary" />
-                          )}
+                          {filters.ciudades.length === 0 && <Check className="h-4 w-4 text-primary" />}
                         </div>
                         <span className="font-medium">Todas</span>
                       </DropdownMenuItem>
@@ -495,19 +462,9 @@ function ServiceListingsPageContent() {
                           className="flex items-center cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                         >
                           <div className="w-5 h-5 mr-2 flex items-center justify-center">
-                            {filters.ciudades.includes(ciudad) && (
-                              <Check className="h-4 w-4 text-primary" />
-                            )}
+                            {filters.ciudades.includes(ciudad) && <Check className="h-4 w-4 text-primary" />}
                           </div>
-                          <span
-                            className={
-                              filters.ciudades.includes(ciudad)
-                                ? "font-medium"
-                                : ""
-                            }
-                          >
-                            {ciudad}
-                          </span>
+                          <span className={filters.ciudades.includes(ciudad) ? "font-medium" : ""}>{ciudad}</span>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuGroup>
@@ -520,14 +477,12 @@ function ServiceListingsPageContent() {
                     <Button variant="outline" className="md:hidden flex gap-2">
                       <Filter className="h-4 w-4" />
                       <span>Filtros</span>
-                      {(filters.categorias.length > 0 ||
-                        filters.subcategorias.length > 0) && (
+                      {(filters.categorias.length > 0 || filters.subcategorias.length > 0) && (
                         <Badge
                           variant="secondary"
                           className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center"
                         >
-                          {filters.categorias.length +
-                            filters.subcategorias.length}
+                          {filters.categorias.length + filters.subcategorias.length}
                         </Badge>
                       )}
                     </Button>
@@ -535,172 +490,25 @@ function ServiceListingsPageContent() {
                   <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                     <SheetHeader>
                       <SheetTitle>Filtros</SheetTitle>
-                      <SheetDescription>
-                        Filtra los resultados por categoría y subcategoría
-                      </SheetDescription>
+                      <SheetDescription>Filtra los resultados por categoría y subcategoría</SheetDescription>
                     </SheetHeader>
                     <div className="py-4">
                       <Accordion type="multiple" className="w-full">
-                        {Object.entries(categoriesMap).map(
-                          ([category, subcategories]) => (
-                            <AccordionItem
-                              key={category}
-                              value={category.toLowerCase()}
-                            >
-                              <AccordionTrigger className="flex items-center group">
-                                <div className="flex items-center">
-                                  <div className="w-5 h-5 mr-2 flex items-center justify-center">
-                                    <div
-                                      className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors 
+                        {Object.entries(categoriesMap).map(([category, subcategories]) => (
+                          <AccordionItem key={category} value={category.toLowerCase()}>
+                            <AccordionTrigger className="flex items-center group">
+                              <div className="flex items-center">
+                                <div className="w-5 h-5 mr-2 flex items-center justify-center">
+                                  <div
+                                    className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors 
                                     ${
                                       filters.categorias.includes(category)
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-transparent"
                                     }`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleCategoriaChange(category);
-                                      }}
-                                    >
-                                      {filters.categorias.includes(
-                                        category
-                                      ) && (
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          className="h-4 w-4"
-                                        >
-                                          <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <span className="font-medium group-hover:text-primary transition-colors">
-                                    {category}
-                                  </span>
-                                </div>
-                              </AccordionTrigger>
-
-                              <AccordionContent>
-                                <div className="space-y-3 pl-6">
-                                  {subcategories.map((subcategory) => (
-                                    <div
-                                      key={subcategory}
-                                      className="flex items-center space-x-2 group"
-                                    >
-                                      <div className="w-5 h-5 flex items-center justify-center">
-                                        <div
-                                          className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors cursor-pointer
-                                        ${
-                                          filters.subcategorias.includes(
-                                            subcategory
-                                          )
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-transparent"
-                                        }`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSubcategoriaChange(
-                                              subcategory
-                                            );
-                                          }}
-                                        >
-                                          {filters.subcategorias.includes(
-                                            subcategory
-                                          ) && (
-                                            <svg
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              viewBox="0 0 24 24"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              strokeWidth="2"
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              className="h-4 w-4"
-                                            >
-                                              <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <label
-                                        htmlFor={`mobile-${subcategory
-                                          .toLowerCase()
-                                          .replace(/\s+/g, "-")}`}
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 group-hover:text-primary transition-colors"
-                                      >
-                                        {subcategory}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              </AccordionContent>
-                            </AccordionItem>
-                          )
-                        )}
-                      </Accordion>
-                    </div>
-                    <div className="flex justify-between mt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          clearAllFilters();
-                          setIsSheetOpen(false);
-                        }}
-                      >
-                        Limpiar filtros
-                      </Button>
-                      <Button onClick={() => setIsSheetOpen(false)}>
-                        Aplicar filtros
-                      </Button>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="container py-8">
-          <div className="flex flex-col md:flex-row gap-8">
-            {/* Desktop Sidebar Filters */}
-            <div className="hidden md:block w-64 shrink-0">
-              <div className="sticky top-36">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-medium mb-3">Categorías</h3>
-                    <Accordion
-                      type="multiple"
-                      className="w-full"
-                      defaultValue={filters.categorias.map((c) =>
-                        c.toLowerCase()
-                      )}
-                    >
-                      {Object.entries(categoriesMap).map(
-                        ([category, subcategories]) => (
-                          <AccordionItem
-                            key={category}
-                            value={category.toLowerCase()}
-                          >
-                            <AccordionTrigger className="text-sm py-2 group">
-                              <div className="flex items-center">
-                                <div className="w-5 h-5 mr-2 flex items-center justify-center">
-                                  <div
-                                    className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors cursor-pointer
-                                  ${
-                                    filters.categorias.includes(category)
-                                      ? "bg-primary text-primary-foreground"
-                                      : "bg-transparent"
-                                  }`}
                                     onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleCategoriaChange(category);
+                                      e.stopPropagation()
+                                      handleCategoriaChange(category)
                                     }}
                                   >
                                     {filters.categorias.includes(category) && (
@@ -724,31 +532,25 @@ function ServiceListingsPageContent() {
                                 </span>
                               </div>
                             </AccordionTrigger>
+
                             <AccordionContent>
-                              <div className="space-y-2 pl-6">
+                              <div className="space-y-3 pl-6">
                                 {subcategories.map((subcategory) => (
-                                  <div
-                                    key={subcategory}
-                                    className="flex items-center space-x-2 group"
-                                  >
+                                  <div key={subcategory} className="flex items-center space-x-2 group">
                                     <div className="w-5 h-5 flex items-center justify-center">
                                       <div
                                         className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors cursor-pointer
-                                      ${
-                                        filters.subcategorias.includes(
-                                          subcategory
-                                        )
-                                          ? "bg-primary text-primary-foreground"
-                                          : "bg-transparent"
-                                      }`}
+                                        ${
+                                          filters.subcategorias.includes(subcategory)
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-transparent"
+                                        }`}
                                         onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSubcategoriaChange(subcategory);
+                                          e.stopPropagation()
+                                          handleSubcategoriaChange(subcategory)
                                         }}
                                       >
-                                        {filters.subcategorias.includes(
-                                          subcategory
-                                        ) && (
+                                        {filters.subcategorias.includes(subcategory) && (
                                           <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 24 24"
@@ -765,10 +567,8 @@ function ServiceListingsPageContent() {
                                       </div>
                                     </div>
                                     <label
-                                      htmlFor={subcategory
-                                        .toLowerCase()
-                                        .replace(/\s+/g, "-")}
-                                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 group-hover:text-primary transition-colors"
+                                      htmlFor={`mobile-${subcategory.toLowerCase().replace(/\s+/g, "-")}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 group-hover:text-primary transition-colors"
                                     >
                                       {subcategory}
                                     </label>
@@ -777,8 +577,123 @@ function ServiceListingsPageContent() {
                               </div>
                             </AccordionContent>
                           </AccordionItem>
-                        )
-                      )}
+                        ))}
+                      </Accordion>
+                    </div>
+                    <div className="flex justify-between mt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          clearAllFilters()
+                          setIsSheetOpen(false)
+                        }}
+                      >
+                        Limpiar filtros
+                      </Button>
+                      <Button onClick={() => setIsSheetOpen(false)}>Aplicar filtros</Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="container py-8">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Desktop Sidebar Filters */}
+            <div className="hidden md:block w-64 shrink-0">
+              <div className="sticky top-36">
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-medium mb-3">Categorías</h3>
+                    <Accordion
+                      type="multiple"
+                      className="w-full"
+                      defaultValue={filters.categorias.map((c) => c.toLowerCase())}
+                    >
+                      {Object.entries(categoriesMap).map(([category, subcategories]) => (
+                        <AccordionItem key={category} value={category.toLowerCase()}>
+                          <AccordionTrigger className="text-sm py-2 group">
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 mr-2 flex items-center justify-center">
+                                <div
+                                  className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors cursor-pointer
+                                  ${
+                                    filters.categorias.includes(category)
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-transparent"
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleCategoriaChange(category)
+                                  }}
+                                >
+                                  {filters.categorias.includes(category) && (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="h-4 w-4"
+                                    >
+                                      <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="font-medium group-hover:text-primary transition-colors">{category}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <div className="space-y-2 pl-6">
+                              {subcategories.map((subcategory) => (
+                                <div key={subcategory} className="flex items-center space-x-2 group">
+                                  <div className="w-5 h-5 flex items-center justify-center">
+                                    <div
+                                      className={`h-4 w-4 rounded-sm border border-primary ring-offset-background transition-colors cursor-pointer
+                                      ${
+                                        filters.subcategorias.includes(subcategory)
+                                          ? "bg-primary text-primary-foreground"
+                                          : "bg-transparent"
+                                      }`}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleSubcategoriaChange(subcategory)
+                                      }}
+                                    >
+                                      {filters.subcategorias.includes(subcategory) && (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="h-4 w-4"
+                                        >
+                                          <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <label
+                                    htmlFor={subcategory.toLowerCase().replace(/\s+/g, "-")}
+                                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 group-hover:text-primary transition-colors"
+                                  >
+                                    {subcategory}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
                     </Accordion>
                   </div>
 
@@ -807,24 +722,17 @@ function ServiceListingsPageContent() {
                         </label>
                       </div>
                       {uniqueCities.map((ciudad) => (
-                        <div
-                          key={ciudad}
-                          className="flex items-center space-x-2 group"
-                        >
+                        <div key={ciudad} className="flex items-center space-x-2 group">
                           <div className="w-5 h-5 flex items-center justify-center">
                             <Checkbox
-                              id={`ciudad-${ciudad
-                                .toLowerCase()
-                                .replace(/\s+/g, "-")}`}
+                              id={`ciudad-${ciudad.toLowerCase().replace(/\s+/g, "-")}`}
                               checked={filters.ciudades.includes(ciudad)}
                               onCheckedChange={() => handleCiudadChange(ciudad)}
                               className="transition-all"
                             />
                           </div>
                           <label
-                            htmlFor={`ciudad-${ciudad
-                              .toLowerCase()
-                              .replace(/\s+/g, "-")}`}
+                            htmlFor={`ciudad-${ciudad.toLowerCase().replace(/\s+/g, "-")}`}
                             className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 group-hover:text-primary transition-colors"
                           >
                             {ciudad}
@@ -836,11 +744,7 @@ function ServiceListingsPageContent() {
 
                   <Separator />
 
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={clearAllFilters}
-                  >
+                  <Button variant="outline" className="w-full" onClick={clearAllFilters}>
                     Limpiar filtros
                   </Button>
                 </div>
@@ -856,57 +760,32 @@ function ServiceListingsPageContent() {
                 filters.searchTerm) && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {filters.searchTerm && (
-                    <Badge
-                      variant="secondary"
-                      className="flex items-center gap-1 px-3 py-1"
-                    >
+                    <Badge variant="secondary" className="flex items-center gap-1 px-3 py-1">
                       Búsqueda: {filters.searchTerm}
                       <X
                         className="h-3 w-3 cursor-pointer"
-                        onClick={() =>
-                          setFilters((prev) => ({ ...prev, searchTerm: "" }))
-                        }
+                        onClick={() => setFilters((prev) => ({ ...prev, searchTerm: "" }))}
                       />
                     </Badge>
                   )}
                   {filters.ciudades.map((ciudad) => (
-                    <Badge
-                      key={ciudad}
-                      variant="secondary"
-                      className="flex items-center gap-1 px-3 py-1"
-                    >
+                    <Badge key={ciudad} variant="secondary" className="flex items-center gap-1 px-3 py-1">
                       {ciudad}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeFilter("ciudad", ciudad)}
-                      />
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeFilter("ciudad", ciudad)} />
                     </Badge>
                   ))}
                   {filters.categorias.map((categoria) => (
-                    <Badge
-                      key={categoria}
-                      variant="secondary"
-                      className="flex items-center gap-1 px-3 py-1"
-                    >
+                    <Badge key={categoria} variant="secondary" className="flex items-center gap-1 px-3 py-1">
                       {categoria}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeFilter("categoria", categoria)}
-                      />
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeFilter("categoria", categoria)} />
                     </Badge>
                   ))}
                   {filters.subcategorias.map((subcategoria) => (
-                    <Badge
-                      key={subcategoria}
-                      variant="secondary"
-                      className="flex items-center gap-1 px-3 py-1"
-                    >
+                    <Badge key={subcategoria} variant="secondary" className="flex items-center gap-1 px-3 py-1">
                       {subcategoria}
                       <X
                         className="h-3 w-3 cursor-pointer"
-                        onClick={() =>
-                          removeFilter("subcategoria", subcategoria)
-                        }
+                        onClick={() => removeFilter("subcategoria", subcategoria)}
                       />
                     </Badge>
                   ))}
@@ -914,11 +793,7 @@ function ServiceListingsPageContent() {
                     filters.categorias.length > 0 ||
                     filters.subcategorias.length > 0 ||
                     filters.searchTerm) && (
-                    <Button
-                      variant="link"
-                      className="text-xs h-auto p-0 ml-2"
-                      onClick={clearAllFilters}
-                    >
+                    <Button variant="link" className="text-xs h-auto p-0 ml-2" onClick={clearAllFilters}>
                       Limpiar todos
                     </Button>
                   )}
@@ -944,8 +819,7 @@ function ServiceListingsPageContent() {
               {/* Results Count and Sort */}
               <div className="flex justify-between items-center mb-6">
                 <p className="text-sm text-muted-foreground">
-                  Mostrando {filteredServices.length}{" "}
-                  {filteredServices.length === 1 ? "resultado" : "resultados"}
+                  Mostrando {filteredServices.length} {filteredServices.length === 1 ? "resultado" : "resultados"}
                 </p>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -996,18 +870,12 @@ function ServiceListingsPageContent() {
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
                     <Search className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-medium mb-2">
-                    No se encontraron resultados
-                  </h3>
+                  <h3 className="text-lg font-medium mb-2">No se encontraron resultados</h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    No hemos encontrado resultados que coincidan con tu
-                    búsqueda. Intenta con otros términos o ajusta los filtros.
+                    No hemos encontrado resultados que coincidan con tu búsqueda. Intenta con otros términos o ajusta
+                    los filtros.
                   </p>
-                  <Button
-                    variant="outline"
-                    className="mt-4"
-                    onClick={clearAllFilters}
-                  >
+                  <Button variant="outline" className="mt-4" onClick={clearAllFilters}>
                     Limpiar filtros
                   </Button>
                 </div>
@@ -1034,11 +902,7 @@ function ServiceListingsPageContent() {
                       </svg>
                       <span className="sr-only">Página anterior</span>
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-primary text-primary-foreground"
-                    >
+                    <Button variant="outline" size="sm" className="bg-primary text-primary-foreground">
                       1
                     </Button>
                     <Button variant="outline" size="sm">
@@ -1081,7 +945,7 @@ function ServiceListingsPageContent() {
       {/* Footer */}
       <SiteFooter />
     </div>
-  );
+  )
 }
 
 // Sample data for services
@@ -1133,8 +997,7 @@ const serviciosData = [
     title: "Asesoría de Extranjería",
     category: "Servicios",
     subcategory: "Extranjería",
-    description:
-      "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
+    description: "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Verificado",
     price: "Consulta 40€",
@@ -1154,8 +1017,7 @@ const serviciosData = [
     title: "Empleo: Camarero/a",
     category: "Empleo",
     subcategory: "Tiempo completo",
-    description:
-      "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
+    description: "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Urgente",
     price: "1.200€/mes",
@@ -1174,8 +1036,7 @@ const serviciosData = [
     title: "Curso de Cocina Dominicana",
     category: "Formación",
     subcategory: "Cursos",
-    description:
-      "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
+    description: "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Nuevo",
     price: "120€",
@@ -1195,8 +1056,7 @@ const serviciosData = [
     title: "Productos Típicos Mexicanos",
     category: "Productos",
     subcategory: "Alimentos",
-    description:
-      "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
+    description: "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
@@ -1214,8 +1074,7 @@ const serviciosData = [
     title: "Masajes Terapéuticos",
     category: "Servicios",
     subcategory: "Masajes",
-    description:
-      "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
+    description: "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "35€/sesión",
@@ -1235,8 +1094,7 @@ const serviciosData = [
     title: "Empleo: Limpieza de Hogar",
     category: "Empleo",
     subcategory: "Por horas",
-    description:
-      "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
+    description: "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "10€/hora",
@@ -1254,8 +1112,7 @@ const serviciosData = [
     title: "Taller de Baile Latino",
     category: "Formación",
     subcategory: "Talleres",
-    description:
-      "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
+    description: "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Popular",
     price: "50€/mes",
@@ -1275,8 +1132,7 @@ const serviciosData = [
     title: "Artesanía Peruana",
     category: "Productos",
     subcategory: "Artesanía",
-    description:
-      "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
+    description: "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
@@ -1296,8 +1152,7 @@ const serviciosData = [
     title: "Restaurante Sabor Venezolano",
     category: "Restaurantes",
     subcategory: "Comida venezolana",
-    description:
-      "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
+    description: "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
     image: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Menú 10€",
@@ -1317,8 +1172,7 @@ const serviciosData = [
     title: "Certificación de Español",
     category: "Formación",
     subcategory: "Certificaciones",
-    description:
-      "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
+    description: "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
     image: "/placeholder.svg?height=300&width=400",
     badge: "Certificado",
     price: "200€/curso",
@@ -1333,4 +1187,4 @@ const serviciosData = [
     isNew: false,
     publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000), // 18 días atrás
   },
-];
+]

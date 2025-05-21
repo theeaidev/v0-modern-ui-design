@@ -1,8 +1,8 @@
-"use server";
+"use server"
 
-import { createServerClient } from "@/lib/supabase-server";
-import { revalidatePath } from "next/cache";
-import type { ServiceListingFormData } from "@/types/service";
+import { createServerClient } from "@/lib/supabase-server"
+import { revalidatePath } from "next/cache"
+import type { ServiceListingFormData } from "@/types/service"
 
 // Get all service listings with pagination and filters
 export async function getServiceListings({
@@ -16,21 +16,21 @@ export async function getServiceListings({
   user_id,
   status,
 }: {
-  page?: number;
-  limit?: number;
-  category_id?: number;
-  subcategory_id?: number;
-  city?: string;
-  search?: string;
-  sort?: "newest" | "oldest" | "price_low" | "price_high" | "popular";
-  user_id?: string;
-  status?: "draft" | "active" | "paused" | "expired" | "rejected";
+  page?: number
+  limit?: number
+  category_id?: number
+  subcategory_id?: number
+  city?: string
+  search?: string
+  sort?: "newest" | "oldest" | "price_low" | "price_high" | "popular"
+  user_id?: string
+  status?: "draft" | "active" | "paused" | "expired" | "rejected"
 }) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Calculate offset for pagination
-    const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit
 
     // Start building the query
     let query = supabase.from("service_listings").select(
@@ -40,75 +40,72 @@ export async function getServiceListings({
         category:categories(*),
         subcategory:subcategories(*)
       `,
-      { count: "exact" }
-    );
+      { count: "exact" },
+    )
 
     // Apply filters
     if (category_id) {
-      query = query.eq("category_id", category_id);
+      query = query.eq("category_id", category_id)
     }
 
     if (subcategory_id) {
-      query = query.eq("subcategory_id", subcategory_id);
+      query = query.eq("subcategory_id", subcategory_id)
     }
 
     if (city) {
-      query = query.eq("city", city);
+      query = query.eq("city", city)
     }
 
     if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
     }
 
     if (user_id) {
-      query = query.eq("user_id", user_id);
+      query = query.eq("user_id", user_id)
     }
 
     if (status) {
-      query = query.eq("status", status);
+      query = query.eq("status", status)
     } else if (!user_id) {
       // If not filtering by user_id, only show active listings by default
-      query = query.eq("status", "active");
+      query = query.in("status", ["active"])
     }
 
     // Apply sorting
     switch (sort) {
       case "newest":
-        query = query.order("created_at", { ascending: false });
-        break;
+        query = query.order("created_at", { ascending: false })
+        break
       case "oldest":
-        query = query.order("created_at", { ascending: true });
-        break;
+        query = query.order("created_at", { ascending: true })
+        break
       case "price_low":
-        query = query.order("price", { ascending: true });
-        break;
+        query = query.order("price", { ascending: true })
+        break
       case "price_high":
-        query = query.order("price", { ascending: false });
-        break;
+        query = query.order("price", { ascending: false })
+        break
       case "popular":
-        query = query.order("views", { ascending: false });
-        break;
+        query = query.order("views", { ascending: false })
+        break
       default:
-        query = query.order("created_at", { ascending: false });
+        query = query.order("created_at", { ascending: false })
     }
 
     // Apply pagination
-    query = query.range(offset, offset + limit - 1);
+    query = query.range(offset, offset + limit - 1)
 
-    const { data, error, count } = await query;
+    const { data, error, count } = await query
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
 
     // Minimal join test
     const minimalTest = await supabase
       .from("service_listings")
-      .select("*, category:categories(*), subcategory:subcategories(*)");
-    console.log(
-      "Minimal join test result:",
-      JSON.stringify(minimalTest, null, 2)
-    );
+      .select("*, category:categories(*), subcategory:subcategories(*)")
+    console.log("Minimal join test result:", JSON.stringify(minimalTest, null, 2))
 
     return {
       listings: data,
@@ -116,17 +113,17 @@ export async function getServiceListings({
       page,
       limit,
       totalPages: count ? Math.ceil(count / limit) : 0,
-    };
+    }
   } catch (error) {
-    console.error("Error fetching service listings:", error);
-    throw error;
+    console.error("Error fetching service listings:", error)
+    throw error
   }
 }
 
 // Get a single service listing by ID
 export async function getServiceListingById(id: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     const { data, error } = await supabase
       .from("service_listings")
@@ -137,13 +134,13 @@ export async function getServiceListingById(id: string) {
         category:categories(*),
         subcategory:subcategories(*),
         user:profiles(id, full_name, avatar_url, is_verified)
-      `
+      `,
       )
       .eq("id", id)
-      .single();
+      .single()
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
 
     // Get reviews count and average rating
@@ -151,80 +148,74 @@ export async function getServiceListingById(id: string) {
       .from("reviews")
       .select("rating", { count: "exact" })
       .eq("service_id", id)
-      .eq("is_approved", true);
+      .eq("is_approved", true)
 
     if (reviewsError) {
-      throw new Error(reviewsError.message);
+      throw new Error(reviewsError.message)
     }
 
-    const reviews_count = reviewsData.length;
+    const reviews_count = reviewsData.length
     const average_rating =
-      reviews_count > 0
-        ? reviewsData.reduce((sum, review) => sum + review.rating, 0) /
-          reviews_count
-        : 0;
+      reviews_count > 0 ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviews_count : 0
 
     // Record a view
-    await recordServiceView(id);
+    await recordServiceView(id)
 
     return {
       ...data,
       reviews_count,
       average_rating,
-    };
+    }
   } catch (error) {
-    console.error("Error fetching service listing:", error);
-    throw error;
+    console.error("Error fetching service listing:", error)
+    throw error
   }
 }
 
 // Record a view for a service listing
 async function recordServiceView(serviceId: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user if logged in
     const {
       data: { session },
-    } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
+    } = await supabase.auth.getSession()
+    const userId = session?.user?.id
 
     // Record the view
     await supabase.from("service_views").insert({
       service_id: serviceId,
       user_id: userId || null,
-    });
+    })
   } catch (error) {
     // Silently fail if recording the view fails
-    console.error("Error recording service view:", error);
+    console.error("Error recording service view:", error)
   }
 }
 
 // Create a new service listing
 export async function createServiceListing(formData: ServiceListingFormData) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
     if (!session?.user) {
-      throw new Error("You must be logged in to create a service listing");
+      throw new Error("Debes iniciar sesión para crear un anuncio")
     }
 
     // Generate a slug from the title
-    const { data: slugData, error: slugError } = await supabase.rpc(
-      "generate_slug",
-      { title: formData.title }
-    );
+    const { data: slugData, error: slugError } = await supabase.rpc("generate_slug", { title: formData.title })
 
     if (slugError) {
-      throw new Error(slugError.message);
+      throw new Error(`Error al generar el slug: ${slugError.message}`)
     }
 
-    const slug = slugData;
+    const slug = slugData
 
     // Insert the service listing
     const { data, error } = await supabase
@@ -251,37 +242,34 @@ export async function createServiceListing(formData: ServiceListingFormData) {
         status: formData.status,
       })
       .select()
-      .single();
+      .single()
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(`Error al crear el anuncio: ${error.message}`)
     }
 
-    revalidatePath("/servicios");
-    revalidatePath("/dashboard/servicios");
+    revalidatePath("/servicios")
+    revalidatePath("/dashboard/servicios")
 
-    return { success: true, data };
+    return { success: true, data }
   } catch (error) {
-    console.error("Error creating service listing:", error);
-    throw error;
+    console.error("Error creating service listing:", error)
+    throw error
   }
 }
 
 // Update an existing service listing
-export async function updateServiceListing(
-  id: string,
-  formData: ServiceListingFormData
-) {
+export async function updateServiceListing(id: string, formData: ServiceListingFormData) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
     if (!session?.user) {
-      throw new Error("You must be logged in to update a service listing");
+      throw new Error("You must be logged in to update a service listing")
     }
 
     // Check if the user owns the listing
@@ -289,14 +277,14 @@ export async function updateServiceListing(
       .from("service_listings")
       .select("user_id")
       .eq("id", id)
-      .single();
+      .single()
 
     if (listingError) {
-      throw new Error(listingError.message);
+      throw new Error(listingError.message)
     }
 
     if (listing.user_id !== session.user.id) {
-      throw new Error("You do not have permission to update this listing");
+      throw new Error("You do not have permission to update this listing")
     }
 
     // Update the service listing
@@ -323,36 +311,36 @@ export async function updateServiceListing(
       })
       .eq("id", id)
       .select()
-      .single();
+      .single()
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
 
-    revalidatePath("/servicios");
-    revalidatePath(`/servicios/${id}`);
-    revalidatePath("/dashboard/servicios");
-    revalidatePath(`/dashboard/servicios/${id}`);
+    revalidatePath("/servicios")
+    revalidatePath(`/servicios/${id}`)
+    revalidatePath("/dashboard/servicios")
+    revalidatePath(`/dashboard/servicios/${id}`)
 
-    return { success: true, data };
+    return { success: true, data }
   } catch (error) {
-    console.error("Error updating service listing:", error);
-    throw error;
+    console.error("Error updating service listing:", error)
+    throw error
   }
 }
 
 // Delete a service listing
 export async function deleteServiceListing(id: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
     if (!session?.user) {
-      throw new Error("You must be logged in to delete a service listing");
+      throw new Error("You must be logged in to delete a service listing")
     }
 
     // Check if the user owns the listing
@@ -360,48 +348,45 @@ export async function deleteServiceListing(id: string) {
       .from("service_listings")
       .select("user_id")
       .eq("id", id)
-      .single();
+      .single()
 
     if (listingError) {
-      throw new Error(listingError.message);
+      throw new Error(listingError.message)
     }
 
     if (listing.user_id !== session.user.id) {
-      throw new Error("You do not have permission to delete this listing");
+      throw new Error("You do not have permission to delete this listing")
     }
 
     // Delete the service listing
-    const { error } = await supabase
-      .from("service_listings")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("service_listings").delete().eq("id", id)
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
 
-    revalidatePath("/servicios");
-    revalidatePath("/dashboard/servicios");
+    revalidatePath("/servicios")
+    revalidatePath("/dashboard/servicios")
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
-    console.error("Error deleting service listing:", error);
-    throw error;
+    console.error("Error deleting service listing:", error)
+    throw error
   }
 }
 
 // Add or remove a service listing from favorites
 export async function toggleFavorite(serviceId: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
     if (!session?.user) {
-      throw new Error("You must be logged in to favorite a listing");
+      throw new Error("You must be logged in to favorite a listing")
     }
 
     // Check if the listing is already favorited
@@ -410,10 +395,10 @@ export async function toggleFavorite(serviceId: string) {
       .select("*")
       .eq("user_id", session.user.id)
       .eq("service_id", serviceId)
-      .maybeSingle();
+      .maybeSingle()
 
     if (favoriteError) {
-      throw new Error(favoriteError.message);
+      throw new Error(favoriteError.message)
     }
 
     if (favorite) {
@@ -422,44 +407,44 @@ export async function toggleFavorite(serviceId: string) {
         .from("favorites")
         .delete()
         .eq("user_id", session.user.id)
-        .eq("service_id", serviceId);
+        .eq("service_id", serviceId)
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error.message)
       }
 
-      return { success: true, favorited: false };
+      return { success: true, favorited: false }
     } else {
       // Add to favorites
       const { error } = await supabase.from("favorites").insert({
         user_id: session.user.id,
         service_id: serviceId,
-      });
+      })
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error.message)
       }
 
-      return { success: true, favorited: true };
+      return { success: true, favorited: true }
     }
   } catch (error) {
-    console.error("Error toggling favorite:", error);
-    throw error;
+    console.error("Error toggling favorite:", error)
+    throw error
   }
 }
 
 // Check if a service listing is favorited by the current user
 export async function isFavorited(serviceId: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
     if (!session?.user) {
-      return { favorited: false };
+      return { favorited: false }
     }
 
     // Check if the listing is favorited
@@ -468,78 +453,81 @@ export async function isFavorited(serviceId: string) {
       .select("*")
       .eq("user_id", session.user.id)
       .eq("service_id", serviceId)
-      .maybeSingle();
+      .maybeSingle()
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
 
-    return { favorited: !!data };
+    return { favorited: !!data }
   } catch (error) {
-    console.error("Error checking if favorited:", error);
-    throw error;
+    console.error("Error checking if favorited:", error)
+    throw error
   }
 }
 
 // Get all categories
 export async function getCategories() {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .order("name");
+    const { data, error } = await supabase.from("categories").select("*").order("name")
 
     if (error) {
-      throw new Error(error.message);
+      console.error("Error fetching categories:", error)
+      throw new Error(error.message)
     }
 
-    return data;
+    if (!data || data.length === 0) {
+      console.warn("No categories found in the database")
+    }
+
+    return data || []
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    throw error;
+    console.error("Error fetching categories:", error)
+    throw error
   }
 }
 
 // Get subcategories for a category
 export async function getSubcategories(categoryId: number) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
-    const { data, error } = await supabase
-      .from("subcategories")
-      .select("*")
-      .eq("category_id", categoryId)
-      .order("name");
-
-    if (error) {
-      throw new Error(error.message);
+    if (!categoryId) {
+      return []
     }
 
-    return data;
+    const { data, error } = await supabase.from("subcategories").select("*").eq("category_id", categoryId).order("name")
+
+    if (error) {
+      console.error("Error fetching subcategories:", error)
+      throw new Error(error.message)
+    }
+
+    if (!data || data.length === 0) {
+      console.warn(`No subcategories found for category ID ${categoryId}`)
+    }
+
+    return data || []
   } catch (error) {
-    console.error("Error fetching subcategories:", error);
-    throw error;
+    console.error("Error fetching subcategories:", error)
+    throw error
   }
 }
 
 // Add a review to a service listing
-export async function addReview(
-  serviceId: string,
-  rating: number,
-  comment: string
-) {
+export async function addReview(serviceId: string, rating: number, comment: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     // Get the current user
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getSession()
 
     if (!session?.user) {
-      throw new Error("You must be logged in to review a listing");
+      throw new Error("You must be logged in to review a listing")
     }
 
     // Check if the user has already reviewed this listing
@@ -548,10 +536,10 @@ export async function addReview(
       .select("*")
       .eq("user_id", session.user.id)
       .eq("service_id", serviceId)
-      .maybeSingle();
+      .maybeSingle()
 
     if (existingReviewError) {
-      throw new Error(existingReviewError.message);
+      throw new Error(existingReviewError.message)
     }
 
     if (existingReview) {
@@ -563,10 +551,10 @@ export async function addReview(
           comment,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", existingReview.id);
+        .eq("id", existingReview.id)
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error.message)
       }
     } else {
       // Add a new review
@@ -575,26 +563,26 @@ export async function addReview(
         user_id: session.user.id,
         rating,
         comment,
-      });
+      })
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error.message)
       }
     }
 
-    revalidatePath(`/servicios/${serviceId}`);
+    revalidatePath(`/servicios/${serviceId}`)
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
-    console.error("Error adding review:", error);
-    throw error;
+    console.error("Error adding review:", error)
+    throw error
   }
 }
 
 // Get reviews for a service listing
 export async function getReviews(serviceId: string) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServerClient()
 
     const { data, error } = await supabase
       .from("reviews")
@@ -602,19 +590,73 @@ export async function getReviews(serviceId: string) {
         `
         *,
         user:profiles(id, full_name, avatar_url)
-      `
+      `,
       )
       .eq("service_id", serviceId)
       .eq("is_approved", true)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message)
     }
 
-    return data;
+    return data
   } catch (error) {
-    console.error("Error fetching reviews:", error);
-    throw error;
+    console.error("Error fetching reviews:", error)
+    throw error
+  }
+}
+
+// Approve or reject a service listing (admin only)
+export async function moderateListing(id: string, action: "approve" | "reject", rejectionReason?: string) {
+  try {
+    const supabase = createServerClient()
+
+    // Get the current user
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session?.user) {
+      throw new Error("Debes iniciar sesión para moderar anuncios")
+    }
+
+    // Check if the user is an admin
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", session.user.id)
+      .single()
+
+    if (profileError) {
+      throw new Error(profileError.message)
+    }
+
+    if (!userProfile.is_admin) {
+      throw new Error("No tienes permisos para moderar anuncios")
+    }
+
+    // Update the listing status
+    const updateData =
+      action === "approve"
+        ? { status: "active", rejection_reason: null }
+        : { status: "rejected", rejection_reason: rejectionReason || "No cumple con nuestras políticas" }
+
+    const { data, error } = await supabase.from("service_listings").update(updateData).eq("id", id).select().single()
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    revalidatePath("/servicios")
+    revalidatePath(`/servicios/${id}`)
+    revalidatePath("/dashboard/servicios")
+    revalidatePath(`/dashboard/servicios/${id}`)
+    revalidatePath("/admin/listings/pending")
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("Error moderating listing:", error)
+    throw error
   }
 }

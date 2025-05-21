@@ -42,11 +42,12 @@ export interface ServiceListing {
   is_featured: boolean
   is_verified: boolean
   verification_date: string | null
-  status: "draft" | "active" | "paused" | "expired" | "rejected"
+  status: "draft" | "pending_approval" | "active" | "paused" | "expired" | "rejected"
   expiration_date: string | null
   views: number
   created_at: string
   updated_at: string
+  rejection_reason: string | null
 }
 
 export interface ServiceImage {

@@ -1,5 +1,5 @@
-import { getServiceListings } from "@/app/actions/service-listings";
-import { serviciosData } from "./sample-data";
+import { getServiceListings } from "@/app/actions/service-listings"
+import { serviciosData } from "./sample-data"
 
 export async function ServiceListings({
   page = 1,
@@ -10,13 +10,13 @@ export async function ServiceListings({
   search,
   sort = "newest",
 }: {
-  page?: number;
-  limit?: number;
-  category_id?: number;
-  subcategory_id?: number;
-  city?: string;
-  search?: string;
-  sort?: "newest" | "oldest" | "price_low" | "price_high" | "popular";
+  page?: number
+  limit?: number
+  category_id?: number
+  subcategory_id?: number
+  city?: string
+  search?: string
+  sort?: "newest" | "oldest" | "price_low" | "price_high" | "popular"
 }) {
   try {
     // Fetch real listings from the database
@@ -28,27 +28,20 @@ export async function ServiceListings({
       city,
       search,
       sort,
-    });
+    })
 
-    console.log("Database listings:", JSON.stringify(listings, null, 2));
+    console.log("Database listings:", JSON.stringify(listings, null, 2))
     // Map database listings to AdCard props
     const dbListings = listings.map((listing) => {
-      console.log("Listing in map:", listing);
+      console.log("Listing in map:", listing)
       // Defensive: handle id as string or number
-      const id =
-        typeof listing.id === "string"
-          ? Number.parseInt(listing.id)
-          : listing.id;
+      const id = typeof listing.id === "string" ? Number.parseInt(listing.id) : listing.id
       // Defensive: handle missing category/subcategory
-      const category =
-        listing.category?.name || listing.category_id?.toString() || "";
-      const subcategory =
-        listing.subcategory?.name || listing.subcategory_id?.toString() || "";
+      const category = listing.category?.name || listing.category_id?.toString() || ""
+      const subcategory = listing.subcategory?.name || listing.subcategory_id?.toString() || ""
       // Defensive: handle missing images
       const imageUrl =
-        listing.images && listing.images.length > 0
-          ? listing.images[0].url
-          : "/placeholder.svg?height=300&width=400";
+        listing.images && listing.images.length > 0 ? listing.images[0].url : "/placeholder.svg?height=300&width=400"
 
       return {
         id,
@@ -66,29 +59,27 @@ export async function ServiceListings({
         email: listing.contact_email || undefined,
         address: listing.address || undefined,
         verified: listing.is_verified,
-        isNew:
-          new Date(listing.created_at) >
-          new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days
+        isNew: new Date(listing.created_at) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days
         publishedAt: new Date(listing.created_at),
-      };
-    });
+      }
+    })
 
     // Combine database listings with sample data
     // In a production environment, you might want to only show sample data if there are no real listings
-    const combinedListings = [...dbListings, ...serviciosData];
+    const combinedListings = [...dbListings, ...serviciosData]
 
     return {
       listings: combinedListings,
       total: total + serviciosData.length,
       totalPages: Math.max(totalPages, Math.ceil(serviciosData.length / limit)),
-    };
+    }
   } catch (error) {
-    console.error("Error fetching service listings:", error);
+    console.error("Error fetching service listings:", error)
     // Return only sample data if there's an error
     return {
       listings: serviciosData,
       total: serviciosData.length,
       totalPages: Math.ceil(serviciosData.length / 12),
-    };
+    }
   }
 }

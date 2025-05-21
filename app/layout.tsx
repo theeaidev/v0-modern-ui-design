@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Directorio Latinos: Un espacio para todos, con sabor latino",
   description: "La plataforma líder para publicar y encontrar anuncios de servicios profesionales latinos",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({

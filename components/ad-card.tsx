@@ -1,39 +1,18 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
-import {
-  Heart,
-  Share2,
-  MapPin,
-  Phone,
-  Globe,
-  Mail,
-  Map,
-  Check,
-  AlertCircle,
-} from "lucide-react";
+import { useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { formatDistanceToNow } from "date-fns"
+import { es } from "date-fns/locale"
+import { Heart, Share2, MapPin, Phone, Globe, Mail, Map, Check, AlertCircle } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Dialog,
   DialogContent,
@@ -41,29 +20,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { isClient } from "@/debug-utils";
+} from "@/components/ui/dialog"
+import { isClient } from "@/debug-utils"
 
 export interface AdCardProps {
-  id: number;
-  title: string;
-  category: string;
-  subcategory?: string;
-  description: string;
-  image: string;
-  badge?: string | null;
-  price?: string;
-  location: string;
-  phone?: string;
-  whatsapp?: string;
-  website?: string;
-  email?: string;
-  address?: string;
-  coordinates?: { lat: number; lng: number };
-  verified?: boolean;
-  isNew?: boolean;
-  publishedAt: Date;
-  onClick?: () => void;
+  id: number
+  title: string
+  category: string
+  subcategory?: string
+  description: string
+  image: string
+  badge?: string | null
+  price?: string
+  location: string
+  phone?: string
+  whatsapp?: string
+  website?: string
+  email?: string
+  address?: string
+  coordinates?: { lat: number; lng: number }
+  verified?: boolean
+  isNew?: boolean
+  publishedAt: Date
+  onClick?: () => void
 }
 
 export function AdCard({
@@ -87,36 +66,36 @@ export function AdCard({
   publishedAt,
   onClick,
 }: AdCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
 
   const toggleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    e.preventDefault()
+    e.stopPropagation()
+    setIsFavorite(!isFavorite)
     // Aquí se podría implementar la lógica para guardar en localStorage o en una base de datos
-  };
+  }
 
   const handleShare = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsShareDialogOpen(true);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    setIsShareDialogOpen(true)
+  }
 
   const timeSincePublication = formatDistanceToNow(publishedAt, {
     addSuffix: true,
     locale: es,
-  });
+  })
 
   const whatsappMessage = encodeURIComponent(
-    `Hola ${title}, he visto tu anuncio en Directorio Latino, necesito información.`
-  );
+    `Hola ${title}, he visto tu anuncio en Directorio Latino, necesito información.`,
+  )
 
   // Safe way to get origin
   const getOrigin = () => {
-    if (!isClient) return "https://example.com";
-    return window.location.origin;
-  };
+    if (!isClient) return "https://example.com"
+    return window.location.origin
+  }
 
   return (
     <Card className="overflow-hidden group transition-all duration-300 hover:shadow-lg h-full flex flex-col">
@@ -130,11 +109,7 @@ export function AdCard({
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1">
-          {badge && (
-            <Badge className="bg-primary text-primary-foreground">
-              {badge}
-            </Badge>
-          )}
+          {badge && <Badge className="bg-primary text-primary-foreground">{badge}</Badge>}
           {isNew && <Badge className="bg-green-500 text-white">Nuevo</Badge>}
         </div>
 
@@ -170,10 +145,7 @@ export function AdCard({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge
-                        variant="outline"
-                        className="border-green-500 text-green-600 flex items-center gap-1"
-                      >
+                      <Badge variant="outline" className="border-green-500 text-green-600 flex items-center gap-1">
                         <Check className="h-3 w-3" />
                       </Badge>
                     </TooltipTrigger>
@@ -186,10 +158,7 @@ export function AdCard({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge
-                        variant="outline"
-                        className="border-amber-500 text-amber-600 flex items-center gap-1"
-                      >
+                      <Badge variant="outline" className="border-amber-500 text-amber-600 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3" />
                       </Badge>
                     </TooltipTrigger>
@@ -204,9 +173,7 @@ export function AdCard({
               <MapPin className="h-3.5 w-3.5 mr-1" />
               {location}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Publicado {timeSincePublication}
-            </div>
+            <div className="text-xs text-muted-foreground mt-1">Publicado {timeSincePublication}</div>
           </div>
           <Badge variant="outline" className="text-xs">
             {category}
@@ -215,19 +182,13 @@ export function AdCard({
       </CardHeader>
 
       <CardContent className="p-4 pt-0 flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-          {description}
-        </p>
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{description}</p>
 
         <div className="grid grid-cols-1 gap-2 text-sm">
           {phone && (
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <a
-                href={`tel:${phone}`}
-                className="hover:text-primary"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <a href={`tel:${phone}`} className="hover:text-primary" onClick={(e) => e.stopPropagation()}>
                 {phone}
               </a>
             </div>
@@ -236,11 +197,7 @@ export function AdCard({
           {email && (
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
-              <a
-                href={`mailto:${email}`}
-                className="hover:text-primary truncate"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <a href={`mailto:${email}`} className="hover:text-primary truncate" onClick={(e) => e.stopPropagation()}>
                 {email}
               </a>
             </div>
@@ -250,9 +207,7 @@ export function AdCard({
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-muted-foreground" />
               <a
-                href={
-                  website.startsWith("http") ? website : `https://${website}`
-                }
+                href={website.startsWith("http") ? website : `https://${website}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary truncate"
@@ -294,10 +249,7 @@ export function AdCard({
                     asChild
                   >
                     <a
-                      href={`https://wa.me/${whatsapp.replace(
-                        /\D/g,
-                        ""
-                      )}?text=${whatsappMessage}`}
+                      href={`https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${whatsappMessage}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -353,19 +305,13 @@ export function AdCard({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Compartir anuncio</DialogTitle>
-                <DialogDescription>
-                  Comparte este anuncio con tus amigos y contactos
-                </DialogDescription>
+                <DialogDescription>Comparte este anuncio con tus amigos y contactos</DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 py-4">
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  asChild
-                >
+                <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
                     href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                      `${getOrigin()}/servicios/${id}`
+                      `${getOrigin()}/servicios/${id}`,
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -387,14 +333,10 @@ export function AdCard({
                     Facebook
                   </a>
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  asChild
-                >
+                <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(
-                      `¡Mira este anuncio en Directorio Latino! ${title} - ${getOrigin()}/servicios/${id}`
+                      `¡Mira este anuncio en Directorio Latino! ${title} - ${getOrigin()}/servicios/${id}`,
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -412,16 +354,12 @@ export function AdCard({
                     WhatsApp
                   </a>
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  asChild
-                >
+                <Button variant="outline" className="flex items-center gap-2" asChild>
                   <a
                     href={`mailto:?subject=${encodeURIComponent(
-                      `Anuncio en Directorio Latino: ${title}`
+                      `Anuncio en Directorio Latino: ${title}`,
                     )}&body=${encodeURIComponent(
-                      `¡Mira este anuncio en Directorio Latino!\n\n${title}\n\n${description}\n\n${getOrigin()}/servicios/${id}`
+                      `¡Mira este anuncio en Directorio Latino!\n\n${title}\n\n${description}\n\n${getOrigin()}/servicios/${id}`,
                     )}`}
                   >
                     <Mail className="h-5 w-5" />
@@ -433,9 +371,7 @@ export function AdCard({
                   className="flex items-center gap-2"
                   onClick={() => {
                     if (isClient) {
-                      navigator.clipboard.writeText(
-                        `${getOrigin()}/servicios/${id}`
-                      );
+                      navigator.clipboard.writeText(`${getOrigin()}/servicios/${id}`)
                     }
                   }}
                 >
@@ -462,5 +398,5 @@ export function AdCard({
         </div>
       </CardFooter>
     </Card>
-  );
+  )
 }

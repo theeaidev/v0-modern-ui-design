@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 import type { ServiceListing, Category, Subcategory } from "@/types/service"
 import {
@@ -49,7 +50,7 @@ const formSchema = z.object({
   contact_email: z.string().email("Introduce un email válido").optional(),
   contact_whatsapp: z.string().optional(),
   contact_website: z.string().url("Introduce una URL válida").optional(),
-  status: z.enum(["draft", "active", "paused"]),
+  status: z.enum(["draft", "pending_approval", "active", "paused", "rejected"]),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -63,6 +64,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+  const [isLoadingSubcategories, setIsLoadingSubcategories] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
   const [activeTab, setActiveTab] = useState("basic")
@@ -93,13 +96,21 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
   // Watch for category changes to load subcategories
   const watchedCategoryId = form.watch("category_id")
+  const watchedStatus = form.watch("status")
 
   // Load categories on component mount
   useEffect(() => {
     async function loadCategories() {
+      setIsLoadingCategories(true)
       try {
         const data = await getCategories()
+        console.log("Categories loaded:", data)
         setCategories(data)
+
+        // If we have a listing with a category, load its subcategories
+        if (listing?.category_id) {
+          loadSubcategoriesForCategory(listing.category_id)
+        }
       } catch (error) {
         console.error("Error loading categories:", error)
         toast({
@@ -107,48 +118,73 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
           description: "No se pudieron cargar las categorías",
           variant: "destructive",
         })
+      } finally {
+        setIsLoadingCategories(false)
       }
     }
 
     loadCategories()
-  }, [toast])
+  }, [toast, listing])
+
+  // Function to load subcategories for a specific category
+  async function loadSubcategoriesForCategory(categoryId: number) {
+    if (!categoryId) return
+
+    setIsLoadingSubcategories(true)
+    try {
+      const data = await getSubcategories(categoryId)
+      console.log(`Subcategories loaded for category ${categoryId}:`, data)
+      setSubcategories(data)
+    } catch (error) {
+      console.error("Error loading subcategories:", error)
+      setSubcategories([])
+    } finally {
+      setIsLoadingSubcategories(false)
+    }
+  }
 
   // Load subcategories when category changes
   useEffect(() => {
-    async function loadSubcategories() {
-      if (watchedCategoryId) {
-        try {
-          const data = await getSubcategories(watchedCategoryId)
-          setSubcategories(data)
-        } catch (error) {
-          console.error("Error loading subcategories:", error)
-          setSubcategories([])
-        }
-      } else {
-        setSubcategories([])
-      }
+    if (watchedCategoryId) {
+      loadSubcategoriesForCategory(watchedCategoryId)
+    } else {
+      setSubcategories([])
     }
-
-    loadSubcategories()
   }, [watchedCategoryId])
 
   // Handle form submission
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true)
 
+    // If user selected "active", change it to "pending_approval" for new listings
+    if (mode === "create" && values.status === "active") {
+      values.status = "pending_approval"
+    }
+
     try {
       if (mode === "create") {
         const result = await createServiceListing(values)
         toast({
           title: "Anuncio creado",
-          description: "Tu anuncio ha sido creado correctamente",
+          description:
+            values.status === "pending_approval"
+              ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
+              : "Tu anuncio ha sido guardado como borrador.",
         })
-        router.push(`/dashboard/servicios/${result.data.id}`)
+        router.push(`/dashboard/servicios/success?id=${result.data.id}`)
       } else if (mode === "edit" && listing) {
+        // For edits, if changing from draft to active, set to pending_approval
+        if (listing.status === "draft" && values.status === "active") {
+          values.status = "pending_approval"
+        }
+
         await updateServiceListing(listing.id, values)
         toast({
           title: "Anuncio actualizado",
-          description: "Tu anuncio ha sido actualizado correctamente",
+          description:
+            values.status === "pending_approval"
+              ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
+              : "Tu anuncio ha sido actualizado correctamente.",
         })
         router.push(`/dashboard/servicios/${listing.id}`)
       }
@@ -156,7 +192,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
       console.error("Error submitting form:", error)
       toast({
         title: "Error",
-        description: "Ha ocurrido un error al guardar el anuncio",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error al guardar el anuncio",
         variant: "destructive",
       })
     } finally {
@@ -235,18 +271,31 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                     <Select
                       onValueChange={(value) => field.onChange(Number.parseInt(value))}
                       value={field.value ? field.value.toString() : undefined}
+                      disabled={isLoadingCategories}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una categoría" />
+                          <SelectValue
+                            placeholder={isLoadingCategories ? "Cargando categorías..." : "Selecciona una categoría"}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
+                        {isLoadingCategories ? (
+                          <SelectItem value="loading" disabled>
+                            Cargando categorías...
                           </SelectItem>
-                        ))}
+                        ) : categories.length > 0 ? (
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No hay categorías disponibles
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -263,19 +312,41 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                     <Select
                       onValueChange={(value) => field.onChange(Number.parseInt(value))}
                       value={field.value ? field.value.toString() : undefined}
-                      disabled={!watchedCategoryId || subcategories.length === 0}
+                      disabled={!watchedCategoryId || isLoadingSubcategories}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una subcategoría" />
+                          <SelectValue
+                            placeholder={
+                              !watchedCategoryId
+                                ? "Primero selecciona una categoría"
+                                : isLoadingSubcategories
+                                  ? "Cargando subcategorías..."
+                                  : "Selecciona una subcategoría"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {subcategories.map((subcategory) => (
-                          <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
-                            {subcategory.name}
+                        {!watchedCategoryId ? (
+                          <SelectItem value="none" disabled>
+                            Primero selecciona una categoría
                           </SelectItem>
-                        ))}
+                        ) : isLoadingSubcategories ? (
+                          <SelectItem value="loading" disabled>
+                            Cargando subcategorías...
+                          </SelectItem>
+                        ) : subcategories.length > 0 ? (
+                          subcategories.map((subcategory) => (
+                            <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
+                              {subcategory.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No hay subcategorías disponibles
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -344,7 +415,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                         <FormControl>
                           <RadioGroupItem value="active" />
                         </FormControl>
-                        <FormLabel className="font-normal">Publicado</FormLabel>
+                        <FormLabel className="font-normal">Publicar</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-2 space-y-0">
                         <FormControl>
@@ -365,6 +436,17 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                 </FormItem>
               )}
             />
+
+            {watchedStatus === "active" && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Información importante</AlertTitle>
+                <AlertDescription>
+                  Tu anuncio será revisado por nuestro equipo antes de ser publicado. Este proceso puede tardar hasta 24
+                  horas.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={() => router.back()}>
