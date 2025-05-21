@@ -637,12 +637,13 @@ export default function HomeClient() {
               <div className="order-2 lg:order-1">
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">Quiénes somos</h2>
                 <p className="text-lg text-muted-foreground mb-4">
-                  Somos la plataforma líder en publicación de anuncios de servicios profesionales. Nuestra misión es
-                  conectar a proveedores de servicios con clientes potenciales de manera rápida y eficiente.
+                Somos la plataforma líder en publicación de anuncios de servicios comerciales latinoamericanos en España. 
                 </p>
                 <p className="text-lg text-muted-foreground mb-6">
-                  Desde 2020, hemos ayudado a miles de profesionales a hacer crecer sus negocios y a clientes a
-                  encontrar exactamente el servicio que necesitan, cuando lo necesitan.
+                Nuestra misión es conectar a proveedores de servicios con clientes potenciales de manera rápida y eficiente. 
+                </p>
+                <p className="text-lg text-muted-foreground mb-6">
+                Hemos ayudado a miles de comerciantes a hacer crecer sus negocios y a clientes a encontrar exactamente el servicio que buscan.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button>Nuestra historia</Button>

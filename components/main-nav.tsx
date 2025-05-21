@@ -25,6 +25,7 @@ export function MainNav() {
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-200">
                 <span className="mr-1">de</span>
                 <span className="text-[10px] uppercase tracking-wide">España</span>
+                <img src="https://flagcdn.com/es.svg" alt="Bandera de España" className="w-6 h-4 ml-2 inline-block" />
               </span>
             </div>
           </div>
