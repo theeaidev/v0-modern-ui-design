@@ -85,6 +85,64 @@ export interface Database {
           verification_date?: string
           preferences?: Json
         }
+      },
+      categories: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          icon: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          icon: string | null
+          created_at: string
+          updated_at: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          description?: string | null
+          icon?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      },
+      subcategories: {
+        Row: {
+          id: string
+          category_id: number
+          name: string
+          slug: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          category_id: number
+          name: string
+          slug: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Update: {
+          id?: string
+          category_id?: number
+          name?: string
+          slug?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
       }
       // Add other tables as needed
     }

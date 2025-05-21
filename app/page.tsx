@@ -2,7 +2,7 @@
 
 import { MainNav } from "@/components/main-nav"
 import { SiteFooter } from "@/components/site-footer"
-import { HomeClient } from "@/components/home-client"
+import HomeClient from "@/components/home-client"
 import ErrorBoundary from "@/components/error-boundary"
 
 export default function Home() {
