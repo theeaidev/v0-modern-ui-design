@@ -170,10 +170,11 @@ export default function TiendaPage() {
                         <div className="h-3 w-3 rounded-full bg-green-500"></div>
                         <div className="h-10 w-0.5 bg-green-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 2</span>
+                        <span className="text-xs text-muted-foreground mt-1">Gratis</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                        <div className="h-10 w-0.5 bg-green-500"></div>
+                        <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                        <div className="h-10 w-0.5 bg-red-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 3</span>
                       </div>
                       <div className="flex flex-col items-center">
@@ -276,11 +277,13 @@ export default function TiendaPage() {
                         <div className="h-3 w-3 rounded-full bg-blue-500"></div>
                         <div className="h-10 w-0.5 bg-blue-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 2</span>
+                        <span className="text-xs text-muted-foreground ">Gratis</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                        <div className="h-10 w-0.5 bg-blue-500"></div>
-                        <span className="text-xs text-muted-foreground mt-1">Mes 3</span>
+                        <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                        <div className="h-10 w-0.5 bg-red-500"></div>
+                        <span className="text-xs text-muted-foreground mt-1">Mes 3</span> 
+                        <span className="text-xs text-muted-foreground ">Gratis</span>
                       </div>
                       <div className="flex flex-col items-center">
                         <div className="h-3 w-3 rounded-full bg-red-500"></div>
