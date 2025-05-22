@@ -34,6 +34,27 @@ type Ciudad = string
 type Categoria = string
 type Subcategoria = string
 
+interface ServiceListingItem {
+  id: string;
+  title: string;
+  category: string;
+  subcategory: string;
+  description: string;
+  image: string;
+  badge: string | null; // Allow string or null for badge
+  price: string;
+  location: string;
+  phone: string;
+  whatsapp: string;
+  website?: string; // Make website optional
+  email: string;
+  address?: string; // Make address optional
+  coordinates?: { lat: number; lng: number }; // Make coordinates optional
+  verified: boolean;
+  isNew: boolean;
+  publishedAt: Date;
+}
+
 interface FilterState {
   ciudades: Ciudad[]
   categorias: Categoria[]
@@ -44,7 +65,7 @@ interface FilterState {
 export function ServiceListingsPage() {
   // Get initial data from server component
   const [initialDataLoaded, setInitialDataLoaded] = useState(false)
-  const [allServices, setAllServices] = useState<typeof serviciosData>([])
+  const [allServices, setAllServices] = useState<ServiceListingItem[]>([])
   const [totalListings, setTotalListings] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [currentPage, setCurrentPage] = useState(1)
@@ -58,7 +79,7 @@ export function ServiceListingsPage() {
   })
 
   // State for filtered services
-  const [filteredServices, setFilteredServices] = useState<typeof serviciosData>([])
+  const [filteredServices, setFilteredServices] = useState<ServiceListingItem[]>([])
 
   // State for active tab (mobile)
   const [activeTab, setActiveTab] = useState("todos")
@@ -453,7 +474,7 @@ export function ServiceListingsPage() {
           <div className="container py-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Servicios</h1>
             <p className="text-muted-foreground max-w-3xl">
-              Encuentra servicios latinos, oportunidades de empleo, formación y productos filtrando por ciudad y
+             Encuentra servicios latinos, oportunidades de empleo, formación y productos filtrando por ciudad y
               categoría.
             </p>
           </div>
@@ -890,29 +911,37 @@ export function ServiceListingsPage() {
                 </div>
               ) : filteredServices.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredServices.map((servicio) => (
-                    <AdCard
-                      key={servicio.id}
-                      id={servicio.id}
-                      title={servicio.title}
-                      category={servicio.category}
-                      subcategory={servicio.subcategory}
-                      description={servicio.description}
-                      image={servicio.image}
-                      badge={servicio.badge}
-                      price={servicio.price}
-                      location={servicio.location}
-                      phone={servicio.phone}
-                      whatsapp={servicio.whatsapp}
-                      website={servicio.website}
-                      email={servicio.email}
-                      address={servicio.address}
-                      coordinates={servicio.coordinates}
-                      verified={servicio.verified}
-                      isNew={servicio.isNew}
-                      publishedAt={servicio.publishedAt}
-                    />
-                  ))}
+                  {filteredServices.map((servicio) => {
+                    // Ensure servicio.id is a valid non-empty string before rendering AdCard
+                    if (typeof servicio.id !== 'string' || servicio.id.trim() === '') {
+                      // Optionally log a warning or handle the error appropriately
+                      // console.warn(`Service with title "${servicio.title}" has an invalid or empty ID (${servicio.id}). Skipping.`);
+                      return null; // Skip rendering this AdCard
+                    }
+                    return (
+                      <AdCard
+                        key={servicio.id} // Use the validated servicio.id
+                        id={servicio.id}   // Use the validated servicio.id
+                        title={servicio.title}
+                        category={servicio.category}
+                        subcategory={servicio.subcategory}
+                        description={servicio.description}
+                        image={servicio.image}
+                        badge={servicio.badge}
+                        price={servicio.price}
+                        location={servicio.location}
+                        phone={servicio.phone}
+                        whatsapp={servicio.whatsapp}
+                        website={servicio.website}
+                        email={servicio.email}
+                        address={servicio.address}
+                        coordinates={servicio.coordinates}
+                        verified={servicio.verified}
+                        isNew={servicio.isNew}
+                        publishedAt={servicio.publishedAt}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">

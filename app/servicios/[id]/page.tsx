@@ -291,7 +291,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Características</h3>
                       <ul className="space-y-2">
-                        {service.features.map((feature, index) => (
+                        {service.features.map((feature: string, index: number) => (
                           <li key={index} className="flex items-center">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -315,7 +315,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Disponibilidad</h3>
                       <ul className="space-y-2">
-                        {service.availability.map((time, index) => (
+                        {service.availability.map((time: string, index: number) => (
                           <li key={index} className="flex items-center">
                             <Calendar className="h-5 w-5 mr-2 text-primary" />
                             <span>{time}</span>
@@ -455,7 +455,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <div className="space-y-2">
                     <span className="text-muted-foreground">Disponibilidad:</span>
                     <ul className="space-y-1">
-                      {service.availability.map((time, index) => (
+                      {service.availability.map((time: string, index: number) => (
                         <li key={index} className="flex items-center">
                           <Calendar className="h-4 w-4 mr-2 text-primary" />
                           <span className="text-sm">{time}</span>
@@ -466,7 +466,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <div className="space-y-2">
                     <span className="text-muted-foreground">Características:</span>
                     <ul className="space-y-1">
-                      {service.features.map((feature, index) => (
+                      {service.features.map((feature: string, index: number) => (
                         <li key={index} className="flex items-center">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

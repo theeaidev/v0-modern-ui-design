@@ -34,8 +34,8 @@ export async function ServiceListings({
     // Map database listings to AdCard props
     const dbListings = listings.map((listing) => {
       console.log("Listing in map:", listing)
-      // Defensive: handle id as string or number
-      const id = typeof listing.id === "string" ? Number.parseInt(listing.id) : listing.id
+      // Ensure id is a string. If it's a number from DB, convert it.
+      const id = typeof listing.id === 'number' ? String(listing.id) : listing.id;
       // Defensive: handle missing category/subcategory
       const category = listing.category?.name || listing.category_id?.toString() || ""
       const subcategory = listing.subcategory?.name || listing.subcategory_id?.toString() || ""
@@ -44,7 +44,7 @@ export async function ServiceListings({
         listing.images && listing.images.length > 0 ? listing.images[0].url : "/placeholder.svg?height=300&width=400"
 
       return {
-        id,
+        id: id || "", // Ensure id is always a string, fallback to empty if somehow null/undefined
         title: listing.title || "",
         category,
         subcategory,

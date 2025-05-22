@@ -1,7 +1,7 @@
 // Sample data for services
 export const serviciosData = [
   {
-    id: 1,
+    id: "1",
     title: "Restaurante El Sabor Latino",
     category: "Restaurantes",
     subcategory: "Comida colombiana",
@@ -22,7 +22,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás
   },
   {
-    id: 2,
+    id: "2",
     title: "Peluquería Latina Style",
     category: "Servicios",
     subcategory: "Peluquería",
@@ -43,7 +43,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás
   },
   {
-    id: 3,
+    id: "3",
     title: "Asesoría de Extranjería",
     category: "Servicios",
     subcategory: "Extranjería",
@@ -63,7 +63,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás
   },
   {
-    id: 4,
+    id: "4",
     title: "Empleo: Camarero/a",
     category: "Empleo",
     subcategory: "Tiempo completo",
@@ -82,7 +82,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás
   },
   {
-    id: 5,
+    id: "5",
     title: "Curso de Cocina Dominicana",
     category: "Formación",
     subcategory: "Cursos",
@@ -102,7 +102,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás
   },
   {
-    id: 6,
+    id: "6",
     title: "Productos Típicos Mexicanos",
     category: "Productos",
     subcategory: "Alimentos",
@@ -120,7 +120,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 días atrás
   },
   {
-    id: 7,
+    id: "7",
     title: "Masajes Terapéuticos",
     category: "Servicios",
     subcategory: "Masajes",
@@ -140,7 +140,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 días atrás
   },
   {
-    id: 8,
+    id: "8",
     title: "Empleo: Limpieza de Hogar",
     category: "Empleo",
     subcategory: "Por horas",
@@ -158,7 +158,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 días atrás
   },
   {
-    id: 9,
+    id: "9",
     title: "Taller de Baile Latino",
     category: "Formación",
     subcategory: "Talleres",
@@ -178,7 +178,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 días atrás
   },
   {
-    id: 10,
+    id: "10",
     title: "Artesanía Peruana",
     category: "Productos",
     subcategory: "Artesanía",
@@ -198,7 +198,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 días atrás
   },
   {
-    id: 11,
+    id: "11",
     title: "Restaurante Sabor Venezolano",
     category: "Restaurantes",
     subcategory: "Comida venezolana",
@@ -218,7 +218,7 @@ export const serviciosData = [
     publishedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), // 25 días atrás
   },
   {
-    id: 12,
+    id: "12",
     title: "Certificación de Español",
     category: "Formación",
     subcategory: "Certificaciones",

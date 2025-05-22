@@ -24,7 +24,7 @@ import {
 import { isClient } from "@/debug-utils"
 
 export interface AdCardProps {
-  id: number
+  id: string
   title: string
   category: string
   subcategory?: string
