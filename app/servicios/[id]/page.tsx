@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteFooter } from "@/components/site-footer"
-import { getServiceListingById } from "@/app/actions/service-listings"; // Import the server action
+import { getServiceListingById } from "@/app/actions/service-listings";
+import { ServiceShareButton } from "@/components/service-share-button";
 
 // Helper function to fetch and map ad data
 async function fetchAndMapAdById(id: string) {
@@ -113,9 +114,7 @@ async function fetchAndMapAdById(id: string) {
   return service;
 }
 
-
 export default async function ServicioDetailPage({ params }: { params: { id: string } }) {
-  // Fetch data using the new helper function that calls the server action
   const service = await fetchAndMapAdById(params.id);
 
   if (!service) {
@@ -130,12 +129,6 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
     );
   }
 
-  // The rest of the component remains largely the same, using the 'service' object populated from DB/mocks
-  // No changes needed below this point if the 'service' object structure is correctly maintained.
-
-  // Construct the service object using fetched data and mock data for parts not covered
-  // const service = { ... This block is now replaced by the call to fetchAndMapAdById above
-
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -149,10 +142,10 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
             <Link href="/" className="text-sm font-medium hover:text-primary">
               Inicio
             </Link>
-            <Link href="/#services" className="text-sm font-medium hover:text-primary">
+            <Link href="/servicios" className="text-sm font-medium hover:text-primary">
               Servicios
             </Link>
-            <Link href="#" className="text-sm font-medium hover:text-primary">
+            <Link href="/tienda" className="text-sm font-medium hover:text-primary">
               Tienda
             </Link>
             <Link href="/#about" className="text-sm font-medium hover:text-primary">
@@ -200,11 +193,11 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
               Inicio
             </Link>
             <span className="mx-2">/</span>
-            <Link href="/#services" className="hover:text-foreground">
+            <Link href="/servicios" className="hover:text-foreground">
               Servicios
             </Link>
             <span className="mx-2">/</span>
-            <Link href="#" className="hover:text-foreground">
+            <Link href={`/servicios?categoria=${service.category}`} className="hover:text-foreground">
               {service.category}
             </Link>
             <span className="mx-2">/</span>
@@ -264,17 +257,13 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <Heart className="h-5 w-5" />
                     <span className="sr-only">Guardar</span>
                   </Button>
-                  <Button variant="outline" size="icon" className="rounded-full">
-                    <Share2 className="h-5 w-5" />
-                    <span className="sr-only">Compartir</span>
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-full">
-                    <Flag className="h-5 w-5" />
-                    <span className="sr-only">Reportar</span>
-                  </Button>
+                  <ServiceShareButton 
+                    serviceId={service.id} 
+                    serviceTitle={service.title} 
+                    serviceDescription={service.description} 
+                  />
                 </div>
               </div>
-
               <Tabs defaultValue="descripcion" className="mb-8">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="descripcion">Descripción</TabsTrigger>
@@ -355,7 +344,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                         {service.advertiser.verified && (
                           <Badge
                             variant="outline"
-                            className="border-green-500 text-green-600 flex items-center gap-1 mr-3"
+                            className="border-green-500 text-green-500 flex items-center gap-1 mr-3"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -494,10 +483,12 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
                   <Button className="w-full">Contactar ahora</Button>
-                  <Button variant="outline" className="w-full flex items-center">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Compartir anuncio
-                  </Button>
+                  <ServiceShareButton 
+                    serviceId={service.id} 
+                    serviceTitle={service.title} 
+                    serviceDescription={service.description} 
+                    displayMode="fullWidthText" 
+                  />
                 </CardFooter>
               </Card>
             </div>
