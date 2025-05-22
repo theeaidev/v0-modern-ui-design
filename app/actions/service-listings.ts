@@ -24,7 +24,7 @@ export async function getServiceListings({
   search?: string
   sort?: "newest" | "oldest" | "price_low" | "price_high" | "popular"
   user_id?: string
-  status?: "draft" | "active" | "paused" | "expired" | "rejected"
+  status?: "draft" | "active" | "paused" | "expired" | "rejected" | "pending_approval"
 }) {
   try {
     const supabase = createServerClient()

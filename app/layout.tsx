@@ -32,7 +32,6 @@ export default function RootLayout({
           <DebugApp>{children}</DebugApp>
           <Analytics />
         </AuthProvider>
-       
       </body>
     </html>
   )

@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Heart, MapPin, Star, CheckCircle2, Clock } from "lucide-react"
+import { Heart, MapPin, Star, CheckCircle2, Clock, Eye, Edit } from "lucide-react"
 import type { ServiceListing, ServiceImage } from "@/types/service"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -63,8 +63,7 @@ export function ServiceListingCard({ listing, showActions = true }: ServiceListi
   }
 
   return (
-    <Link href={`/servicios/${listing.id}`}>
-      <div className="group h-full overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md">
+    <div className="group h-full overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md">
         <div className="relative aspect-[4/3] overflow-hidden">
           <Image
             src={imageUrl || "/placeholder.svg"}
@@ -142,8 +141,23 @@ export function ServiceListingCard({ listing, showActions = true }: ServiceListi
           )}
 
           <p className="line-clamp-2 text-sm text-muted-foreground">{listing.description}</p>
+          
+          <div className="mt-4 flex justify-between items-center">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/servicios/${listing.id}`}>
+                <Eye className="mr-2 h-4 w-4" />
+                Ver detalles
+              </Link>
+            </Button>
+            
+            <Button variant="default" size="sm" asChild>
+              <Link href={`/servicios/${listing.id}`} target="_blank">
+                <Eye className="mr-2 h-4 w-4" />
+                Ver anuncio
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
-    </Link>
   )
 }
