@@ -195,7 +195,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
 
         {/* Service Content */}
         <div className="container py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="w-full overflow-hidden">
             <div className="lg:col-span-2">
               <div className="flex justify-between items-center mb-6">
                 <div>
@@ -215,9 +215,9 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                 </div>
               </div>
               <Tabs defaultValue="descripcion" className="mb-8">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="descripcion">Descripción</TabsTrigger>
-                  <TabsTrigger value="detalles">Detalles</TabsTrigger>
+                 {/*  <TabsTrigger value="detalles">Detalles</TabsTrigger> */}
                   <TabsTrigger value="anunciante">Anunciante</TabsTrigger>
                 </TabsList>
                 <TabsContent value="descripcion" className="pt-6">
@@ -331,11 +331,11 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                           <p className="font-medium">{service.advertiser.otherAds} anuncios activos</p>
                         </div>
                       </div>
-                      <div className="mt-6">
+   {/*                    <div className="mt-6">
                         <Button variant="outline" className="w-full sm:w-auto">
                           Ver perfil completo
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </TabsContent>
@@ -373,7 +373,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
               </div>
             </div>
 
-            <div>
+{/*             <div>
               <Card className="sticky top-24">
                 <CardHeader>
                   <CardTitle>Información del anuncio</CardTitle>
@@ -441,7 +441,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   />
                 </CardFooter>
               </Card>
-            </div>
+            </div> */}
           </div>
 
           {/* Related Services */}

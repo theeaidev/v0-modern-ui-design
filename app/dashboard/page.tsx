@@ -167,12 +167,12 @@ export default function DashboardPage() {
         <div className="container">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <h1 className="text-3xl font-bold">Mi perfil</h1>
-            <Button asChild>
+{/*             <Button asChild>
               <Link href="/dashboard/profile" className="flex items-center gap-2">
                 <Edit className="h-4 w-4" />
                 Editar perfil
               </Link>
-            </Button>
+            </Button> */}
           </div>
 
           {profileError && (
@@ -215,9 +215,9 @@ export default function DashboardPage() {
                       <span>{user.email_confirmed_at ? "Email verificado" : "Email no verificado"}</span>
                     </div>
 
-                    <Button variant="outline" className="w-full mt-4" asChild>
+{/*                     <Button variant="outline" className="w-full mt-4" asChild>
                       <Link href="/dashboard/profile">Editar perfil</Link>
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>
@@ -363,7 +363,7 @@ export default function DashboardPage() {
                       </div>
                     )}
 
-                    <div>
+{/*                     <div>
                       <h3 className="text-lg font-medium mb-2">Actividad reciente</h3>
                       <div className="bg-muted rounded-lg p-6 text-center">
                         <User className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                           <Link href="/dashboard/servicios/nuevo">Publicar anuncio</Link>
                         </Button>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div>
                       <h3 className="text-lg font-medium mb-2">Favoritos</h3>

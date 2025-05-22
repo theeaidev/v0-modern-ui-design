@@ -85,12 +85,12 @@ export function UserDropdown() {
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+{/*           <DropdownMenuItem asChild>
             <Link href="/dashboard/profile" className="flex items-center cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               <span>Ajustes</span>
             </Link>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
