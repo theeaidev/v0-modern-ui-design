@@ -317,8 +317,17 @@ export default function HomeClient() {
 
         // Map database listings to AdCard props
         const dbListings = listings.map((listing: any) => {
-          // Defensive: handle id as string or number
-          const id = typeof listing.id === "string" ? Number.parseInt(listing.id) : listing.id
+          // Defensive: handle id as string or number, ensure it's a string for the URL
+          let id_processed: string | undefined;
+          if (listing.id !== null && listing.id !== undefined) {
+            id_processed = String(listing.id);
+          } else {
+            // Fallback or error handling if id is null/undefined
+            // For now, let's log an error and skip this item or use a placeholder
+            console.error('Listing found with null or undefined ID:', listing);
+            id_processed = undefined; // Or some placeholder if you prefer not to filter out
+          }
+
           // Defensive: handle missing category/subcategory
           const category = listing.category?.name || listing.category_id?.toString() || ""
           const subcategory = listing.subcategory?.name || listing.subcategory_id?.toString() || ""
@@ -329,7 +338,7 @@ export default function HomeClient() {
               : "/placeholder.svg?height=300&width=400"
 
           return {
-            id,
+            id: id_processed, // Use the processed id
             title: listing.title || "",
             category,
             subcategory,
@@ -349,8 +358,11 @@ export default function HomeClient() {
           }
         })
 
+        // Filter out listings that ended up with an undefined ID
+        const validDbListings = dbListings.filter(item => item.id !== undefined);
+
         // Combine database listings with sample data
-        const combinedListings = [...dbListings, ...services]
+        const combinedListings = [...validDbListings, ...services]
         setFeaturedListings(combinedListings)
       } catch (error) {
         console.error("Error fetching featured listings:", error)

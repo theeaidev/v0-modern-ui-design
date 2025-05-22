@@ -1,6 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Calendar, Clock, MapPin, Share2, Star, Heart, Flag, PlusCircle } from "lucide-react"
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,81 +11,130 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteFooter } from "@/components/site-footer"
+import { getServiceListingById } from "@/app/actions/service-listings"; // Import the server action
 
-export default function ServicioDetailPage({ params }: { params: { id: string } }) {
-  // This would normally fetch the service based on the ID
-  // For this example, we'll use a mock service
-  const service = {
-    id: params.id,
-    title: "Terapia emocional",
-    category: "Bienestar",
-    description:
-      "Sesiones personalizadas para mejorar tu bienestar emocional y mental. Nuestros terapeutas profesionales te ayudarán a superar obstáculos, gestionar el estrés y desarrollar herramientas para una vida más plena y satisfactoria.",
-    longDescription: `
-      <p>La terapia emocional es un proceso de acompañamiento profesional que te ayuda a explorar y comprender tus emociones, pensamientos y comportamientos. A través de diferentes técnicas y enfoques, nuestros terapeutas te guiarán en un viaje de autodescubrimiento y crecimiento personal.</p>
-      
-      <p>Beneficios de nuestras sesiones:</p>
-      <ul>
-        <li>Reducción de síntomas de ansiedad y depresión</li>
-        <li>Mejora en las relaciones interpersonales</li>
-        <li>Desarrollo de estrategias de afrontamiento saludables</li>
-        <li>Aumento de la autoestima y confianza</li>
-        <li>Mayor claridad mental y emocional</li>
-      </ul>
-      
-      <p>Nuestro enfoque es personalizado, adaptándonos a tus necesidades específicas y respetando tu ritmo. Creemos en crear un espacio seguro y confidencial donde puedas expresarte libremente sin juicios.</p>
-      
-      <p>Las sesiones tienen una duración de 50 minutos y se pueden realizar de forma presencial o en línea, según tu preferencia y disponibilidad.</p>
-    `,
-    image: "/placeholder.svg?height=600&width=1200",
-    provider: "Centro de Bienestar Integral",
-    location: "Calle Principal 123, Madrid",
-    rating: 4.8,
-    reviews: 24,
-    price: "60€",
-    duration: "50 minutos",
-    availability: ["Lunes a Viernes: 9:00 - 20:00", "Sábados: 10:00 - 14:00"],
-    features: ["Sesiones online disponibles", "Primera consulta gratuita", "Profesionales certificados"],
-    relatedServices: [
-      {
-        id: 3,
-        title: "Yoga y meditación",
-        category: "Bienestar",
-        description: "Clases para todos los niveles enfocadas en el equilibrio cuerpo-mente.",
-        image: "/placeholder.svg?height=300&width=400",
-        price: "12€/clase",
-        location: "Valencia",
-      },
-      {
-        id: 7,
-        title: "Mindfulness",
-        category: "Bienestar",
-        description: "Aprende a vivir el presente y reducir el estrés con técnicas de atención plena.",
-        image: "/placeholder.svg?height=300&width=400",
-        price: "15€/clase",
-        location: "Zaragoza",
-      },
-      {
-        id: 5,
-        title: "Coaching personal",
-        category: "Desarrollo",
-        description: "Acompañamiento para alcanzar tus metas personales y profesionales.",
-        image: "/placeholder.svg?height=300&width=400",
-        price: "70€/sesión",
-        location: "Bilbao",
-      },
-    ],
-    advertiser: {
-      name: "Elena Sánchez",
-      title: "Psicóloga especialista en terapia emocional",
-      image: "/placeholder.svg?height=100&width=100",
-      memberSince: "Marzo 2021",
-      responseRate: "98%",
-      responseTime: "En menos de 2 horas",
-      verified: true,
-      otherAds: 3,
-    },
+// Helper function to fetch and map ad data
+async function fetchAndMapAdById(id: string) {
+  const dbAdData = await getServiceListingById(id);
+
+  if (!dbAdData) {
+    console.log(`Ad with ID "${id}" not found in database.`);
+    return null;
   }
+
+  // Log the raw data from Supabase for debugging purposes (server-side)
+  // console.log("Raw dbAdData:", JSON.stringify(dbAdData, null, 2));
+
+  // Default mock structures for parts that might not come from DB or are explicitly mock
+  const mockLongDescription = `
+    <p>La terapia emocional es un proceso de acompañamiento profesional que te ayuda a explorar y comprender tus emociones, pensamientos y comportamientos. A través de diferentes técnicas y enfoques, nuestros terapeutas te guiarán en un viaje de autodescubrimiento y crecimiento personal.</p>
+    <p><strong>Información específica para '${dbAdData.title || "el servicio"}' cargada dinámicamente.</strong></p>
+    <p>Beneficios de nuestras sesiones (ejemplo):</p>
+    <ul>
+      <li>Reducción de síntomas de ansiedad y depresión</li>
+      <li>Mejora en las relaciones interpersonales</li>
+      <li>Desarrollo de estrategias de afrontamiento saludables</li>
+      <li>Aumento de la autoestima y confianza</li>
+      <li>Mayor claridad mental y emocional</li>
+    </ul>
+    <p>Nuestro enfoque es personalizado, adaptándonos a tus necesidades específicas y respetando tu ritmo. Creemos en crear un espacio seguro y confidencial donde puedas expresarte libremente sin juicios.</p>
+    <p>Las sesiones tienen una duración de ejemplo y se pueden realizar de forma presencial o en línea, según tu preferencia y disponibilidad (datos de ejemplo).</p>
+  `;
+
+  const mockAvailability = ["Lunes a Viernes: 9:00 - 20:00 (Mock)", "Sábados: 10:00 - 14:00 (Mock)"];
+  const mockFeatures = ["Sesiones online disponibles (Mock)", "Primera consulta gratuita (Mock)", "Profesionales certificados (Mock)"];
+  const mockRelatedServices = [
+    {
+      id: 33, // Using different IDs to distinguish from any potential DB IDs
+      title: "Yoga y meditación (Relacionado Mock)",
+      category: "Bienestar",
+      description: "Clases para todos los niveles enfocadas en el equilibrio cuerpo-mente.",
+      image: "/placeholder.svg?height=300&width=400&text=Related1",
+      price: "12€/clase",
+      location: "Valencia",
+    },
+    {
+      id: 77,
+      title: "Mindfulness (Relacionado Mock)",
+      category: "Bienestar",
+      description: "Aprende a vivir el presente y reducir el estrés con técnicas de atención plena.",
+      image: "/placeholder.svg?height=300&width=400&text=Related2",
+      price: "15€/clase",
+      location: "Zaragoza",
+    },
+    {
+      id: 55,
+      title: "Coaching personal (Relacionado Mock)",
+      category: "Desarrollo",
+      description: "Acompañamiento para alcanzar tus metas personales y profesionales.",
+      image: "/placeholder.svg?height=300&width=400&text=Related3",
+      price: "70€/sesión",
+      location: "Bilbao",
+    },
+  ];
+
+  const service = {
+    id: dbAdData.id.toString(),
+    title: dbAdData.title || "Título no disponible",
+    category: dbAdData.category?.name || "Categoría desconocida",
+    description: dbAdData.description || "Descripción breve no disponible.",
+    // Use dbAdData.long_description if it exists in your table, otherwise fallback to mock
+    longDescription: (dbAdData as any).long_description || mockLongDescription,
+    image: dbAdData.images?.[0]?.url || "/placeholder.svg?height=600&width=1200&text=No+Image",
+    provider: "Centro de Bienestar Ejemplo (Mock Provider)", // Kept as mock per previous state
+    location: dbAdData.city || (dbAdData as any).address || "Ubicación no especificada", // (dbAdData as any).address assumes 'address' might be a field
+    rating: dbAdData.average_rating || 0,
+    reviews: dbAdData.reviews_count || 0,
+    price: dbAdData.price ? `${dbAdData.price}€` : "Consultar", // Assuming price is numeric from DB
+    // Use dbAdData.duration_minutes if it exists, otherwise fallback
+    duration: (dbAdData as any).duration_minutes ? `${(dbAdData as any).duration_minutes} minutos` : "50 minutos (Mock Duration)", 
+    // Use dbAdData.availability_details if it exists (might need parsing if JSON), otherwise fallback
+    availability: (dbAdData as any).availability_details || mockAvailability,
+    // Use dbAdData.features_list if it exists (might need parsing if JSON array), otherwise fallback
+    features: (dbAdData as any).features_list || mockFeatures,
+    
+    publishedAt: dbAdData.created_at ? new Date(dbAdData.created_at) : new Date(),
+    isVerified: dbAdData.is_verified ?? false, // Ad verification status
+
+    advertiser: {
+      name: dbAdData.user?.full_name || "Anunciante Anónimo",
+      title: "Especialista en el área (Mock Title)", // dbAdData.user doesn't have a specific professional title field
+      image: dbAdData.user?.avatar_url || "/placeholder.svg?height=100&width=100&text=Advertiser",
+      memberSince: "Marzo 2021 (Mock)", // dbAdData.user doesn't have member_since; consider adding to profiles if needed
+      responseRate: "98% (Mock)",
+      responseTime: "En menos de 2 horas (Mock)",
+      verified: dbAdData.user?.is_verified ?? false, // Advertiser's profile verification status
+      otherAds: 3, // This would require another query; kept as mock
+    },
+
+    relatedServices: mockRelatedServices, // Kept as mock per instructions
+  };
+
+  return service;
+}
+
+
+export default async function ServicioDetailPage({ params }: { params: { id: string } }) {
+  // Fetch data using the new helper function that calls the server action
+  const service = await fetchAndMapAdById(params.id);
+
+  if (!service) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold">Anuncio no encontrado</h1>
+        <p className="text-muted-foreground">El anuncio con ID "{params.id}" no pudo ser encontrado o no está activo.</p>
+        <Link href="/" className="mt-4">
+          <Button variant="outline">Volver al inicio</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  // The rest of the component remains largely the same, using the 'service' object populated from DB/mocks
+  // No changes needed below this point if the 'service' object structure is correctly maintained.
+
+  // Construct the service object using fetched data and mock data for parts not covered
+  // const service = { ... This block is now replaced by the call to fetchAndMapAdById above
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -179,16 +230,20 @@ export default function ServicioDetailPage({ params }: { params: { id: string } 
                 <span>{service.rating}</span>
                 <span className="text-xs ml-1">({service.reviews} reseñas)</span>
               </div>
-              <Badge variant="outline" className="bg-green-500/20 text-green-500 border-green-500/30">
-                Anuncio verificado
-              </Badge>
+              {service.isVerified && (
+                <Badge variant="outline" className="bg-green-500/20 text-green-500 border-green-500/30">
+                  Anuncio verificado
+                </Badge>
+              )}
             </div>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">{service.title}</h1>
             <div className="flex items-center mt-2 text-white/80">
               <MapPin className="h-4 w-4 mr-1" />
               <span>{service.location}</span>
               <span className="mx-2">•</span>
-              <span>Publicado hace 3 días</span>
+              <span>
+                Publicado {formatDistanceToNow(service.publishedAt, { addSuffix: true, locale: es })}
+              </span>
               <span className="mx-2">•</span>
               <span>ID: {service.id}</span>
             </div>

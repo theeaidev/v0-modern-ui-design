@@ -66,6 +66,7 @@ export function AdCard({
   publishedAt,
   onClick,
 }: AdCardProps) {
+  console.log('AdCard ID Prop:', id);
   const [isFavorite, setIsFavorite] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
 
