@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteFooter } from "@/components/site-footer"
 import { getServiceListingById } from "@/app/actions/service-listings";
 import { ServiceShareButton } from "@/components/service-share-button";
+import { MainNav } from "@/components/main-nav";
 
 // Helper function to fetch and map ad data
 async function fetchAndMapAdById(id: string) {
@@ -132,58 +133,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Directorio Latinos Logo" width={32} height={32} className="rounded-sm" />
-            <span className="text-xl font-bold">Directorio Latinos</span>
-          </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary">
-              Inicio
-            </Link>
-            <Link href="/servicios" className="text-sm font-medium hover:text-primary">
-              Servicios
-            </Link>
-            <Link href="/tienda" className="text-sm font-medium hover:text-primary">
-              Tienda
-            </Link>
-            <Link href="/#about" className="text-sm font-medium hover:text-primary">
-              Quiénes somos
-            </Link>
-            <Link href="/#contact" className="text-sm font-medium hover:text-primary">
-              Contacto
-            </Link>
-          </nav>
-          <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              Iniciar sesión
-            </Button>
-            <Button variant="default" size="sm" className="gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Publicar anuncio gratis
-            </Button>
-          </div>
-          <Button variant="outline" size="icon" className="md:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-6 w-6"
-            >
-              <line x1="4" x2="20" y1="12" y2="12" />
-              <line x1="4" x2="20" y1="6" y2="6" />
-              <line x1="4" x2="20" y1="18" y2="18" />
-            </svg>
-          </Button>
-        </div>
-      </header>
+      <MainNav />
 
       <main className="flex-1">
         {/* Breadcrumb */}
