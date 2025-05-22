@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getServiceListingById } from "@/app/actions/service-listings"
 import { createServerClient } from "@/lib/supabase-server"
 import { DeleteServiceButton } from "@/components/delete-service-button"
+import { MainNav } from "@/components/main-nav"
+import { SiteFooter } from "@/components/site-footer"
 
 export default async function ServiceListingDetailPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
@@ -60,6 +62,7 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
 
   return (
     <div className="space-y-6">
+      <MainNav />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{listingData.title}</h1>
         <div className="flex gap-2">
@@ -170,6 +173,7 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
           </Card>
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

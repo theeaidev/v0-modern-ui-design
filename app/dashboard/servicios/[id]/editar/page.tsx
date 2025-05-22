@@ -2,6 +2,8 @@ import { notFound } from "next/navigation"
 import { ServiceListingForm } from "@/components/service-listing-form"
 import { getServiceListingById } from "@/app/actions/service-listings"
 import { createServerClient } from "@/lib/supabase-server"
+import { MainNav } from "@/components/main-nav"
+import { SiteFooter } from "@/components/site-footer"
 
 export default async function EditServiceListingPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
@@ -23,12 +25,14 @@ export default async function EditServiceListingPage({ params }: { params: { id:
 
     return (
       <div className="space-y-6">
+        <MainNav />
         <div>
           <h1 className="text-2xl font-bold">Editar anuncio</h1>
           <p className="text-muted-foreground">Actualiza la información de tu anuncio.</p>
         </div>
 
         <ServiceListingForm mode="edit" listing={listing} />
+        <SiteFooter />
       </div>
     )
   } catch (error) {
