@@ -3,8 +3,9 @@ import { cookies } from "next/headers"
 import type { Database } from "@/types/supabase"
 
 // This function should ONLY be used in Server Components
-export function createServerClient() {
-  const cookieStore = cookies()
+export async function createServerClient() {
+  // Next.js cookies() is async in newer versions, so we await it
+  const cookieStore = await cookies()
 
   return createServerClientSupabase<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
