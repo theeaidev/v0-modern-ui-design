@@ -11,9 +11,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteFooter } from "@/components/site-footer"
-import { getServiceListingById } from "@/app/actions/service-listings";
+import { getServiceListingById, getRelatedServicesByCategory } from "@/app/actions/service-listings";
 import { ServiceShareButton } from "@/components/service-share-button";
 import { MainNav } from "@/components/main-nav";
+
+// Define type for related services
+type RelatedService = {
+  id: string | number;
+  title: string;
+  description: string;
+  image: string | null;
+  price: string | null;
+  location: string;
+  category?: string;
+};
 
 // Helper function to fetch and map ad data
 async function fetchAndMapAdById(id: string) {
@@ -45,35 +56,27 @@ async function fetchAndMapAdById(id: string) {
 
   const mockAvailability = ["Lunes a Viernes: 9:00 - 20:00 (Mock)", "Sábados: 10:00 - 14:00 (Mock)"];
   const mockFeatures = ["Sesiones online disponibles (Mock)", "Primera consulta gratuita (Mock)", "Profesionales certificados (Mock)"];
-  const mockRelatedServices = [
-    {
-      id: 33, // Using different IDs to distinguish from any potential DB IDs
-      title: "Yoga y meditación (Relacionado Mock)",
-      category: "Bienestar",
-      description: "Clases para todos los niveles enfocadas en el equilibrio cuerpo-mente.",
-      image: "/placeholder.svg?height=300&width=400&text=Related1",
-      price: "12€/clase",
-      location: "Valencia",
-    },
-    {
-      id: 77,
-      title: "Mindfulness (Relacionado Mock)",
-      category: "Bienestar",
-      description: "Aprende a vivir el presente y reducir el estrés con técnicas de atención plena.",
-      image: "/placeholder.svg?height=300&width=400&text=Related2",
-      price: "15€/clase",
-      location: "Zaragoza",
-    },
-    {
-      id: 55,
-      title: "Coaching personal (Relacionado Mock)",
-      category: "Desarrollo",
-      description: "Acompañamiento para alcanzar tus metas personales y profesionales.",
-      image: "/placeholder.svg?height=300&width=400&text=Related3",
-      price: "70€/sesión",
-      location: "Bilbao",
-    },
-  ];
+  
+  // Fetch related services from the same category
+  let relatedServices: RelatedService[] = [];
+  if (dbAdData && dbAdData.category_id) {
+    relatedServices = await getRelatedServicesByCategory(dbAdData.category_id, dbAdData.id.toString());
+  }
+  
+  // Fallback to default placeholder services if none found from DB
+  if (relatedServices.length === 0) {
+    // Fallback to similar services in case no related ones are found
+    relatedServices = [
+      {
+        id: 'placeholder-1',
+        title: "Servicio relacionado",
+        description: "Este es un servicio de ejemplo que se muestra cuando no hay servicios relacionados disponibles.",
+        image: "/placeholder.svg",
+        price: null,
+        location: "España",
+      }
+    ];
+  }
 
   const service = {
     id: dbAdData.id.toString(),
@@ -109,7 +112,7 @@ async function fetchAndMapAdById(id: string) {
       otherAds: 3, // This would require another query; kept as mock
     },
 
-    relatedServices: mockRelatedServices, // Kept as mock per instructions
+    relatedServices: relatedServices, // Kept as mock per instructions
   };
 
   return service;
@@ -195,7 +198,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
 
         {/* Service Content */}
         <div className="container py-12">
-          <div className="w-full overflow-hidden">
+          <div className="w-full overflow-visible">
             <div className="lg:col-span-2">
               <div className="flex justify-between items-center mb-6">
                 <div>
@@ -318,14 +321,14 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                         </span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
+{/*                         <div>
                           <p className="text-sm text-muted-foreground">Tasa de respuesta</p>
                           <p className="font-medium">{service.advertiser.responseRate}</p>
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Tiempo de respuesta</p>
                           <p className="font-medium">{service.advertiser.responseTime}</p>
-                        </div>
+                        </div> */}
                         <div>
                           <p className="text-sm text-muted-foreground">Otros anuncios</p>
                           <p className="font-medium">{service.advertiser.otherAds} anuncios activos</p>
@@ -358,7 +361,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                       <Input id="email" type="email" placeholder="tu@email.com" />
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 overflow-visible">
                     <label htmlFor="message" className="block text-sm font-medium">
                       Mensaje
                     </label>
@@ -448,7 +451,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
           <div className="mt-16">
             <h2 className="text-2xl font-bold mb-6">Anuncios relacionados</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {service.relatedServices.map((relatedService) => (
+              {service.relatedServices.map((relatedService: RelatedService) => (
                 <Card
                   key={relatedService.id}
                   className="overflow-hidden group transition-all duration-300 hover:shadow-lg"
@@ -481,12 +484,14 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <p className="text-muted-foreground line-clamp-2">{relatedService.description}</p>
                   </CardContent>
                   <CardFooter>
-                    <Button
-                      variant="outline"
-                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
-                    >
-                      Ver anuncio
-                    </Button>
+                    <Link href={`/servicios/${relatedService.id}`} className="w-full">
+                      <Button
+                        variant="outline"
+                        className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
+                      >
+                        Ver anuncio
+                      </Button>
+                    </Link>
                   </CardFooter>
                 </Card>
               ))}

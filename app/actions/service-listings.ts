@@ -120,6 +120,56 @@ export async function getServiceListings({
   }
 }
 
+// Get related services by category ID, excluding the current service
+export async function getRelatedServicesByCategory(categoryId: number, currentServiceId: string, limit: number = 3) {
+  try {
+    const supabase = createServerClient()
+
+    const { data, error } = await supabase
+      .from("service_listings")
+      .select(`
+        id,
+        title,
+        description,
+        price,
+        city,
+        images:service_images(url),
+        category:categories(id, name),
+        created_at
+      `)
+      .eq("category_id", categoryId)
+      .eq("status", "active") // Only fetch active listings
+      .neq("id", currentServiceId) // Exclude current service
+      .order("created_at", { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return data.map(service => {
+      // Extract category name safely with proper type checking
+      let categoryName = "Otros";
+      if (service.category && typeof service.category === 'object' && 'name' in service.category) {
+        categoryName = String(service.category.name) || "Otros";
+      }
+      
+      return {
+        id: service.id,
+        title: service.title,
+        description: service.description,
+        price: service.price ? `${service.price}€` : null,
+        location: service.city || "España",
+        image: service.images && service.images.length > 0 ? service.images[0].url : null,
+        category: categoryName
+      };
+    })
+  } catch (error) {
+    console.error("Error fetching related services:", error)
+    return [] // Return empty array on error
+  }
+}
+
 // Get a single service listing by ID
 export async function getServiceListingById(id: string) {
   try {
