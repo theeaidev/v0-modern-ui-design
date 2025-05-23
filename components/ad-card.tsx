@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { toggleFavorite, isFavorited } from "@/app/actions/service-listings"
+import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
   DialogContent,
@@ -66,15 +68,51 @@ export function AdCard({
   publishedAt,
   onClick,
 }: AdCardProps) {
-  console.log('AdCard ID Prop:', id);
+  const { toast } = useToast()
   const [isFavorite, setIsFavorite] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  
+  // Check if the ad is favorited when component mounts
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      try {
+        const result = await isFavorited(id)
+        setIsFavorite(result.favorited)
+      } catch (error) {
+        console.error("Error checking favorite status:", error)
+      }
+    }
+    
+    checkFavoriteStatus()
+  }, [id])
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsFavorite(!isFavorite)
-    // Aquí se podría implementar la lógica para guardar en localStorage o en una base de datos
+    
+    try {
+      setIsLoading(true)
+      const result = await toggleFavorite(id)
+      setIsFavorite(result.favorited)
+      
+      toast({
+        title: result.favorited ? "Añadido a favoritos" : "Eliminado de favoritos",
+        description: result.favorited
+          ? "Este anuncio ha sido añadido a tus favoritos"
+          : "Este anuncio ha sido eliminado de tus favoritos",
+        variant: result.favorited ? "default" : "destructive",
+      })
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
+      toast({
+        title: "Error",
+        description: "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleShare = (e: React.MouseEvent) => {
@@ -130,7 +168,8 @@ export function AdCard({
           } bg-background/50 backdrop-blur-sm hover:bg-background/70 transition-colors ${
             isFavorite ? "text-red-500" : "text-muted-foreground"
           }`}
-          onClick={toggleFavorite}
+          onClick={handleFavoriteToggle}
+          disabled={isLoading}
         >
           <Heart className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`} />
           <span className="sr-only">Favorito</span>
