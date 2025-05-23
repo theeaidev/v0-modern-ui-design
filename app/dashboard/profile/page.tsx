@@ -4,9 +4,13 @@ import { ProfileFormWrapper } from "@/components/profile-form-wrapper"
 import { MainNav } from "@/components/main-nav"
 import { SiteFooter } from "@/components/site-footer"
 
+// Prevent prerendering during build
+export const dynamic = 'force-dynamic'
+
 // This is a Server Component (no "use client" directive)
 export default async function ProfilePage() {
-  const supabase = createServerClient()
+  // Initialize the Supabase client
+  const supabase = await createServerClient()
 
   // Get the current user
   const {
