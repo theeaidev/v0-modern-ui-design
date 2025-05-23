@@ -2,8 +2,11 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createServerClient } from "@/lib/supabase-server"
 
+// Prevent prerendering during build
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   // Get counts for various items
   const { count: pendingListingsCount } = await supabase

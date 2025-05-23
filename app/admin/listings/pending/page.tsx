@@ -4,8 +4,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
 
+// Prevent prerendering during build
+export const dynamic = 'force-dynamic'
+
 export default async function PendingListingsPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   // Get all pending listings
   const { data: pendingListings, error } = await supabase
