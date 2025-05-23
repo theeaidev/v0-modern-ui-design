@@ -11,8 +11,11 @@ import { DeleteServiceButton } from "@/components/delete-service-button"
 import { MainNav } from "@/components/main-nav"
 import { SiteFooter } from "@/components/site-footer"
 
+// Prevent prerendering during build
+export const dynamic = 'force-dynamic'
+
 export default async function ServiceListingDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -57,7 +60,7 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
     );
   }
 
-  const primaryImage = listingData.images?.find((img) => img.is_primary) || listingData.images?.[0]
+  const primaryImage = listingData.images?.find((img: { is_primary: boolean; url: string }) => img.is_primary) || listingData.images?.[0]
   const imageUrl = primaryImage?.url || "/placeholder.svg?height=600&width=1200"
 
   return (
