@@ -2,8 +2,11 @@ import type React from "react"
 import { createServerClient } from "@/lib/supabase-server"
 import { redirect } from "next/navigation"
 
+// Prevent prerendering during build
+export const dynamic = 'force-dynamic'
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   // Check if user is logged in
   const {
