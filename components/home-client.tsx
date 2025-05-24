@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Mail, Search, PlusCircle, ArrowRight, Briefcase, GraduationCap } from "lucide-react"
+import { ServiceSearchClient } from "@/components/search/service-search-client"
 import { Home as HomeIcon } from "@/components/home" // Import the Home component
 
 import { Button } from "@/components/ui/button"
@@ -409,14 +410,8 @@ export default function HomeClient() {
             <p className="text-xl text-muted-foreground max-w-2xl">
               La plataforma líder para anunciar tus servicios profesionales o encontrar exactamente lo que necesitas
             </p>
-            <div className="w-full max-w-2xl mt-8 flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input type="search" placeholder="¿Qué servicio buscas?" className="pl-10 pr-4 py-6 text-base" />
-              </div>
-              <Button size="lg" className="py-6">
-                Buscar
-              </Button>
+            <div className="w-full max-w-2xl mt-8">
+              <ServiceSearchClient />
             </div>
             <div className="flex flex-wrap justify-center gap-3 mt-4">
               <Badge variant="secondary" className="px-3 py-1 text-xs">
