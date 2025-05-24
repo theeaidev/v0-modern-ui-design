@@ -112,9 +112,9 @@ export function ServiceSearch({
           <div className="flex flex-col items-center mb-4">
             <p className="text-sm mb-1">Resultados impulsados por Algolia</p>
             <img
-              src="/algoliaLogo.png"
+              src="/Algolia-logo-blue.png"
               alt="Algolia logo"
-              style={{ height: 100 }}
+              style={{ height: 50 }}
               title="Resultados impulsados por Algolia"
             />
           </div>
