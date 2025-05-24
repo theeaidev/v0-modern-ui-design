@@ -315,9 +315,12 @@ export default function HomeClient() {
           limit: 8,
           sort: "newest",
         })
+        
+        // Filter only featured listings
+        const featuredDbListings = listings.filter((listing: any) => listing.is_featured)
 
         // Map database listings to AdCard props
-        const dbListings = listings.map((listing: any) => {
+        const dbListings = featuredDbListings.map((listing: any) => {
           // Defensive: handle id as string or number, ensure it's a string for the URL
           let id_processed: string | undefined;
           if (listing.id !== null && listing.id !== undefined) {
@@ -360,15 +363,18 @@ export default function HomeClient() {
         })
 
         // Filter out listings that ended up with an undefined ID
-        const validDbListings = dbListings.filter(item => item.id !== undefined);
+        const validDbListings = dbListings.filter(item => item.id !== undefined && item.badge === "Destacado");
 
-        // Combine database listings with sample data
-        const combinedListings = [...validDbListings, ...services]
+        // If we have enough featured listings from the database, use only those
+        // Otherwise, supplement with sample data if needed
+        const combinedListings = validDbListings.length >= 8 
+          ? validDbListings 
+          : [...validDbListings, ...services.filter(s => s.badge === "Destacado").slice(0, 8 - validDbListings.length)]
         setFeaturedListings(combinedListings)
       } catch (error) {
         console.error("Error fetching featured listings:", error)
-        // Use sample data as fallback if there's an error
-        setFeaturedListings(services)
+        // Use only featured sample data as fallback if there's an error
+        setFeaturedListings(services.filter(service => service.badge === "Destacado"))
       } finally {
         setIsLoading(false)
       }
