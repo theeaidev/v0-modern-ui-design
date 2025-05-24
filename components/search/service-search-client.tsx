@@ -43,7 +43,7 @@ export function ServiceSearchClient({ className = "" }: ServiceSearchClientProps
     <ServiceSearch
       onSearch={handleSearch}
       className={className}
-      placeholder="¿Qué servicio buscas?"
+      placeholder="¿Qué estas buscando?"
     />
   )
 }

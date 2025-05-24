@@ -415,19 +415,25 @@ export default function HomeClient() {
             </div>
             <div className="flex flex-wrap justify-center gap-3 mt-4">
               <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Masajes
+                Restaurantes
               </Badge>
               <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Terapia
+                Servicios
               </Badge>
               <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Yoga
+                Formación
               </Badge>
               <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Nutrición
+                Productos
               </Badge>
               <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Coaching
+                Comunidad
+              </Badge>
+              <Badge variant="secondary" className="px-3 py-1 text-xs">
+                Inmobiliaria
+              </Badge>
+              <Badge variant="secondary" className="px-3 py-1 text-xs">
+                Otros
               </Badge>
             </div>
             <Link href="https://www.innnova.es/" target="_blank" rel="noopener" aria-label="Innnova">

@@ -101,10 +101,23 @@ export function ServiceSearch({
       {error && <div className="mt-4 p-4 bg-destructive/10 text-destructive rounded-md">{error}</div>}
 
       {hasSearched && searchResults && (
+        
         <div className="mt-8">
+                               
+
+ 
           <h2 className="text-2xl font-bold mb-4">
             {searchResults.nbHits} resultados para "{searchResults.query}"
           </h2>
+          <div className="flex flex-col items-center mb-4">
+            <p className="text-sm mb-1">Resultados impulsados por Algolia</p>
+            <img
+              src="/algoliaLogo.png"
+              alt="Algolia logo"
+              style={{ height: 100 }}
+              title="Resultados impulsados por Algolia"
+            />
+          </div>
 
           {searchResults.nbHits > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -146,6 +159,7 @@ export function ServiceSearch({
                 }
                 
                 return (
+                  
                   <ErrorBoundary
                     key={service.id}
                     fallback={<div className="p-4 border rounded">Error rendering service card</div>}
