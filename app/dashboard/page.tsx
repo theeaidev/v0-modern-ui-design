@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Trash2 } from "lucide-react"; // Assuming Eye icon is also imported from lucide-react, you might group them.
+import { toast } from "sonner";
+import { toggleFavorite } from "@/app/actions/service-listings";
 import { User, Mail, Calendar, MapPin, Phone, Globe, Briefcase, Building, Edit, Heart, Eye } from "lucide-react"
 
 import { useAuth } from "@/contexts/auth-context"
@@ -18,6 +21,23 @@ import { getFavoritedServiceListings } from "@/app/actions/service-listings"
 export default function DashboardPage() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
+
+  // Ensure favoritedAds and setFavoritedAds are defined in this component's state
+  // e.g., const [favoritedAds, setFavoritedAds] = useState<Array<{id: string, title?: string}>>([]);
+
+  const handleRemoveFavorite = async (adId: string, adTitle?: string) => {
+    try {
+      // Assuming toggleFavorite is designed to remove if already favorited and handles user context
+      await toggleFavorite(adId);
+      
+      // Update UI optimistically
+      setFavoritedAds((prevAds) => prevAds.filter(ad => ad.id !== adId));
+      toast.success(`${adTitle ? `"${adTitle}"` : 'Anuncio'} eliminado de favoritos.`);
+    } catch (error) {
+      console.error("Error removing favorite:", error);
+      toast.error("No se pudo eliminar de favoritos. Por favor, inténtalo de nuevo.");
+    }
+  };
   const [profileData, setProfileData] = useState<any>(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
@@ -419,12 +439,23 @@ export default function DashboardPage() {
                               {favoritedAds.map(ad => (
                                 <li key={ad.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
                                   <span className="font-medium truncate pr-2" title={ad.title || 'Anuncio sin título'}>{ad.title || "Anuncio sin título"}</span>
-                                  <Button variant="outline" size="sm" asChild>
-                                    <Link href={`/servicios/${ad.id}`} className="flex items-center gap-1.5">
-                                      <Eye className="h-4 w-4" />
-                                      Ver Anuncio
-                                    </Link>
-                                  </Button>
+                                  <div className="flex items-center space-x-2">
+                                    <Button variant="outline" size="sm" asChild>
+                                      <Link href={`/servicios/${ad.id}`} className="flex items-center gap-1.5">
+                                        <Eye className="h-4 w-4" />
+                                        Ver Anuncio
+                                      </Link>
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleRemoveFavorite(ad.id, ad.title || undefined)}
+                                      className="flex items-center gap-1.5 text-destructive hover:text-destructive/80"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      Eliminar de favoritos
+                                    </Button>
+                                  </div>
                                 </li>
                               ))}
                             </ul>

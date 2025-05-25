@@ -141,18 +141,18 @@ export default function TiendaPage() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 shrink-0" />
                       <span>
-                        Anuncio visible durante <strong>3 meses</strong>
+                        Anuncio visible durante <strong>2 meses</strong>
                       </span>
                     </li>
                     <li className="flex items-start">
                       <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 shrink-0" />
                       <span>
-                        En el <strong>4º mes</strong>, si no se renueva, se elimina automáticamente
+                        En el <strong>3º mes</strong>, si no se renueva, se elimina automáticamente
                       </span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 shrink-0" />
-                      <span>El pago inicial activa el anuncio de forma inmediata</span>
+                      <span>El pago inicial activa el anuncio</span>
                     </li>
                   </ul>
                   <div className="mt-6 p-3 bg-muted rounded-lg">
@@ -343,7 +343,7 @@ export default function TiendaPage() {
                           <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                           Duración
                         </span>
-                        <span className="font-medium">3 meses</span>
+                        <span className="font-medium">2 meses</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="flex items-center">
@@ -454,7 +454,7 @@ export default function TiendaPage() {
                       <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                       Duración
                     </td>
-                    <td className="p-4 text-center">3 meses</td>
+                    <td className="p-4 text-center">2 meses</td>
                     <td className="p-4 text-center">3 meses</td>
                   </tr>
                   <tr className="border-b">
@@ -518,11 +518,11 @@ export default function TiendaPage() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span>Duración:</span>
-                        <span className="font-medium">3 meses</span>
+                        <span className="font-medium">{selectedPlan === "basica" ? "2 meses" : "3 meses"}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span>Total a pagar:</span>
-                        <span className="font-bold text-lg">{selectedPlan === "basica" ? "15 €" : "30 €"}</span>
+                        <span>Total a pagar (Con Descuento Aplicado a Nuevos Clientes):</span>
+                        <span className="font-bold text-lg">{selectedPlan === "basica" ? "5 €" : "10 €"}</span>
                       </div>
                       <Separator />
 
@@ -586,21 +586,21 @@ export default function TiendaPage() {
                             {paymentMethod === "bizum" && (
                               <p className="text-sm text-amber-800">
                                 Para completar tu pago, realiza una transferencia por Bizum al número{" "}
-                                <strong>600 123 456</strong> con el concepto{" "}
+                                <strong>644 314 978</strong> con el concepto{" "}
                                 <strong>"Anuncio {selectedPlan === "basica" ? "Básico" : "Premium"}"</strong>
                               </p>
                             )}
                             {paymentMethod === "paypal" && (
                               <p className="text-sm text-amber-800">
                                 Serás redirigido a PayPal para completar el pago de{" "}
-                                <strong>{selectedPlan === "basica" ? "15 €" : "30 €"}</strong> al confirmar.
+                                <strong>{selectedPlan === "basica" ? "5 €" : "10 €"}</strong> al confirmar.
                               </p>
                             )}
                             {paymentMethod === "transfer" && (
                               <p className="text-sm text-amber-800">
                                 Realiza una transferencia bancaria a la siguiente cuenta:
                                 <br />
-                                <strong>IBAN: ES12 3456 7890 1234 5678 9012</strong>
+                                <strong>IBAN: ES05 1583 0001 1191 9706 5127</strong>
                                 <br />
                                 <strong>Beneficiario: Directorio Latinos SL</strong>
                                 <br />
