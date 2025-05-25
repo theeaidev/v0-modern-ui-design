@@ -542,6 +542,54 @@ export async function isFavorited(serviceId: string) {
   }
 }
 
+// Get all service listings favorited by the current user
+export async function getFavoritedServiceListings(): Promise<{ id: string; title: string | null }[]> {
+  try {
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      // Or handle as an error, depending on how you want to treat unauthenticated users
+      return []
+    }
+
+    // Step 1: Get the service_ids of the listings favorited by the user
+    const { data: favorites, error: favoritesError } = await supabase
+      .from("favorites")
+      .select("service_id")
+      .eq("user_id", user.id)
+
+    if (favoritesError) {
+      console.error("Error fetching user favorites:", favoritesError)
+      throw new Error(favoritesError.message)
+    }
+
+    if (!favorites || favorites.length === 0) {
+      return [] // No favorites found
+    }
+
+    const serviceIds = favorites.map(fav => fav.service_id)
+
+    // Step 2: Get the id and title of the service listings corresponding to the favorited service_ids
+    const { data: listings, error: listingsError } = await supabase
+      .from("service_listings")
+      .select("id, title")
+      .in("id", serviceIds)
+      .eq("status", "active") // Optionally, only show active listings
+
+    if (listingsError) {
+      console.error("Error fetching favorited service listings:", listingsError)
+      throw new Error(listingsError.message)
+    }
+
+    return listings || []
+  } catch (error) {
+    console.error("Error in getFavoritedServiceListings:", error)
+    // Depending on your error handling strategy, you might re-throw, or return empty/error indicator
+    return [] 
+  }
+}
+
 // Get all categories
 export async function getCategories() {
   try {

@@ -824,16 +824,16 @@ function ServiceListingsPageContent() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
-                      Ordenar por: Relevancia
+                      Ordenar por: Más recientes
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Relevancia</DropdownMenuItem>
+                   {/*  <DropdownMenuItem>Relevancia</DropdownMenuItem> */}
                     <DropdownMenuItem>Más recientes</DropdownMenuItem>
                     <DropdownMenuItem>Precio: menor a mayor</DropdownMenuItem>
                     <DropdownMenuItem>Precio: mayor a menor</DropdownMenuItem>
-                    <DropdownMenuItem>Mejor valorados</DropdownMenuItem>
+                    {/* <DropdownMenuItem>Mejor valorados</DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

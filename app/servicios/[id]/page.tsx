@@ -163,7 +163,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
           <Image src={service.image || "/placeholder.svg"} alt={service.title} fill className="object-cover" priority />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 container py-6">
-            <Link href="/" className="inline-flex items-center text-sm font-medium text-white mb-4 hover:underline">
+            <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-white mb-4 hover:underline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a servicios
             </Link>
@@ -206,10 +206,10 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <p className="text-muted-foreground">por sesión</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon" className="rounded-full">
+{/*                   <Button variant="outline" size="icon" className="rounded-full">
                     <Heart className="h-5 w-5" />
                     <span className="sr-only">Guardar</span>
-                  </Button>
+                  </Button> */}
                   <ServiceShareButton 
                     serviceId={service.id} 
                     serviceTitle={service.title} 

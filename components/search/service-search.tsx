@@ -120,7 +120,7 @@ export function ServiceSearch({
           </div>
 
           {searchResults.nbHits > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
               {searchResults.hits.map((service) => {
                 // Extract category information if available
                 let categoryName = "";
@@ -161,28 +161,28 @@ export function ServiceSearch({
                 return (
                   
                   <ErrorBoundary
-                    key={service.id}
                     fallback={<div className="p-4 border rounded">Error rendering service card</div>}
                   >
-                    <AdCard
-                      id={service.id}
-                      title={service.title}
-                      category={categoryName}
-                      description={service.description}
-                      image={imageUrl}
-                      badge={service.is_featured ? "Destacado" : null}
-                      price={service.price ? `${service.price}€` : "Consultar"}
-                      location={service.city || service.location || ""}
-                      phone={service.contact_phone || ""}
-                      whatsapp={service.contact_whatsapp || ""}
-                      website={service.contact_website || ""}
-                      email={service.contact_email || ""}
-                      address={service.address || ""}
-                      coordinates={coordinates}
-                      verified={service.is_verified || false}
-                      isNew={service.created_at ? new Date(service.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false}
-                      publishedAt={new Date(service.created_at)}
-                    />
+                    <div key={service.id} className="w-full md:p-1 lg:p-2 lg:max-w-lg lg:mx-auto">
+                      <AdCard
+                        id={service.id}
+                        title={service.title}
+                        category={categoryName}
+                        description={service.description}
+                        image={imageUrl}
+                        badge={service.is_featured ? "Destacado" : null}
+                        price={service.price ? `${service.price}€` : "Consultar"}
+                        location={service.city || service.location || ""}
+                        phone={service.contact_phone || ""}
+                        whatsapp={service.contact_whatsapp || ""}
+                        website={service.contact_website || ""}
+                        email={service.contact_email || ""}
+                        coordinates={coordinates}
+                        verified={service.is_verified || false}
+                        isNew={service.created_at ? new Date(service.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false}
+                        publishedAt={new Date(service.created_at)}
+                      />
+                    </div>
                   </ErrorBoundary>
                 );
               })}

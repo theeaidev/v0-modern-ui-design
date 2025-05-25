@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { User, Mail, Calendar, MapPin, Phone, Globe, Briefcase, Building, Edit } from "lucide-react"
+import { User, Mail, Calendar, MapPin, Phone, Globe, Briefcase, Building, Edit, Heart, Eye } from "lucide-react"
 
 import { useAuth } from "@/contexts/auth-context"
 import { MainNav } from "@/components/main-nav"
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { getSupabaseBrowserClient } from "@/lib/supabase"
+import { getFavoritedServiceListings } from "@/app/actions/service-listings"
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth()
@@ -21,6 +22,10 @@ export default function DashboardPage() {
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
   const [fetchAttempted, setFetchAttempted] = useState(false)
+
+  const [favoritedAds, setFavoritedAds] = useState<{ id: string; title: string | null }[]>([])
+  const [favoritedAdsLoading, setFavoritedAdsLoading] = useState(true)
+  const [favoritedAdsError, setFavoritedAdsError] = useState<string | null>(null)
 
   console.log("[DASHBOARD] Rendering dashboard, user:", !!user, "isLoading:", isLoading)
 
@@ -100,6 +105,25 @@ export default function DashboardPage() {
     if (user && !fetchAttempted) {
       console.log("[DASHBOARD] Starting profile fetch")
       fetchProfileData()
+    }
+
+    const fetchFavoritedAds = async () => {
+      if (!user) return
+      try {
+        setFavoritedAdsLoading(true)
+        setFavoritedAdsError(null)
+        const ads = await getFavoritedServiceListings()
+        setFavoritedAds(ads)
+      } catch (error) {
+        console.error("[DASHBOARD] Error fetching favorited ads:", error)
+        setFavoritedAdsError(error instanceof Error ? error.message : "Failed to load favorites")
+      } finally {
+        setFavoritedAdsLoading(false)
+      }
+    }
+
+    if (user) {
+      fetchFavoritedAds()
     }
   }, [user, fetchAttempted])
 
@@ -222,7 +246,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="mt-6">
+{/*               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle>Información de contacto</CardTitle>
                 </CardHeader>
@@ -268,7 +292,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
 
             <div className="md:col-span-2">
@@ -376,13 +400,45 @@ export default function DashboardPage() {
 
                     <div>
                       <h3 className="text-lg font-medium mb-2">Favoritos</h3>
-                      <div className="bg-muted rounded-lg p-6 text-center">
-                        <User className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-muted-foreground">No has guardado ningún anuncio como favorito</p>
-                        <Button variant="outline" className="mt-4" asChild>
-                          <Link href="/servicios">Explorar anuncios</Link>
-                        </Button>
-                      </div>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Favoritos</CardTitle>
+                          <CardDescription>Anuncios que has guardado</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {favoritedAdsLoading ? (
+                            <div className="flex justify-center items-center h-24">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            </div>
+                          ) : favoritedAdsError ? (
+                            <div className="text-red-500 text-center">
+                              <p>Error al cargar favoritos: {favoritedAdsError}</p>
+                            </div>
+                          ) : favoritedAds.length > 0 ? (
+                            <ul className="space-y-4">
+                              {favoritedAds.map(ad => (
+                                <li key={ad.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                                  <span className="font-medium truncate pr-2" title={ad.title || 'Anuncio sin título'}>{ad.title || "Anuncio sin título"}</span>
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/servicios/${ad.id}`} className="flex items-center gap-1.5">
+                                      <Eye className="h-4 w-4" />
+                                      Ver Anuncio
+                                    </Link>
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="bg-muted rounded-lg p-6 text-center">
+                              <Heart className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                              <p className="text-muted-foreground">No has guardado ningún anuncio como favorito</p>
+                              <Button variant="outline" className="mt-4" asChild>
+                                <Link href="/servicios">Explorar anuncios</Link>
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
                 </CardContent>

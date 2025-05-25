@@ -192,8 +192,8 @@ const categories = [
         <path d="M18 8a6 6 0 0 0-6-6 6 6 0 0 0-6 6c0 7 6 13 6 13s6-6 6-13Z" />
         <circle cx="12" cy="8" r="2" />
       </svg>
-    ),
-    count: 124,
+    )
+   /*  count: 124, */
   },
   {
     name: "Salud",
@@ -213,7 +213,7 @@ const categories = [
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
       </svg>
     ),
-    count: 89,
+    /* count: 89, */
   },
   {
     name: "Formación",
@@ -233,7 +233,7 @@ const categories = [
         <polyline points="9 22 9 12 15 12 15 22" />
       </svg>
     ),
-    count: 67,
+    /* count: 67, */
   },
   {
     name: "Empleo",
@@ -255,7 +255,7 @@ const categories = [
         <line x1="9" x2="15" y1="15" y2="9" />
       </svg>
     ),
-    count: 54,
+    /* count: 54, */
   },
   {
     name: "Inmobiliaria",
@@ -276,7 +276,7 @@ const categories = [
         <path d="M8 9V2h8v7" />
       </svg>
     ),
-    count: 42,
+    /* count: 42, */
   },
   {
     name: "Eventos",
@@ -298,7 +298,7 @@ const categories = [
         <line x1="3" x2="21" y1="10" y2="10" />
       </svg>
     ),
-    count: 31,
+    /* count: 31, */
   },
 ]
 
@@ -420,27 +420,41 @@ export default function HomeClient() {
               <ServiceSearchClient />
             </div>
             <div className="flex flex-wrap justify-center gap-3 mt-4">
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Restaurantes
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Servicios
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Formación
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Productos
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Comunidad
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Inmobiliaria
-              </Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs">
-                Otros
-              </Badge>
+              <Link href="/servicios?categoria=Restaurantes">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Restaurantes
+                </Badge>
+              </Link>
+              <Link href="/servicios?categoria=Servicios">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Servicios
+                </Badge>
+              </Link>
+              <Link href="/servicios?categoria=Formación">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Formación
+                </Badge>
+              </Link>
+              <Link href="/servicios?categoria=Productos">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Productos
+                </Badge>
+              </Link>
+              <Link href="/servicios?categoria=Comunidad">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Comunidad
+                </Badge>
+              </Link>
+              <Link href="/servicios?categoria=Inmobiliaria">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Inmobiliaria
+                </Badge>
+              </Link>
+              <Link href="/servicios?categoria=Otros">
+                <Badge variant="secondary" className="px-3 py-1 text-xs">
+                  Otros
+                </Badge>
+              </Link>
             </div>
             <Link href="https://www.innnova.es/" target="_blank" rel="noopener" aria-label="Innnova">
             <svg width="210" height="40" viewBox="0 0 210 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="INNNOVA logo">
@@ -467,10 +481,12 @@ export default function HomeClient() {
               <h2 className="text-2xl md:text-3xl font-bold mb-2">¿Ofreces algún servicio?</h2>
               <p className="text-muted-foreground">Publica tu anuncio y llega a miles de clientes potenciales</p>
             </div>
+            <Link href="/dashboard/servicios/nuevo">
             <Button size="lg" className="whitespace-nowrap gap-2">
               <PlusCircle className="h-5 w-5" />
               Publicar anuncio
             </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -531,10 +547,12 @@ export default function HomeClient() {
                 ))}
           </div>
           <div className="flex justify-center mt-12">
+          <Link href="/servicios">
             <Button variant="outline" size="lg" className="gap-2">
               Ver todos los anuncios
               <ArrowRight className="h-4 w-4" />
             </Button>
+          </Link>
           </div>
         </div>
       </section>
@@ -560,7 +578,7 @@ export default function HomeClient() {
                     <category.icon />
                   </div>
                   <span className="font-medium text-center">{category.name}</span>
-                  <span className="text-xs text-muted-foreground mt-1">{category.count} anuncios</span>
+                  {/* <span className="text-xs text-muted-foreground mt-1">{category.count} anuncios</span> */}
                 </Link>
               ))}
             </div>
@@ -678,10 +696,10 @@ export default function HomeClient() {
                 <p className="text-lg text-muted-foreground mb-6">
                 Hemos ayudado a miles de comerciantes a hacer crecer sus negocios y a clientes a encontrar exactamente el servicio que buscan.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4">
+{/*                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button>Nuestra historia</Button>
                   <Button variant="outline">Únete a nosotros</Button>
-                </div>
+                </div> */}
               </div>
               <div className="order-1 lg:order-2 relative aspect-video lg:aspect-square">
                 <Image
