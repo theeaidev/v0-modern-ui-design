@@ -40,7 +40,8 @@ interface ServiceListingItem {
   category: string;
   subcategory: string;
   description: string;
-  image: string;
+  imagePath?: string; // Path to image in Supabase bucket
+  videoPath?: string; // Path to video in Supabase bucket
   badge: string | null; // Allow string or null for badge
   price: string;
   location: string;
@@ -926,7 +927,8 @@ export function ServiceListingsPage() {
                         category={servicio.category}
                         subcategory={servicio.subcategory}
                         description={servicio.description}
-                        image={servicio.image}
+                        imagePath={servicio.imagePath} // Use imagePath
+                        // videoPath={servicio.videoPath} // Uncomment if videoPath becomes available
                         badge={servicio.badge}
                         price={servicio.price}
                         location={servicio.location}

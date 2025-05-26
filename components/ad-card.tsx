@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import supabase from "@/lib/client" // Import Supabase client
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import { Heart, Share2, MapPin, Phone, Globe, Mail, Map, Check, AlertCircle } from "lucide-react"
@@ -31,7 +32,8 @@ export interface AdCardProps {
   category: string
   subcategory?: string
   description: string
-  image: string
+  imagePath?: string // Path to image in Supabase bucket
+  videoPath?: string // Path to video in Supabase bucket
   badge?: string | null
   price?: string
   location: string
@@ -53,7 +55,8 @@ export function AdCard({
   category,
   subcategory,
   description,
-  image,
+  imagePath,
+  videoPath,
   badge,
   price,
   location,
@@ -72,6 +75,32 @@ export function AdCard({
   const [isFavorite, setIsFavorite] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [mediaProps, setMediaProps] = useState<{ src: string; type: "image" | "video" }>({ 
+    src: "/placeholder.svg", 
+    type: 'image' 
+  });
+
+  // Determine media URL from Supabase
+  useEffect(() => {
+    let determinedSrc = "/placeholder.svg";
+    let determinedType: 'image' | 'video' = 'image';
+
+    if (imagePath) {
+      const { data } = supabase.storage.from('service-listings').getPublicUrl(imagePath);
+      if (data?.publicUrl) {
+        determinedSrc = data.publicUrl;
+        determinedType = 'image';
+      }
+    } else if (videoPath) { // Only check video if no imagePath
+      const { data } = supabase.storage.from('service-listings').getPublicUrl(videoPath);
+      if (data?.publicUrl) {
+        determinedSrc = data.publicUrl;
+        determinedType = 'video';
+      }
+    }
+    
+    setMediaProps({ src: determinedSrc, type: determinedType });
+  }, [imagePath, videoPath]);
   
   // Check if the ad is favorited when component mounts
   useEffect(() => {
@@ -139,12 +168,34 @@ export function AdCard({
   return (
     <Card className="overflow-hidden group transition-all duration-300 hover:shadow-lg h-full flex flex-col">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <Image
-          src={image || "/placeholder.svg"}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {mediaProps.type === 'image' ? (
+          <Image
+            src={mediaProps.src}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => {
+              if (mediaProps.src !== "/placeholder.svg") {
+                setMediaProps({ src: "/placeholder.svg", type: 'image' });
+              }
+            }}
+          />
+        ) : ( // mediaProps.type === 'video'
+          <video
+            key={mediaProps.src} // Re-mount if src changes
+            src={mediaProps.src}
+            controls
+            preload="metadata"
+            className="w-full h-full object-cover"
+            onError={() => {
+              if (mediaProps.src !== "/placeholder.svg") {
+                setMediaProps({ src: "/placeholder.svg", type: 'image' }); // Fallback to placeholder image
+              }
+            }}
+          >
+            Tu navegador no soporta la etiqueta de video.
+          </video>
+        )}
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1">
