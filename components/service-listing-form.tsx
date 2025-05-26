@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { useForm, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2, AlertCircle } from "lucide-react"
@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-import type { ServiceListing, Category, Subcategory } from "@/types/service"
+import type { ServiceListing, Category, Subcategory, ServiceListingFormData } from "@/types/service"
 import {
   createServiceListing,
   updateServiceListing,
@@ -50,7 +50,7 @@ const formSchema = z.object({
   contact_email: z.string().email("Introduce un email válido").optional(),
   contact_whatsapp: z.string().optional(),
   contact_website: z.string().url("Introduce una URL válida").optional(),
-  status: z.enum(["draft", "pending_approval", "active", "paused", "rejected"]),
+  status: z.enum(["draft", "pending_approval", "active", "paused", "rejected", "expired"]),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -72,7 +72,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
   // Initialize the form with default values or existing listing data
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       title: listing?.title || "",
       description: listing?.description || "",
@@ -156,35 +156,55 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true)
 
-    // If user selected "active", change it to "pending_approval" for new listings
+    // Determine the intended status for user feedback and internal logic.
+    // This reflects what the user selected or what the system logically transitions to before backend submission.
+    let intendedUserFacingStatus = values.status
     if (mode === "create" && values.status === "active") {
-      values.status = "pending_approval"
+      intendedUserFacingStatus = "pending_approval"
+    } else if (mode === "edit" && listing && listing.status === "draft" && values.status === "active") {
+      intendedUserFacingStatus = "pending_approval"
+    }
+
+    // Prepare data for the backend, ensuring it conforms to ServiceListingFormData.
+    // The backend expects status to be one of: "draft", "active", "paused".
+    const dataForBackend: ServiceListingFormData = {
+      ...values, // Spread all form values
+      category_id: Number(values.category_id), // Ensure numeric type
+      subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined, // Ensure numeric type or undefined
+      status:
+        intendedUserFacingStatus === "active" || intendedUserFacingStatus === "pending_approval"
+          ? "active" // If user wants active, or it's now pending, tell backend 'active'. Backend handles actual 'pending_approval' state.
+          : intendedUserFacingStatus === "paused"
+          ? "paused"
+          : "draft", // For 'draft', 'rejected', 'expired', tell backend 'draft'.
     }
 
     try {
       if (mode === "create") {
-        const result = await createServiceListing(values)
+        const result = await createServiceListing(dataForBackend)
         toast({
           title: "Anuncio creado",
           description:
-            values.status === "pending_approval"
+            intendedUserFacingStatus === "pending_approval"
               ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
-              : "Tu anuncio ha sido guardado como borrador.",
+              : `Tu anuncio ha sido guardado como ${intendedUserFacingStatus === "draft" ? "borrador" : intendedUserFacingStatus}.`,
         })
-        router.push(`/dashboard/servicios/success?id=${result.data.id}`)
-      } else if (mode === "edit" && listing) {
-        // For edits, if changing from draft to active, set to pending_approval
-        if (listing.status === "draft" && values.status === "active") {
-          values.status = "pending_approval"
+        // Assuming result.data.id exists and is the correct new ID
+        if (result && result.data && result.data.id) {
+          router.push(`/dashboard/servicios/success?id=${result.data.id}`)
+        } else {
+          // Fallback or error handling if ID is not returned as expected
+          router.push("/dashboard/servicios") 
+          console.warn("Service listing created, but ID not found in response for redirection.")
         }
-
-        await updateServiceListing(listing.id, values)
+      } else if (mode === "edit" && listing) {
+        await updateServiceListing(listing.id, dataForBackend)
         toast({
           title: "Anuncio actualizado",
           description:
-            values.status === "pending_approval"
+            intendedUserFacingStatus === "pending_approval"
               ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
-              : "Tu anuncio ha sido actualizado correctamente.",
+              : `Tu anuncio ha sido actualizado correctamente (estado: ${intendedUserFacingStatus}).`,
         })
         router.push(`/dashboard/servicios/${listing.id}`)
       }
