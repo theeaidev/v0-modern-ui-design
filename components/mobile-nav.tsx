@@ -21,10 +21,11 @@ interface MobileNavProps {
 
 export function MobileNav({ currentPath }: MobileNavProps) {
   const { user, signOut } = useAuth()
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   return (
     <div className="md:hidden">
-      <Sheet>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
             <Menu className="h-6 w-6" />
@@ -58,6 +59,7 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                 className={`text-lg font-medium ${
                   currentPath === "/" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
                 }`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 Inicio
               </Link>
@@ -66,6 +68,7 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                 className={`text-lg font-medium ${
                   currentPath === "/servicios" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
                 }`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 Servicios
               </Link>
@@ -74,6 +77,7 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                 className={`text-lg font-medium relative group flex items-center gap-1 ${
                   currentPath.includes("categoria=Empleo") ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
                 }`}
+                onClick={() => setIsSheetOpen(false)}
               ><Briefcase className="h-4 w-4" />
                 Empleo
                 <span
@@ -87,14 +91,16 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                 className={`text-lg font-medium ${
                   currentPath === "/tienda" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
                 }`}
+                onClick={() => setIsSheetOpen(false)}
               >
-                Tienda
+                Precios
               </Link>
               <Link
                 href="/#about"
                 className={`text-lg font-medium ${
                   currentPath === "/#about" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
                 }`}
+                onClick={() => setIsSheetOpen(false)}
               >
                 Quiénes somos
               </Link>
@@ -103,6 +109,7 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                 className={`text-lg font-medium ${
                   currentPath === "/#contact" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
                 }`}
+                onClick={() => setIsSheetOpen(false)}
                
               >
                 Contacto
