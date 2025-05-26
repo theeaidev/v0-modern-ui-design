@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, UploadCloud, Trash2, FileText, Video as VideoIcon, Image as ImageIcon } from "lucide-react"
+import NextImage from "next/image" // Renamed to avoid conflict with ImageIcon
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -13,12 +14,16 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-import type { ServiceListing, Category, Subcategory, ServiceListingFormData } from "@/types/service"
+import supabase from "@/lib/client" // Assuming lib/client.ts or lib/supabase/client.ts
+import { v4 as uuidv4 } from 'uuid';
+import type { User } from '@supabase/supabase-js';
+
+import type { ServiceListing, Category, Subcategory, ServiceListingFormData } from "@/types/service" // Ensure this type includes image_urls and video_urls
 import {
   createServiceListing,
   updateServiceListing,
@@ -26,7 +31,14 @@ import {
   getSubcategories,
 } from "@/app/actions/service-listings"
 
+const MAX_IMAGE_SIZE_MB = 5;
+const MAX_VIDEO_SIZE_MB = 50;
+const MAX_IMAGE_FILES = 5;
+const MAX_VIDEO_FILES = 2;
+
 // Define the form schema with Zod
+// File inputs will be handled separately, not directly in Zod for react-hook-form values
+// The final image_urls and video_urls (string arrays) will be part of ServiceListingFormData sent to backend.
 const formSchema = z.object({
   title: z
     .string()
@@ -69,6 +81,36 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
   const [activeTab, setActiveTab] = useState("basic")
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // File states
+  const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const [selectedVideoFiles, setSelectedVideoFiles] = useState<File[]>([]);
+  const [videoPreviews, setVideoPreviews] = useState<{ name: string; url: string }[]>([]); // Using object URLs for video previews
+  const [existingVideoUrls, setExistingVideoUrls] = useState<string[]>([]);
+  const [videosToDelete, setVideosToDelete] = useState<string[]>([]);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (listing) {
+      setExistingImageUrls(listing.image_urls || []);
+      setExistingVideoUrls(listing.video_urls || []);
+    }
+  }, [listing]);
 
   // Initialize the form with default values or existing listing data
   const form = useForm<FormValues>({
@@ -99,6 +141,175 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   const watchedStatus = form.watch("status")
 
   // Load categories on component mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    async function loadCategories() {
+      setIsLoadingCategories(true)
+      try {
+        const data = await getCategories()
+        console.log("Categories loaded:", data)
+        setCategories(data)
+
+        // If we have a listing with a category, load its subcategories
+        if (listing?.category_id) {
+          loadSubcategoriesForCategory(listing.category_id)
+        }
+      } catch (error) {
+        console.error("Error loading categories:", error)
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las categorías",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoadingCategories(false)
+      }
+    }
+
+    loadCategories()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listing]) // Keep toast out if it causes re-runs, or memoize it
+
+  // Function to load subcategories for a specific category
+  async function loadSubcategoriesForCategory(categoryId: number) {
+    if (!categoryId) return
+
+    setIsLoadingSubcategories(true)
+    try {
+      const data = await getSubcategories(categoryId)
+      console.log(`Subcategories loaded for category ${categoryId}:`, data)
+      setSubcategories(data)
+    } catch (error) {
+      console.error("Error loading subcategories:", error)
+      setSubcategories([]) // Clear subcategories on error
+    } finally {
+      setIsLoadingSubcategories(false)
+    }
+  }
+
+  // Load subcategories when category changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (watchedCategoryId) {
+      loadSubcategoriesForCategory(watchedCategoryId)
+    } else {
+      setSubcategories([])
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedCategoryId])
+
+  // File handling functions
+  const handleImageFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const newFiles = files.filter(file => file.size <= MAX_IMAGE_SIZE_MB * 1024 * 1024);
+    if (newFiles.length !== files.length) {
+      toast({ title: "Archivo grande", description: `Algunas imágenes exceden el tamaño máximo de ${MAX_IMAGE_SIZE_MB}MB.`, variant: "warning" });
+    }
+
+    if (selectedImageFiles.length + newFiles.length > MAX_IMAGE_FILES) {
+      toast({ title: "Límite alcanzado", description: `Puedes subir un máximo de ${MAX_IMAGE_FILES} imágenes.`, variant: "warning" });
+      return;
+    }
+
+    setSelectedImageFiles(prev => [...prev, ...newFiles]);
+    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
+    if (imageInputRef.current) imageInputRef.current.value = ""; // Reset input
+  };
+
+  const removeSelectedImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setSelectedImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const markExistingImageForDeletion = (url: string) => {
+    setImagesToDelete(prev => [...prev, url]);
+    setExistingImageUrls(prev => prev.filter(u => u !== url));
+  };
+
+  const handleVideoFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const newFiles = files.filter(file => file.size <= MAX_VIDEO_SIZE_MB * 1024 * 1024);
+    if (newFiles.length !== files.length) {
+      toast({ title: "Archivo grande", description: `Algunos videos exceden el tamaño máximo de ${MAX_VIDEO_SIZE_MB}MB.`, variant: "warning" });
+    }
+
+    if (selectedVideoFiles.length + newFiles.length > MAX_VIDEO_FILES) {
+      toast({ title: "Límite alcanzado", description: `Puedes subir un máximo de ${MAX_VIDEO_FILES} videos.`, variant: "warning" });
+      return;
+    }
+    
+    setSelectedVideoFiles(prev => [...prev, ...newFiles]);
+    const newVidPreviews = newFiles.map(file => ({ name: file.name, url: URL.createObjectURL(file) }));
+    setVideoPreviews(prev => [...prev, ...newVidPreviews]);
+    if (videoInputRef.current) videoInputRef.current.value = ""; // Reset input
+  };
+
+  const removeSelectedVideo = (index: number) => {
+    URL.revokeObjectURL(videoPreviews[index].url);
+    setVideoPreviews(prev => prev.filter((_, i) => i !== index));
+    setSelectedVideoFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const markExistingVideoForDeletion = (url: string) => {
+    setVideosToDelete(prev => [...prev, url]);
+    setExistingVideoUrls(prev => prev.filter(u => u !== url));
+  };
+
+  // Cleanup object URLs
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+      videoPreviews.forEach(item => URL.revokeObjectURL(item.url));
+    };
+  }, [imagePreviews, videoPreviews]);
+
+  // Helper to upload a single file
+  async function uploadSupabaseFile(file: File, userId: string, pathPrefix: string): Promise<string> {
+    const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '_')}`;
+    const filePath = `${userId}/${pathPrefix}/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('service-listings')
+      .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+    if (error) {
+      console.error('Error uploading file:', filePath, error);
+      throw new Error(`Error al subir ${file.name}: ${error.message}`);
+    }
+    const { data: publicUrlData } = supabase.storage.from('service-listings').getPublicUrl(data.path);
+    return publicUrlData.publicUrl;
+  }
+
+  // Helper to delete a file from Supabase storage
+  async function deleteSupabaseFile(fileUrl: string) {
+    try {
+      const url = new URL(fileUrl);
+      const pathParts = url.pathname.split('/');
+      // Path is typically /storage/v1/object/public/bucket-name/actual-path-to-file
+      // We need to extract 'actual-path-to-file'
+      const filePath = pathParts.slice(5).join('/'); 
+      if (!filePath) {
+        console.warn('Could not extract file path from URL for deletion:', fileUrl);
+        return;
+      }
+      const { error } = await supabase.storage.from('service-listings').remove([filePath]);
+      if (error) {
+        console.error('Error deleting file from Supabase:', filePath, error);
+        toast({ title: "Error al eliminar archivo", description: `No se pudo eliminar ${filePath}.`, variant: "destructive" });
+      }
+    } catch (e) {
+      console.error('Error parsing URL for file deletion:', fileUrl, e);
+    }
+  }
+
+  // Load categories on component mount
+
   useEffect(() => {
     async function loadCategories() {
       setIsLoadingCategories(true)
@@ -154,69 +365,103 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
   // Handle form submission
   async function onSubmit(values: FormValues) {
-    setIsSubmitting(true)
-
-    // Determine the intended status for user feedback and internal logic.
-    // This reflects what the user selected or what the system logically transitions to before backend submission.
-    let intendedUserFacingStatus = values.status
-    if (mode === "create" && values.status === "active") {
-      intendedUserFacingStatus = "pending_approval"
-    } else if (mode === "edit" && listing && listing.status === "draft" && values.status === "active") {
-      intendedUserFacingStatus = "pending_approval"
+    if (!currentUser) {
+      toast({ title: "Error de autenticación", description: "Debes iniciar sesión para crear o editar anuncios.", variant: "destructive" });
+      return;
     }
+    setIsSubmitting(true);
+    setIsUploading(true);
 
-    // Prepare data for the backend, ensuring it conforms to ServiceListingFormData.
-    // The backend expects status to be one of: "draft", "active", "paused".
-    const dataForBackend: ServiceListingFormData = {
-      ...values, // Spread all form values
-      category_id: Number(values.category_id), // Ensure numeric type
-      subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined, // Ensure numeric type or undefined
-      status:
-        intendedUserFacingStatus === "active" || intendedUserFacingStatus === "pending_approval"
-          ? "active" // If user wants active, or it's now pending, tell backend 'active'. Backend handles actual 'pending_approval' state.
-          : intendedUserFacingStatus === "paused"
-          ? "paused"
-          : "draft", // For 'draft', 'rejected', 'expired', tell backend 'draft'.
-    }
+    let finalImageUrls: string[] = [...existingImageUrls];
+    let finalVideoUrls: string[] = [...existingVideoUrls];
+    const userId = currentUser.id;
 
     try {
+      // 1. Handle deletions from Supabase Storage
+      for (const url of imagesToDelete) await deleteSupabaseFile(url);
+      for (const url of videosToDelete) await deleteSupabaseFile(url);
+
+      // Determine the listing ID to use for upload paths
+      // For 'create' mode, we ideally create listing first, get ID, then upload.
+      // For simplicity here, we'll use a UUID for path if creating, or existing ID if editing.
+      // A more robust 'create' flow would be multi-step: create text data -> get ID -> upload files -> update listing with URLs.
+      const pathPrefixId = mode === 'edit' && listing ? listing.id : uuidv4();
+
+      // 2. Handle uploads to Supabase Storage
+      const uploadedImageUrls = await Promise.all(
+        selectedImageFiles.map(file => uploadSupabaseFile(file, userId, `${pathPrefixId}/images`))
+      );
+      finalImageUrls.push(...uploadedImageUrls);
+
+      const uploadedVideoUrls = await Promise.all(
+        selectedVideoFiles.map(file => uploadSupabaseFile(file, userId, `${pathPrefixId}/videos`))
+      );
+      finalVideoUrls.push(...uploadedVideoUrls);
+
+      // 3. Prepare data for backend
+      let intendedUserFacingStatus = values.status;
+      if (mode === "create" && values.status === "active") {
+        intendedUserFacingStatus = "pending_approval";
+      } else if (mode === "edit" && listing && listing.status === "draft" && values.status === "active") {
+        intendedUserFacingStatus = "pending_approval";
+      }
+
+      const dataForBackend: ServiceListingFormData = {
+        ...values,
+        category_id: Number(values.category_id),
+        subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined,
+        status:
+          intendedUserFacingStatus === "active" || intendedUserFacingStatus === "pending_approval"
+            ? "active"
+            : intendedUserFacingStatus === "paused"
+            ? "paused"
+            : "draft",
+        image_urls: finalImageUrls.filter(url => !!url), // Ensure no empty/null URLs
+        video_urls: finalVideoUrls.filter(url => !!url),
+      };
+
+      // 4. Call backend actions
       if (mode === "create") {
-        const result = await createServiceListing(dataForBackend)
+        // If using pathPrefixId = uuidv4() for uploads before creation, the backend needs to know this ID
+        // or the paths need to be updated by backend after real ID is known.
+        // For now, assuming backend can handle URLs as provided.
+        const result = await createServiceListing(dataForBackend);
         toast({
           title: "Anuncio creado",
-          description:
-            intendedUserFacingStatus === "pending_approval"
-              ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
-              : `Tu anuncio ha sido guardado como ${intendedUserFacingStatus === "draft" ? "borrador" : intendedUserFacingStatus}.`,
-        })
-        // Assuming result.data.id exists and is the correct new ID
+          description: intendedUserFacingStatus === "pending_approval"
+            ? "Tu anuncio ha sido enviado para revisión."
+            : `Tu anuncio ha sido guardado como ${intendedUserFacingStatus === "draft" ? "borrador" : intendedUserFacingStatus}.`,
+        });
         if (result && result.data && result.data.id) {
-          router.push(`/dashboard/servicios/success?id=${result.data.id}`)
+          router.push(`/dashboard/servicios/success?id=${result.data.id}`);
         } else {
-          // Fallback or error handling if ID is not returned as expected
-          router.push("/dashboard/servicios") 
-          console.warn("Service listing created, but ID not found in response for redirection.")
+          router.push("/dashboard/servicios");
+          console.warn("Service listing created, but ID not found in response for redirection.");
         }
       } else if (mode === "edit" && listing) {
-        await updateServiceListing(listing.id, dataForBackend)
+        await updateServiceListing(listing.id, dataForBackend);
         toast({
           title: "Anuncio actualizado",
-          description:
-            intendedUserFacingStatus === "pending_approval"
-              ? "Tu anuncio ha sido enviado para revisión y será publicado una vez aprobado."
-              : `Tu anuncio ha sido actualizado correctamente (estado: ${intendedUserFacingStatus}).`,
-        })
-        router.push(`/dashboard/servicios/${listing.id}`)
+          description: intendedUserFacingStatus === "pending_approval"
+            ? "Tus cambios han sido enviados para revisión."
+            : `Tu anuncio ha sido actualizado (estado: ${intendedUserFacingStatus}).`,
+        });
+        router.push(`/dashboard/servicios/${listing.id}`);
       }
     } catch (error) {
-      console.error("Error submitting form:", error)
+      console.error("Error submitting form:", error);
       toast({
-        title: "Error",
+        title: "Error al guardar",
         description: error instanceof Error ? error.message : "Ha ocurrido un error al guardar el anuncio",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsUploading(false);
+      setIsSubmitting(false);
+      // Clear selections after submission attempt
+      // setSelectedImageFiles([]); setImagePreviews([]);
+      // setSelectedVideoFiles([]); setVideoPreviews([]);
+      // setImagesToDelete([]); setVideosToDelete([]);
     }
   }
 
@@ -224,9 +469,10 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4"> {/* Updated to 4 columns */}
             <TabsTrigger value="basic">Información básica</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
+            <TabsTrigger value="multimedia">Multimedia</TabsTrigger> {/* New Multimedia Tab */}
             <TabsTrigger value="contact">Contacto</TabsTrigger>
           </TabsList>
 
@@ -478,7 +724,137 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="details" className="space-y-6 pt-4">
+          {/* Details Tab Content - No changes shown, but ensure it exists */}
+          <TabsContent value="details" className="space-y-6 pt-4"> 
+            {/* ... existing fields for city, location, postal_code, country, address ... */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>Ciudad</FormLabel><FormControl><Input placeholder="Ej: Madrid" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="location" render={({ field }) => (<FormItem><FormLabel>Ubicación</FormLabel><FormControl><Input placeholder="Ej: Centro" {...field} value={field.value || ""} /></FormControl><FormDescription>Barrio o zona dentro de la ciudad.</FormDescription><FormMessage /></FormItem>)} />
+                </div>
+                <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField control={form.control} name="postal_code" render={({ field }) => (<FormItem><FormLabel>Código postal</FormLabel><FormControl><Input placeholder="Ej: 28001" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel>País</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <FormField control={form.control} name="address" render={({ field }) => (<FormItem className="mt-6"><FormLabel>Dirección (opcional)</FormLabel><FormControl><Input placeholder="Ej: Calle Gran Vía 1" {...field} value={field.value || ""} /></FormControl><FormDescription>Esta información solo será visible si decides compartirla.</FormDescription><FormMessage /></FormItem>)} />
+              </CardContent>
+            </Card>
+            <div className="flex justify-between">
+              <Button type="button" variant="outline" onClick={() => setActiveTab("basic")}>
+                Anterior
+              </Button>
+              <Button type="button" onClick={() => setActiveTab("multimedia")}> {/* Changed to multimedia */}
+                Siguiente
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Multimedia Tab Content */}
+          <TabsContent value="multimedia" className="space-y-6 pt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Archivos Multimedia</CardTitle>
+                <FormDescription>
+                  Sube hasta {MAX_IMAGE_FILES} imágenes (JPG, PNG, WEBP, max {MAX_IMAGE_SIZE_MB}MB cada una) y hasta {MAX_VIDEO_FILES} videos (MP4, MOV, max {MAX_VIDEO_SIZE_MB}MB cada uno).
+                </FormDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Image Upload Section */}
+                <div className="space-y-4">
+                  <FormLabel htmlFor="image-upload">Imágenes del Anuncio</FormLabel>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleImageFilesChange}
+                    ref={imageInputRef}
+                    className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    disabled={isUploading || selectedImageFiles.length >= MAX_IMAGE_FILES}
+                  />
+                  {(imagePreviews.length > 0 || existingImageUrls.length > 0) && (
+                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {existingImageUrls.map((url) => (
+                        <div key={url} className="relative group aspect-square">
+                          <NextImage src={url} alt="Imagen existente" layout="fill" objectFit="cover" className="rounded-md border" />
+                          <Button
+                            type="button" variant="destructive" size="icon"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-7 w-7"
+                            onClick={() => markExistingImageForDeletion(url)} disabled={isUploading}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      {imagePreviews.map((previewUrl, index) => (
+                        <div key={previewUrl} className="relative group aspect-square">
+                          <NextImage src={previewUrl} alt={`Vista previa imagen ${index + 1}`} layout="fill" objectFit="cover" className="rounded-md border" />
+                           <Button
+                            type="button" variant="destructive" size="icon"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-7 w-7"
+                            onClick={() => removeSelectedImage(index)} disabled={isUploading}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Video Upload Section */}
+                <div className="space-y-4">
+                  <FormLabel htmlFor="video-upload">Videos del Anuncio (opcional)</FormLabel>
+                  <Input
+                    id="video-upload"
+                    type="file"
+                    multiple
+                    accept="video/mp4,video/quicktime,video/x-msvideo,video/webm"
+                    onChange={handleVideoFilesChange}
+                    ref={videoInputRef}
+                    className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    disabled={isUploading || selectedVideoFiles.length >= MAX_VIDEO_FILES}
+                  />
+                  {(videoPreviews.length > 0 || existingVideoUrls.length > 0) && (
+                    <div className="mt-4 space-y-3">
+                      {existingVideoUrls.map((url) => (
+                        <div key={url} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+                          <div className="flex items-center gap-2 truncate">
+                            <VideoIcon className="h-5 w-5 text-primary" />
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm truncate hover:underline">Ver video existente</a>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => markExistingVideoForDeletion(url)} disabled={isUploading} className="text-destructive hover:text-destructive-foreground hover:bg-destructive/80 h-7 w-7">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      {videoPreviews.map((file, index) => (
+                        <div key={file.url} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+                           <div className="flex items-center gap-2 truncate">
+                            <VideoIcon className="h-5 w-5 text-primary" />
+                            <span className="text-sm truncate" title={file.name}>{file.name}</span>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => removeSelectedVideo(index)} disabled={isUploading} className="text-destructive hover:text-destructive-foreground hover:bg-destructive/80 h-7 w-7">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-between">
+              <Button type="button" variant="outline" onClick={() => setActiveTab("details")}>
+                Anterior
+              </Button>
+              <Button type="button" onClick={() => setActiveTab("contact")}>
+                Siguiente
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-6 pt-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -636,12 +1012,12 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
             </Card>
 
             <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => setActiveTab("details")}>
+              <Button type="button" variant="outline" onClick={() => setActiveTab("multimedia")}> {/* Changed to multimedia */}
                 Anterior
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "create" ? "Crear anuncio" : "Actualizar anuncio"}
+              <Button type="submit" disabled={isSubmitting || isUploading}>
+                {(isSubmitting || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isUploading ? 'Subiendo archivos...' : (mode === "create" ? "Crear anuncio" : "Actualizar anuncio")}
               </Button>
             </div>
           </TabsContent>

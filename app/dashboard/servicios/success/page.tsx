@@ -10,7 +10,7 @@ export default async function SuccessPage({
 }: {
   searchParams: { id?: string }
 }) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient() // Added await
   const id = searchParams.id
 
   if (!id) {
