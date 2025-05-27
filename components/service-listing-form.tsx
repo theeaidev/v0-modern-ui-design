@@ -99,11 +99,21 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log("Current user:", user);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        toast({
+          title: "Error de autenticación",
+          description: "No se pudo obtener la información del usuario.",
+          variant: "destructive",
+        });
+      }
     };
     fetchUser();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     if (listing) {
@@ -270,9 +280,9 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   }, [imagePreviews, videoPreviews]);
 
   // Helper to upload a single file
-  async function uploadSupabaseFile(file: File, userId: string, pathPrefix: string): Promise<string> {
+  async function uploadSupabaseFile(file: File, userId: string, mediaType: 'images' | 'videos'): Promise<string> {
     const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '_')}`;
-    const filePath = `${userId}/${pathPrefix}/${fileName}`;
+    const filePath = `${userId}/${mediaType}/${fileName}`;
 
     const { data, error } = await supabase.storage
       .from('service-listings')
@@ -298,6 +308,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
         console.warn('Could not extract file path from URL for deletion:', fileUrl);
         return;
       }
+      console.log('Deleting file path:', filePath);
       const { error } = await supabase.storage.from('service-listings').remove([filePath]);
       if (error) {
         console.error('Error deleting file from Supabase:', filePath, error);
@@ -308,93 +319,63 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     }
   }
 
-  // Load categories on component mount
-
-  useEffect(() => {
-    async function loadCategories() {
-      setIsLoadingCategories(true)
-      try {
-        const data = await getCategories()
-        console.log("Categories loaded:", data)
-        setCategories(data)
-
-        // If we have a listing with a category, load its subcategories
-        if (listing?.category_id) {
-          loadSubcategoriesForCategory(listing.category_id)
-        }
-      } catch (error) {
-        console.error("Error loading categories:", error)
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar las categorías",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoadingCategories(false)
-      }
-    }
-
-    loadCategories()
-  }, [toast, listing])
-
-  // Function to load subcategories for a specific category
-  async function loadSubcategoriesForCategory(categoryId: number) {
-    if (!categoryId) return
-
-    setIsLoadingSubcategories(true)
-    try {
-      const data = await getSubcategories(categoryId)
-      console.log(`Subcategories loaded for category ${categoryId}:`, data)
-      setSubcategories(data)
-    } catch (error) {
-      console.error("Error loading subcategories:", error)
-      setSubcategories([])
-    } finally {
-      setIsLoadingSubcategories(false)
-    }
-  }
-
-  // Load subcategories when category changes
-  useEffect(() => {
-    if (watchedCategoryId) {
-      loadSubcategoriesForCategory(watchedCategoryId)
-    } else {
-      setSubcategories([])
-    }
-  }, [watchedCategoryId])
-
   // Handle form submission
   async function onSubmit(values: FormValues) {
+    // Double-check user authentication
     if (!currentUser) {
-      toast({ title: "Error de autenticación", description: "Debes iniciar sesión para crear o editar anuncios.", variant: "destructive" });
+      // Try to get the user again in case the session was updated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Error de autenticación", description: "Debes iniciar sesión para crear o editar anuncios.", variant: "destructive" });
+        
+        // Try to refresh the session
+        const { error } = await supabase.auth.refreshSession();
+        if (error) {
+          console.error("Error refreshing session:", error);
+          return;
+        }
+        
+        // Check if we got a user after refresh
+        const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+        if (!refreshedUser) {
+          router.push('/auth/login?redirect=/dashboard/servicios/crear');
+          return;
+        }
+        
+        setCurrentUser(refreshedUser);
+      } else {
+        setCurrentUser(user);
+      }
+    }
+    
+    // Final check - if still no user, abort
+    if (!currentUser) {
+      toast({ title: "Error de autenticación", description: "No se pudo verificar tu sesión. Por favor, inicia sesión nuevamente.", variant: "destructive" });
       return;
     }
+    
     setIsSubmitting(true);
     setIsUploading(true);
 
     let finalImageUrls: string[] = [...existingImageUrls];
     let finalVideoUrls: string[] = [...existingVideoUrls];
     const userId = currentUser.id;
+    
+    console.log("Using user ID for uploads and form submission:", userId);
 
     try {
       // 1. Handle deletions from Supabase Storage
       for (const url of imagesToDelete) await deleteSupabaseFile(url);
       for (const url of videosToDelete) await deleteSupabaseFile(url);
 
-      // Determine the listing ID to use for upload paths
-      // For 'create' mode, we ideally create listing first, get ID, then upload.
-      // For simplicity here, we'll use a UUID for path if creating, or existing ID if editing.
-      // A more robust 'create' flow would be multi-step: create text data -> get ID -> upload files -> update listing with URLs.
-      const pathPrefixId = mode === 'edit' && listing ? listing.id : uuidv4();
-
       // 2. Handle uploads to Supabase Storage
       const uploadedImageUrls = await Promise.all(
-        selectedImageFiles.map(file => uploadSupabaseFile(file, userId, `${pathPrefixId}/images`))
+        selectedImageFiles.map(file => uploadSupabaseFile(file, userId, 'images'))
       );
       finalImageUrls.push(...uploadedImageUrls);
 
       const uploadedVideoUrls = await Promise.all(
-        selectedVideoFiles.map(file => uploadSupabaseFile(file, userId, `${pathPrefixId}/videos`))
+        selectedVideoFiles.map(file => uploadSupabaseFile(file, userId, 'videos'))
       );
       finalVideoUrls.push(...uploadedVideoUrls);
 
@@ -406,6 +387,16 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
         intendedUserFacingStatus = "pending_approval";
       }
 
+      // Make sure we're logged in - this should ensure the server-side function can access the user session
+      await supabase.auth.refreshSession();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("No hay sesión activa. Por favor, inicia sesión nuevamente.");
+      }
+      
+      console.log("Active session confirmed before form submission");
+      
       const dataForBackend: ServiceListingFormData = {
         ...values,
         category_id: Number(values.category_id),
@@ -803,7 +794,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
                 {/* Video Upload Section */}
                 <div className="space-y-4">
-                  <FormLabel htmlFor="video-upload">VVVideos del Anuncio (opcional)</FormLabel>
+                  <FormLabel htmlFor="video-upload">Videos del Anuncio (opcional)</FormLabel>
                   <Input
                     id="video-upload"
                     type="file"
@@ -846,97 +837,6 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={() => setActiveTab("details")}>
-                Anterior
-              </Button>
-              <Button type="button" onClick={() => setActiveTab("contact")}>
-                Siguiente
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="contact" className="space-y-6 pt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ciudad</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ej: Madrid" {...field} value={field.value || ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ubicación</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ej: Centro" {...field} value={field.value || ""} />
-                        </FormControl>
-                        <FormDescription>Barrio o zona dentro de la ciudad.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="postal_code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Código postal</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ej: 28001" {...field} value={field.value || ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>País</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className="mt-6">
-                      <FormLabel>Dirección (opcional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ej: Calle Gran Vía 1" {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormDescription>Esta información solo será visible si decides compartirla.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => setActiveTab("basic")}>
                 Anterior
               </Button>
               <Button type="button" onClick={() => setActiveTab("contact")}>

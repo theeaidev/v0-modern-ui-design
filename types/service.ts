@@ -126,4 +126,6 @@ export interface ServiceListingFormData {
   contact_whatsapp?: string
   contact_website?: string
   status: "draft" | "active" | "paused"
+  image_urls?: string[]
+  video_urls?: string[]
 }
