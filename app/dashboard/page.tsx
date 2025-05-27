@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { PencilIcon } from "lucide-react"
 import { Trash2 } from "lucide-react"; // Assuming Eye icon is also imported from lucide-react, you might group them.
 import { toast } from "sonner";
 import { toggleFavorite } from "@/app/actions/service-listings";
@@ -12,6 +13,9 @@ import { useAuth } from "@/contexts/auth-context"
 import { MainNav } from "@/components/main-nav"
 import { SiteFooter } from "@/components/site-footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +46,9 @@ export default function DashboardPage() {
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
   const [fetchAttempted, setFetchAttempted] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string>("") 
+  const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const [favoritedAds, setFavoritedAds] = useState<{ id: string; title: string | null }[]>([])
   const [favoritedAdsLoading, setFavoritedAdsLoading] = useState(true)
@@ -147,6 +154,48 @@ export default function DashboardPage() {
     }
   }, [user, fetchAttempted])
 
+  const handleUpdateAvatar = async () => {
+    if (!avatarUrl.trim()) {
+      toast.error("Por favor, introduce una URL válida")
+      return
+    }
+
+    if (!user) {
+      toast.error("Debes iniciar sesión para realizar esta acción")
+      return
+    }
+
+    setIsUpdatingAvatar(true)
+    try {
+      const supabase = getSupabaseBrowserClient()
+      
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", user.id)
+
+      if (error) {
+        console.error("Error updating avatar URL:", error)
+        toast.error("No se pudo actualizar la imagen de perfil. Por favor, inténtalo de nuevo.")
+        return
+      }
+
+      // Update local state
+      setProfileData((prev: any) => ({
+        ...prev,
+        avatar_url: avatarUrl
+      }))
+
+      toast.success("Imagen de perfil actualizada correctamente")
+      setIsDialogOpen(false)
+    } catch (err) {
+      console.error("Unexpected error updating avatar URL:", err)
+      toast.error("Ocurrió un error al actualizar la imagen de perfil")
+    } finally {
+      setIsUpdatingAvatar(false)
+    }
+  }
+
   // Show loading state
   if (isLoading || (profileLoading && !fetchAttempted)) {
     console.log("[DASHBOARD] Showing loading state")
@@ -232,13 +281,64 @@ export default function DashboardPage() {
             <div className="md:col-span-1">
               <Card>
                 <CardHeader className="flex flex-col items-center">
-                  <Avatar className="h-24 w-24 mb-4">
-                    <AvatarImage
-                      src={profileData?.avatar_url || "/placeholder.svg"}
-                      alt={profileData?.full_name || user?.email || "User"}
-                    />
-                    <AvatarFallback className="text-2xl">{getUserInitials()}</AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-24 w-24 mb-4">
+                      <AvatarImage
+                        src={profileData?.avatar_url || "/placeholder.svg"}
+                        alt={profileData?.full_name || user?.email || "User"}
+                      />
+                      <AvatarFallback className="text-2xl">{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background border shadow hover:bg-muted"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                          <span className="sr-only">Cambiar imagen de perfil</span>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Cambiar imagen de perfil</DialogTitle>
+                          <DialogDescription>
+                            Introduce la URL de una imagen para usarla como foto de perfil.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="avatar-url" className="text-right">
+                              URL de imagen
+                            </Label>
+                            <Input 
+                              id="avatar-url" 
+                              value={avatarUrl} 
+                              onChange={(e) => setAvatarUrl(e.target.value)}
+                              placeholder="https://ejemplo.com/imagen.jpg"
+                              className="col-span-3"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsDialogOpen(false)}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button 
+                            onClick={handleUpdateAvatar} 
+                            disabled={isUpdatingAvatar}
+                          >
+                            {isUpdatingAvatar ? "Guardando..." : "Guardar cambios"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <CardTitle>{profileData?.full_name || user?.email?.split("@")[0] || "Usuario"}</CardTitle>
                   <CardDescription className="flex items-center">
                     <Mail className="h-4 w-4 mr-1" />
