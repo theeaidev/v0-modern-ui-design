@@ -133,18 +133,21 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                   <Link
                     href="/dashboard"
                     className="text-lg font-medium text-gray-800 hover:text-emerald-400 transition-colors duration-200"
+                    onClick={() => setIsSheetOpen(false)}
                   >
                     Mi perfil
                   </Link>
                   <Link
                     href="/dashboard/servicios"
                     className="text-lg font-medium text-gray-800 hover:text-emerald-400 transition-colors duration-200"
-                  >
+                    onClick={() => setIsSheetOpen(false)}
+                    >
                     Mis anuncios
                   </Link>
                   <Link
                     href="/dashboard"
                     className="text-lg font-medium text-gray-800 hover:text-emerald-400 transition-colors duration-200"
+                    onClick={() => setIsSheetOpen(false)}
                   >
                     Favoritos
                   </Link>
