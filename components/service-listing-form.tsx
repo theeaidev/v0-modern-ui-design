@@ -115,10 +115,80 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     fetchUser();
   }, [toast]);
 
+  // Function to fetch media files from Supabase storage
+  const fetchMediaFromStorage = async (userId: string) => {
+    if (!userId) return;
+    
+    try {
+      console.log("Fetching media from storage for user ID:", userId);
+      
+      // Fetch images
+      const { data: imageFiles, error: imageError } = await supabase.storage
+        .from('service-listings')
+        .list(`${userId}/images`, {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' }
+        });
+      
+      if (imageError) {
+        console.error('Error fetching images from storage:', imageError);
+      } else if (imageFiles && imageFiles.length > 0) {
+        console.log('Found image files in storage:', imageFiles.length);
+        const imageUrls = imageFiles.map(file => {
+          const { data } = supabase.storage
+            .from('service-listings')
+            .getPublicUrl(`${userId}/images/${file.name}`);
+          return data.publicUrl;
+        });
+        setExistingImageUrls(imageUrls);
+      }
+      
+      // Fetch videos
+      const { data: videoFiles, error: videoError } = await supabase.storage
+        .from('service-listings')
+        .list(`${userId}/videos`, {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' }
+        });
+      
+      if (videoError) {
+        console.error('Error fetching videos from storage:', videoError);
+      } else if (videoFiles && videoFiles.length > 0) {
+        console.log('Found video files in storage:', videoFiles.length);
+        const videoUrls = videoFiles.map(file => {
+          const { data } = supabase.storage
+            .from('service-listings')
+            .getPublicUrl(`${userId}/videos/${file.name}`);
+          return data.publicUrl;
+        });
+        setExistingVideoUrls(videoUrls);
+      }
+    } catch (error) {
+      console.error('Error in fetchMediaFromStorage:', error);
+    }
+  };
+
   useEffect(() => {
     if (listing) {
-      setExistingImageUrls(listing.image_urls || []);
-      setExistingVideoUrls(listing.video_urls || []);
+      console.log("Service listing data for edit mode:", listing);
+      
+      // Check if listing already has media URLs
+      const imageUrls = Array.isArray(listing.image_urls) ? listing.image_urls.filter((url: string) => !!url) : [];
+      const videoUrls = Array.isArray(listing.video_urls) ? listing.video_urls.filter((url: string) => !!url) : [];
+      
+      console.log("Media URLs from listing object:", { imageUrls, videoUrls });
+      
+      // Set any existing URLs from the listing object
+      if (imageUrls.length > 0) setExistingImageUrls(imageUrls);
+      if (videoUrls.length > 0) setExistingVideoUrls(videoUrls);
+      
+      // If no media URLs are found in the listing object, try to fetch them from storage
+      if (imageUrls.length === 0 || videoUrls.length === 0) {
+        console.log("No media URLs found in listing object, fetching from storage...");
+        fetchMediaFromStorage(listing.user_id);
+      }
     }
   }, [listing]);
 
@@ -215,11 +285,11 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
     const newFiles = files.filter(file => file.size <= MAX_IMAGE_SIZE_MB * 1024 * 1024);
     if (newFiles.length !== files.length) {
-      toast({ title: "Archivo grande", description: `Algunas imágenes exceden el tamaño máximo de ${MAX_IMAGE_SIZE_MB}MB.`, variant: "warning" });
+      toast({ title: "Archivo grande", description: `Algunas imágenes exceden el tamaño máximo de ${MAX_IMAGE_SIZE_MB}MB.`, variant: "destructive" });
     }
 
     if (selectedImageFiles.length + newFiles.length > MAX_IMAGE_FILES) {
-      toast({ title: "Límite alcanzado", description: `Puedes subir un máximo de ${MAX_IMAGE_FILES} imágenes.`, variant: "warning" });
+      toast({ title: "Límite alcanzado", description: `Puedes subir un máximo de ${MAX_IMAGE_FILES} imágenes.`, variant: "destructive" });
       return;
     }
 
@@ -246,11 +316,11 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
     const newFiles = files.filter(file => file.size <= MAX_VIDEO_SIZE_MB * 1024 * 1024);
     if (newFiles.length !== files.length) {
-      toast({ title: "Archivo grande", description: `Algunos videos exceden el tamaño máximo de ${MAX_VIDEO_SIZE_MB}MB.`, variant: "warning" });
+      toast({ title: "Archivo grande", description: `Algunos videos exceden el tamaño máximo de ${MAX_VIDEO_SIZE_MB}MB.`, variant: "destructive" });
     }
 
     if (selectedVideoFiles.length + newFiles.length > MAX_VIDEO_FILES) {
-      toast({ title: "Límite alcanzado", description: `Puedes subir un máximo de ${MAX_VIDEO_FILES} videos.`, variant: "warning" });
+      toast({ title: "Límite alcanzado", description: `Puedes subir un máximo de ${MAX_VIDEO_FILES} videos.`, variant: "destructive" });
       return;
     }
     
@@ -296,14 +366,35 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     return publicUrlData.publicUrl;
   }
 
+  // Helper to extract the storage path from a Supabase URL
+  function extractStoragePath(fileUrl: string): string | null {
+    try {
+      // Handle both absolute URLs and relative paths
+      if (fileUrl.startsWith('http')) {
+        const url = new URL(fileUrl);
+        const pathParts = url.pathname.split('/');
+        // Path is typically /storage/v1/object/public/bucket-name/actual-path-to-file
+        // We need to extract 'actual-path-to-file'
+        return pathParts.slice(5).join('/');
+      } else if (fileUrl.startsWith('/')) {
+        // Handle relative paths that start with /
+        const pathParts = fileUrl.split('/');
+        // Remove any empty parts and the first slash
+        return pathParts.filter(part => part).join('/');
+      } else {
+        // Already a storage path
+        return fileUrl;
+      }
+    } catch (e) {
+      console.error('Error extracting storage path from URL:', fileUrl, e);
+      return null;
+    }
+  }
+
   // Helper to delete a file from Supabase storage
   async function deleteSupabaseFile(fileUrl: string) {
     try {
-      const url = new URL(fileUrl);
-      const pathParts = url.pathname.split('/');
-      // Path is typically /storage/v1/object/public/bucket-name/actual-path-to-file
-      // We need to extract 'actual-path-to-file'
-      const filePath = pathParts.slice(5).join('/'); 
+      const filePath = extractStoragePath(fileUrl);
       if (!filePath) {
         console.warn('Could not extract file path from URL for deletion:', fileUrl);
         return;
@@ -364,6 +455,16 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     console.log("Using user ID for uploads and form submission:", userId);
 
     try {
+      // Log the current state before handling deletions
+      console.log("Current media state before submission:", {
+        existingImageUrls,
+        existingVideoUrls,
+        imagesToDelete,
+        videosToDelete,
+        selectedImageFiles: selectedImageFiles.map(f => f.name),
+        selectedVideoFiles: selectedVideoFiles.map(f => f.name)
+      });
+      
       // 1. Handle deletions from Supabase Storage
       for (const url of imagesToDelete) await deleteSupabaseFile(url);
       for (const url of videosToDelete) await deleteSupabaseFile(url);
@@ -768,7 +869,17 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                     <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                       {existingImageUrls.map((url) => (
                         <div key={url} className="relative group aspect-square">
-                          <NextImage src={url} alt="Imagen existente" layout="fill" objectFit="cover" className="rounded-md border" />
+                          <NextImage 
+                            src={url} 
+                            alt="Imagen existente" 
+                            layout="fill" 
+                            objectFit="cover" 
+                            className="rounded-md border"
+                            onError={(e) => {
+                              console.error(`Error loading image: ${url}`);
+                              e.currentTarget.src = "https://placehold.co/300x300?text=Error+de+imagen";
+                            }}
+                          />
                           <Button
                             type="button" variant="destructive" size="icon"
                             className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-7 w-7"
@@ -811,9 +922,33 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                         <div key={url} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
                           <div className="flex items-center gap-2 truncate">
                             <VideoIcon className="h-5 w-5 text-primary" />
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm truncate hover:underline">Ver video existente</a>
+                            <a 
+                              href={url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-sm truncate hover:underline"
+                              onClick={(e) => {
+                                if (!url.startsWith('http')) {
+                                  e.preventDefault();
+                                  toast({
+                                    title: "URL inválida",
+                                    description: "El enlace del video no parece ser válido.",
+                                    variant: "destructive"
+                                  });
+                                }
+                              }}
+                            >
+                              Ver video existente
+                            </a>
                           </div>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => markExistingVideoForDeletion(url)} disabled={isUploading} className="text-destructive hover:text-destructive-foreground hover:bg-destructive/80 h-7 w-7">
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => markExistingVideoForDeletion(url)} 
+                            disabled={isUploading} 
+                            className="text-destructive hover:text-destructive-foreground hover:bg-destructive/80 h-7 w-7"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

@@ -48,6 +48,8 @@ export interface ServiceListing {
   created_at: string
   updated_at: string
   rejection_reason: string | null
+  image_urls?: string[] // URLs to images stored in Supabase storage
+  video_urls?: string[] // URLs to videos stored in Supabase storage
 }
 
 export interface ServiceImage {

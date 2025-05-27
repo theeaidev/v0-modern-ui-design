@@ -101,14 +101,74 @@ export async function getServiceListings({
       throw new Error(error.message)
     }
 
-    // Minimal join test
-    const minimalTest = await supabase
-      .from("service_listings")
-      .select("*, category:categories(*), subcategory:subcategories(*)")
-    console.log("Minimal join test result:", JSON.stringify(minimalTest, null, 2))
+    // Process the results to include media URLs from storage
+    const processedData = await Promise.all(data.map(async (listing) => {
+      // Initialize empty arrays for media URLs
+      let image_urls: string[] = [];
+      let video_urls: string[] = [];
+      
+      try {
+        // First check if the listing already has image_urls and video_urls arrays
+        if (listing.image_urls && Array.isArray(listing.image_urls)) {
+          image_urls = listing.image_urls.filter((url: string) => !!url);
+        } else {
+          // Otherwise fetch from storage
+          const { data: imageFiles, error: imageError } = await supabase.storage
+            .from('service-listings')
+            .list(`${listing.user_id}/images`, {
+              limit: 100,
+              offset: 0,
+              sortBy: { column: 'name', order: 'asc' }
+            });
+          
+          if (!imageError && imageFiles && imageFiles.length > 0) {
+            console.log(`Found ${imageFiles.length} images for listing ${listing.id} in storage`);
+            image_urls = imageFiles.map(file => {
+              const { data } = supabase.storage
+                .from('service-listings')
+                .getPublicUrl(`${listing.user_id}/images/${file.name}`);
+              return data.publicUrl;
+            });
+          }
+        }
+        
+        if (listing.video_urls && Array.isArray(listing.video_urls)) {
+          video_urls = listing.video_urls.filter((url: string) => !!url);
+        } else {
+          // Fetch videos
+          const { data: videoFiles, error: videoError } = await supabase.storage
+            .from('service-listings')
+            .list(`${listing.user_id}/videos`, {
+              limit: 100,
+              offset: 0,
+              sortBy: { column: 'name', order: 'asc' }
+            });
+          
+          if (!videoError && videoFiles && videoFiles.length > 0) {
+            console.log(`Found ${videoFiles.length} videos for listing ${listing.id} in storage`);
+            video_urls = videoFiles.map(file => {
+              const { data } = supabase.storage
+                .from('service-listings')
+                .getPublicUrl(`${listing.user_id}/videos/${file.name}`);
+              return data.publicUrl;
+            });
+          }
+        }
+      } catch (mediaError) {
+        console.error('Error fetching media for listing:', listing.id, mediaError);
+        // Continue even if media fetching fails
+      }
+      
+      // Return the listing with added media URLs
+      return {
+        ...listing,
+        image_urls,
+        video_urls
+      };
+    }));
 
     return {
-      listings: data,
+      listings: processedData,
       total: count || 0,
       page,
       limit,
@@ -222,6 +282,64 @@ export async function getServiceListingById(id: string) {
       throw new Error(reviewsError.message)
     }
 
+    // Fetch media files from Supabase storage
+    let image_urls: string[] = [];
+    let video_urls: string[] = [];
+    
+    try {
+      // First check if the listing already has image_urls and video_urls arrays
+      if (listing.image_urls && Array.isArray(listing.image_urls)) {
+        image_urls = listing.image_urls.filter((url: string) => !!url);
+      } else {
+        // Otherwise fetch from storage
+        const { data: imageFiles, error: imageError } = await supabase.storage
+          .from('service-listings')
+          .list(`${listing.user_id}/images`, {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'name', order: 'asc' }
+          });
+        
+        if (!imageError && imageFiles && imageFiles.length > 0) {
+          console.log(`Found ${imageFiles.length} images for listing ${id} in storage`);
+          image_urls = imageFiles.map(file => {
+            const { data } = supabase.storage
+              .from('service-listings')
+              .getPublicUrl(`${listing.user_id}/images/${file.name}`);
+            return data.publicUrl;
+          });
+        }
+      }
+      
+      if (listing.video_urls && Array.isArray(listing.video_urls)) {
+        video_urls = listing.video_urls.filter((url: string) => !!url);
+      } else {
+        // Fetch videos
+        const { data: videoFiles, error: videoError } = await supabase.storage
+          .from('service-listings')
+          .list(`${listing.user_id}/videos`, {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'name', order: 'asc' }
+          });
+        
+        if (!videoError && videoFiles && videoFiles.length > 0) {
+          console.log(`Found ${videoFiles.length} videos for listing ${id} in storage`);
+          video_urls = videoFiles.map(file => {
+            const { data } = supabase.storage
+              .from('service-listings')
+              .getPublicUrl(`${listing.user_id}/videos/${file.name}`);
+            return data.publicUrl;
+          });
+        }
+      }
+    } catch (mediaError) {
+      console.error('Error fetching media for listing:', id, mediaError);
+      // Continue even if media fetching fails
+    }
+    
+    console.log(`Media URLs for listing ${id}:`, { image_urls, video_urls });
+
     const reviews_count = reviewsData.length
     const average_rating =
       reviews_count > 0 ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviews_count : 0
@@ -233,6 +351,8 @@ export async function getServiceListingById(id: string) {
       ...data,
       reviews_count,
       average_rating,
+      image_urls,
+      video_urls
     }
   } catch (error) {
     console.error("Error fetching service listing:", error)

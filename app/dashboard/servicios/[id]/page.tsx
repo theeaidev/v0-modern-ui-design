@@ -93,7 +93,7 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
           <Tabs defaultValue="details" className="mt-6">
             <TabsList>
               <TabsTrigger value="details">Detalles</TabsTrigger>
-              <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+              {/* <TabsTrigger value="stats">Estadísticas</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="details" className="space-y-4 pt-6">

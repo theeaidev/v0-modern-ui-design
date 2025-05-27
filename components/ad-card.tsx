@@ -80,27 +80,118 @@ export function AdCard({
     type: 'image' 
   });
 
-  // Determine media URL from Supabase
+  // Enhanced media detection from Supabase storage
   useEffect(() => {
-    let determinedSrc = "/placeholder.svg";
-    let determinedType: 'image' | 'video' = 'image';
-
-    if (imagePath) {
-      const { data } = supabase.storage.from('service-listings').getPublicUrl(imagePath);
-      if (data?.publicUrl) {
-        determinedSrc = data.publicUrl;
-        determinedType = 'image';
+    const fetchMedia = async () => {
+      try {
+        // Debug info
+        console.log(`AdCard ${id}: Starting media fetch`, { imagePath, videoPath });
+        
+        // Check for direct path to image
+        if (imagePath) {
+          const { data: imageData } = supabase.storage.from('service-listings').getPublicUrl(imagePath);
+          if (imageData?.publicUrl) {
+            console.log(`AdCard ${id}: Found image at direct path:`, imageData.publicUrl);
+            setMediaProps({
+              src: imageData.publicUrl,
+              type: 'image'
+            });
+            return;
+          }
+        }
+        
+        // Check for direct path to video
+        if (videoPath) {
+          const { data: videoData } = supabase.storage.from('service-listings').getPublicUrl(videoPath);
+          if (videoData?.publicUrl) {
+            console.log(`AdCard ${id}: Found video at direct path:`, videoData.publicUrl);
+            setMediaProps({
+              src: videoData.publicUrl,
+              type: 'video'
+            });
+            return;
+          }
+        }
+        
+        // Try to extract user ID from the service ID
+        // If that doesn't work, make a DB query to get user_id
+        let userId = null;
+        
+        // First try to extract from paths
+        if (imagePath || videoPath) {
+          const pathParts = (imagePath || videoPath)?.split('/');
+          if (pathParts && pathParts.length > 0) {
+            userId = pathParts[0];
+          }
+        }
+        
+        // If still no user ID, query it from the database
+        if (!userId) {
+          const { data: listingData, error: listingError } = await supabase
+            .from('service_listings')
+            .select('user_id')
+            .eq('id', id)
+            .single();
+            
+          if (!listingError && listingData) {
+            userId = listingData.user_id;
+            console.log(`AdCard ${id}: Found user_id from database:`, userId);
+          }
+        }
+        
+        if (!userId) {
+          console.error(`AdCard ${id}: Could not determine user_id`);
+          return;
+        }
+        
+        // Look for images in the standard folder structure
+        const { data: imageFiles, error: imageError } = await supabase.storage
+          .from('service-listings')
+          .list(`${userId}/images`);
+          
+        if (!imageError && imageFiles && imageFiles.length > 0) {
+          const { data: imageData } = supabase.storage
+            .from('service-listings')
+            .getPublicUrl(`${userId}/images/${imageFiles[0].name}`);
+            
+          if (imageData?.publicUrl) {
+            console.log(`AdCard ${id}: Found image in storage:`, imageData.publicUrl);
+            setMediaProps({
+              src: imageData.publicUrl,
+              type: 'image'
+            });
+            return;
+          }
+        }
+        
+        // Look for videos if no images found
+        const { data: videoFiles, error: videoError } = await supabase.storage
+          .from('service-listings')
+          .list(`${userId}/videos`);
+          
+        if (!videoError && videoFiles && videoFiles.length > 0) {
+          const { data: videoData } = supabase.storage
+            .from('service-listings')
+            .getPublicUrl(`${userId}/videos/${videoFiles[0].name}`);
+            
+          if (videoData?.publicUrl) {
+            console.log(`AdCard ${id}: Found video in storage:`, videoData.publicUrl);
+            setMediaProps({
+              src: videoData.publicUrl,
+              type: 'video'
+            });
+            return;
+          }
+        }
+        
+        console.log(`AdCard ${id}: No media found, using placeholder`);
+      } catch (error) {
+        console.error(`AdCard ${id}: Error fetching media:`, error);
       }
-    } else if (videoPath) { // Only check video if no imagePath
-      const { data } = supabase.storage.from('service-listings').getPublicUrl(videoPath);
-      if (data?.publicUrl) {
-        determinedSrc = data.publicUrl;
-        determinedType = 'video';
-      }
-    }
+    };
     
-    setMediaProps({ src: determinedSrc, type: determinedType });
-  }, [imagePath, videoPath]);
+    fetchMedia();
+  }, [id, imagePath, videoPath]);
   
   // Check if the ad is favorited when component mounts
   useEffect(() => {
