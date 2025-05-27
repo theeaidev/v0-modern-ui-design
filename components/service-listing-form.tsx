@@ -31,10 +31,10 @@ import {
   getSubcategories,
 } from "@/app/actions/service-listings"
 
-const MAX_IMAGE_SIZE_MB = 5;
-const MAX_VIDEO_SIZE_MB = 50;
-const MAX_IMAGE_FILES = 5;
-const MAX_VIDEO_FILES = 2;
+const MAX_IMAGE_SIZE_MB = 2;
+const MAX_VIDEO_SIZE_MB = 10;
+const MAX_IMAGE_FILES = 10;
+const MAX_VIDEO_FILES = 1;
 
 // Define the form schema with Zod
 // File inputs will be handled separately, not directly in Zod for react-hook-form values
@@ -43,12 +43,12 @@ const formSchema = z.object({
   title: z
     .string()
     .min(5, "El título debe tener al menos 5 caracteres")
-    .max(100, "El título no puede exceder los 100 caracteres"),
+    .max(50, "El título no puede exceder los 50 caracteres"),
   description: z
     .string()
-    .min(20, "La descripción debe tener al menos 20 caracteres")
+    .min(10, "La descripción debe tener al menos 10 caracteres")
     .max(500, "La descripción no puede exceder los 500 caracteres"),
-  long_description: z.string().max(5000, "La descripción larga no puede exceder los 5000 caracteres").optional(),
+  long_description: z.string().max(1000, "La descripción larga no puede exceder los 1000 caracteres").optional(),
   category_id: z.coerce.number().min(1, "Debes seleccionar una categoría"),
   subcategory_id: z.coerce.number().optional(),
   price: z.string().optional(),
@@ -59,9 +59,9 @@ const formSchema = z.object({
   country: z.string().default("España"),
   address: z.string().optional(),
   contact_phone: z.string().optional(),
-  contact_email: z.string().email("Introduce un email válido").optional(),
+  contact_email: z.string().email("Introduce un email válido"),
   contact_whatsapp: z.string().optional(),
-  contact_website: z.string().url("Introduce una URL válida").optional(),
+  contact_website: z.string().url("Introduce una URL válida").optional().or(z.literal("")),
   status: z.enum(["draft", "pending_approval", "active", "paused", "rejected", "expired"]),
 })
 
@@ -477,7 +477,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                   <FormControl>
                     <Input placeholder="Ej: Clases de español para extranjeros" {...field} />
                   </FormControl>
-                  <FormDescription>Un título claro y descriptivo para tu anuncio.</FormDescription>
+                  <FormDescription>Un título claro y descriptivo para tu anuncio. Min 5 caracteres, Max 50 caracteres</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -492,7 +492,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                   <FormControl>
                     <Textarea placeholder="Breve descripción de tu servicio o producto" {...field} rows={3} />
                   </FormControl>
-                  <FormDescription>Esta descripción aparecerá en los resultados de búsqueda.</FormDescription>
+                  <FormDescription>Esta descripción aparecerá en los resultados de búsqueda. Min 10 caracteres, Max 500 caracteres</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -512,7 +512,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                       value={field.value || ""}
                     />
                   </FormControl>
-                  <FormDescription>Puedes incluir más detalles, características y beneficios.</FormDescription>
+                  <FormDescription>Puedes incluir más detalles, características y beneficios. Min 10 caracteres, Max 1000 caracteres.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -747,7 +747,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
               <CardHeader>
                 <CardTitle>Archivos Multimedia</CardTitle>
                 <FormDescription>
-                  Sube hasta {MAX_IMAGE_FILES} imágenes (JPG, PNG, WEBP, max {MAX_IMAGE_SIZE_MB}MB cada una) y hasta {MAX_VIDEO_FILES} videos (MP4, MOV, max {MAX_VIDEO_SIZE_MB}MB cada uno).
+                  Sube hasta {MAX_IMAGE_FILES} imágenes (en la Tarifa Premium ) - (6 imagenes en la Tarifa Básica) (JPG, PNG, WEBP, max {MAX_IMAGE_SIZE_MB}MB cada una) y hasta {MAX_VIDEO_FILES} video (Solo Tarifa Premium) (MP4, MOV, max {MAX_VIDEO_SIZE_MB}MB).
                 </FormDescription>
               </CardHeader>
               <CardContent className="space-y-8">
@@ -854,7 +854,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                     name="contact_phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Teléfono de contacto</FormLabel>
+                        <FormLabel>Teléfono de contacto (opcional)</FormLabel>
                         <FormControl>
                           <Input placeholder="Ej: +34 612 345 678" {...field} value={field.value || ""} />
                         </FormControl>
@@ -886,7 +886,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                       <FormItem>
                         <FormLabel>WhatsApp (opcional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ej: +34612345678" {...field} value={field.value || ""} />
+                          <Input placeholder="Ej: 34612345678" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormDescription>Número de WhatsApp sin espacios ni guiones.</FormDescription>
                         <FormMessage />
