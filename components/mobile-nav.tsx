@@ -137,13 +137,13 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                     Mi perfil
                   </Link>
                   <Link
-                    href="/dashboard/anuncios"
+                    href="/dashboard/servicios"
                     className="text-lg font-medium text-gray-800 hover:text-emerald-400 transition-colors duration-200"
                   >
                     Mis anuncios
                   </Link>
                   <Link
-                    href="/dashboard/favoritos"
+                    href="/dashboard"
                     className="text-lg font-medium text-gray-800 hover:text-emerald-400 transition-colors duration-200"
                   >
                     Favoritos
