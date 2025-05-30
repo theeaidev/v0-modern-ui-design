@@ -201,8 +201,10 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
         {/* Service Banner */}
         <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
           <ServiceMediaGallery listingId={service.id} userId={service.user_id} title={service.title} initialPrimaryImageUrl={service.image || undefined} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 container py-6">
+          {/* Gradient overlay only on desktop */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none hidden sm:block" />
+          {/* Overlay text only on desktop */}
+          <div className="absolute bottom-0 left-0 right-0 container py-6 hidden sm:block">
             <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-white mb-4 hover:underline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a servicios
@@ -233,6 +235,34 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
               <span className="mx-2">•</span>
               <span>ID: {service.id}</span>
             </div>
+          </div>
+        </div>
+        {/* Overlay text only on mobile, below image, above consult */}
+        <div className="block sm:hidden px-4 pt-4">
+          <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-foreground mb-4 hover:underline">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver a servicios
+          </Link>
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <Badge variant="secondary" className="text-white">
+              {service.category}
+            </Badge>
+            {service.isVerified && (
+              <Badge variant="outline" className="bg-green-500/20 text-green-500 border-green-500/30">
+                Anuncio verificado
+              </Badge>
+            )}
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">{service.title}</h1>
+          <div className="flex items-center mt-1 text-muted-foreground text-sm">
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>{service.location}</span>
+            <span className="mx-2">•</span>
+            <span>
+              Publicado {formatDistanceToNow(service.publishedAt, { addSuffix: true, locale: es })}
+            </span>
+            <span className="mx-2">•</span>
+            <span>ID: {service.id}</span>
           </div>
         </div>
 
