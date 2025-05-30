@@ -11,7 +11,7 @@ export function SiteFooter() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Directorio Latinos</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              La plataforma líder para publicar y encontrar anuncios de servicios profesionales desde 2020.
+              La plataforma líder para publicar y encontrar anuncios de servicios profesionales.
             </p>
             <div className="flex gap-4">
               <Button variant="ghost" size="icon" className="h-8 w-8">

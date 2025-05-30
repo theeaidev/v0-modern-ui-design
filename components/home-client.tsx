@@ -663,9 +663,9 @@ export default function HomeClient() {
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-2">Publicación gratuita</h3>
+                <h3 className="text-xl font-bold mb-2">Publicaciones gratuita</h3>
                 <p className="text-muted-foreground">
-                  Publica tu anuncio de forma gratuita y solo paga por funciones premium si las necesitas.
+                Pública tu oferta de empleo, alquileres, etc. de forma gratuita.  (Solo pagas por funciones Premium si las necesitas).
                 </p>
               </div>
               <div className="flex flex-col items-center text-center p-6 rounded-lg border bg-background">
