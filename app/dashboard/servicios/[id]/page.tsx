@@ -86,9 +86,9 @@ export default async function ServiceListingDetailPage({ params }: { params: { i
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="md:col-span-2">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+{/*           <div className="relative aspect-video w-full overflow-hidden rounded-lg">
             <Image src={imageUrl || "/placeholder.svg"} alt={listingData.title} fill className="object-cover" />
-          </div>
+          </div> */}
 
           <Tabs defaultValue="details" className="mt-6">
             <TabsList>

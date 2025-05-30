@@ -116,54 +116,63 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   }, [toast]);
 
   // Function to fetch media files from Supabase storage
-  const fetchMediaFromStorage = async (userId: string) => {
-    if (!userId) return;
+  const fetchMediaFromStorage = async (userId: string, listingId: string) => {
+    if (!userId || !listingId) {
+      console.warn("fetchMediaFromStorage: userId or listingId is missing.");
+      return;
+    }
     
     try {
-      console.log("Fetching media from storage for user ID:", userId);
+      console.log(`Fetching media from storage for user ID: ${userId}, listing ID: ${listingId}`);
       
-      // Fetch images
+      const imagePathPrefix = `${userId}/${listingId}/images`;
       const { data: imageFiles, error: imageError } = await supabase.storage
         .from('service-listings')
-        .list(`${userId}/images`, {
+        .list(imagePathPrefix, {
           limit: 100,
           offset: 0,
           sortBy: { column: 'name', order: 'asc' }
         });
       
       if (imageError) {
-        console.error('Error fetching images from storage:', imageError);
+        console.error(`Error fetching images from storage (${imagePathPrefix}):`, imageError);
       } else if (imageFiles && imageFiles.length > 0) {
-        console.log('Found image files in storage:', imageFiles.length);
+        console.log(`Found ${imageFiles.length} image files in storage at ${imagePathPrefix}`);
         const imageUrls = imageFiles.map(file => {
           const { data } = supabase.storage
             .from('service-listings')
-            .getPublicUrl(`${userId}/images/${file.name}`);
+            .getPublicUrl(`${imagePathPrefix}/${file.name}`);
           return data.publicUrl;
         });
         setExistingImageUrls(imageUrls);
+      } else {
+        console.log(`No image files found in storage at ${imagePathPrefix}`);
+        // Optionally clear if no files found: setExistingImageUrls([]);
       }
       
-      // Fetch videos
+      const videoPathPrefix = `${userId}/${listingId}/videos`;
       const { data: videoFiles, error: videoError } = await supabase.storage
         .from('service-listings')
-        .list(`${userId}/videos`, {
+        .list(videoPathPrefix, {
           limit: 100,
           offset: 0,
           sortBy: { column: 'name', order: 'asc' }
         });
       
       if (videoError) {
-        console.error('Error fetching videos from storage:', videoError);
+        console.error(`Error fetching videos from storage (${videoPathPrefix}):`, videoError);
       } else if (videoFiles && videoFiles.length > 0) {
-        console.log('Found video files in storage:', videoFiles.length);
+        console.log(`Found ${videoFiles.length} video files in storage at ${videoPathPrefix}`);
         const videoUrls = videoFiles.map(file => {
           const { data } = supabase.storage
             .from('service-listings')
-            .getPublicUrl(`${userId}/videos/${file.name}`);
+            .getPublicUrl(`${videoPathPrefix}/${file.name}`);
           return data.publicUrl;
         });
         setExistingVideoUrls(videoUrls);
+      } else {
+        console.log(`No video files found in storage at ${videoPathPrefix}`);
+        // Optionally clear if no files found: setExistingVideoUrls([]);
       }
     } catch (error) {
       console.error('Error in fetchMediaFromStorage:', error);
@@ -187,7 +196,14 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
       // If no media URLs are found in the listing object, try to fetch them from storage
       if (imageUrls.length === 0 || videoUrls.length === 0) {
         console.log("No media URLs found in listing object, fetching from storage...");
-        fetchMediaFromStorage(listing.user_id);
+        // Ensure listing.id and listing.user_id are available from the prop
+        if (listing.id && listing.user_id) {
+          fetchMediaFromStorage(listing.user_id, listing.id);
+        } else {
+          // This might occur if the 'listing' prop is somehow incomplete in edit mode.
+          // In 'create' mode, 'listing' prop is undefined, so this block isn't reached via `if (listing)` check.
+          console.warn("Cannot fetch media from storage: listing.id or listing.user_id is missing from 'listing' prop in edit mode.");
+        }
       }
     }
   }, [listing]);
@@ -350,9 +366,9 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   }, [imagePreviews, videoPreviews]);
 
   // Helper to upload a single file
-  async function uploadSupabaseFile(file: File, userId: string, mediaType: 'images' | 'videos'): Promise<string> {
+  async function uploadSupabaseFile(file: File, userId: string, listingId: string, mediaType: 'images' | 'videos'): Promise<string> {
     const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '_')}`;
-    const filePath = `${userId}/${mediaType}/${fileName}`;
+    const filePath = `${userId}/${listingId}/${mediaType}/${fileName}`;
 
     const { data, error } = await supabase.storage
       .from('service-listings')
@@ -412,148 +428,187 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
   // Handle form submission
   async function onSubmit(values: FormValues) {
-    // Double-check user authentication
     if (!currentUser) {
-      // Try to get the user again in case the session was updated
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({ title: "Error de autenticación", description: "Debes iniciar sesión para crear o editar anuncios.", variant: "destructive" });
-        
-        // Try to refresh the session
-        const { error } = await supabase.auth.refreshSession();
-        if (error) {
-          console.error("Error refreshing session:", error);
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error("Error refreshing session:", refreshError);
+          router.push('/auth/login?redirect=/dashboard/servicios/crear'); // or current path
           return;
         }
-        
-        // Check if we got a user after refresh
         const { data: { user: refreshedUser } } = await supabase.auth.getUser();
         if (!refreshedUser) {
           router.push('/auth/login?redirect=/dashboard/servicios/crear');
           return;
         }
-        
         setCurrentUser(refreshedUser);
       } else {
         setCurrentUser(user);
       }
     }
-    
-    // Final check - if still no user, abort
+    // Re-check after attempt to set
     if (!currentUser) {
       toast({ title: "Error de autenticación", description: "No se pudo verificar tu sesión. Por favor, inicia sesión nuevamente.", variant: "destructive" });
       return;
     }
-    
+
     setIsSubmitting(true);
     setIsUploading(true);
-
-    let finalImageUrls: string[] = [...existingImageUrls];
-    let finalVideoUrls: string[] = [...existingVideoUrls];
     const userId = currentUser.id;
-    
-    console.log("Using user ID for uploads and form submission:", userId);
 
     try {
-      // Log the current state before handling deletions
-      console.log("Current media state before submission:", {
-        existingImageUrls,
-        existingVideoUrls,
-        imagesToDelete,
-        videosToDelete,
-        selectedImageFiles: selectedImageFiles.map(f => f.name),
-        selectedVideoFiles: selectedVideoFiles.map(f => f.name)
-      });
-      
-      // 1. Handle deletions from Supabase Storage
-      for (const url of imagesToDelete) await deleteSupabaseFile(url);
-      for (const url of videosToDelete) await deleteSupabaseFile(url);
-
-      // 2. Handle uploads to Supabase Storage
-      const uploadedImageUrls = await Promise.all(
-        selectedImageFiles.map(file => uploadSupabaseFile(file, userId, 'images'))
-      );
-      finalImageUrls.push(...uploadedImageUrls);
-
-      const uploadedVideoUrls = await Promise.all(
-        selectedVideoFiles.map(file => uploadSupabaseFile(file, userId, 'videos'))
-      );
-      finalVideoUrls.push(...uploadedVideoUrls);
-
-      // 3. Prepare data for backend
-      let intendedUserFacingStatus = values.status;
-      if (mode === "create" && values.status === "active") {
-        intendedUserFacingStatus = "pending_approval";
-      } else if (mode === "edit" && listing && listing.status === "draft" && values.status === "active") {
-        intendedUserFacingStatus = "pending_approval";
-      }
-
-      // Make sure we're logged in - this should ensure the server-side function can access the user session
-      await supabase.auth.refreshSession();
+      await supabase.auth.refreshSession(); // Ensure session is fresh before operations
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
         throw new Error("No hay sesión activa. Por favor, inicia sesión nuevamente.");
       }
-      
-      console.log("Active session confirmed before form submission");
-      
-      const dataForBackend: ServiceListingFormData = {
-        ...values,
-        category_id: Number(values.category_id),
-        subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined,
-        status:
-          intendedUserFacingStatus === "active" || intendedUserFacingStatus === "pending_approval"
+      console.log("Active session confirmed before form submission logic.");
+
+      if (mode === "create") {
+        console.log("Starting 'create' mode submission for user:", userId);
+        // 1. Prepare initial data (no media URLs, no client-generated ID for the record)
+        let intendedInitialStatus = values.status;
+        if (values.status === "active") {
+          intendedInitialStatus = "pending_approval";
+        }
+
+        const initialDataForBackend: Omit<ServiceListingFormData, 'id' | 'image_urls' | 'video_urls'> = {
+          ...values,
+          category_id: Number(values.category_id),
+          subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined,
+          status: intendedInitialStatus === "active" || intendedInitialStatus === "pending_approval" ? "active" : intendedInitialStatus === "paused" ? "paused" : "draft",
+        };
+
+        // 2. Create the listing to get its ID
+        // Cast to ServiceListingFormData if your createServiceListing expects all fields, even if some are undefined initially.
+        const createResult = await createServiceListing(initialDataForBackend as ServiceListingFormData);
+        if (!createResult || !createResult.data || !createResult.data.id) {
+          throw new Error("No se pudo crear el anuncio o no se recibió el ID del anuncio creado.");
+        }
+        const newListingId = createResult.data.id;
+        console.log(`Listing created with ID: ${newListingId}. Proceeding to upload media.`);
+
+        // 3. Handle uploads to Supabase Storage using newListingId
+        let uploadedImageUrls: string[] = [];
+        let uploadedVideoUrls: string[] = [];
+
+        if (selectedImageFiles.length > 0) {
+          uploadedImageUrls = await Promise.all(
+            selectedImageFiles.map(file => uploadSupabaseFile(file, userId, newListingId, 'images'))
+          );
+        }
+        if (selectedVideoFiles.length > 0) {
+          uploadedVideoUrls = await Promise.all(
+            selectedVideoFiles.map(file => uploadSupabaseFile(file, userId, newListingId, 'videos'))
+          );
+        }
+
+        // 4. Update the listing with media URLs if any were uploaded
+        if (uploadedImageUrls.length > 0 || uploadedVideoUrls.length > 0) {
+          const mediaUpdateData = {
+            image_urls: uploadedImageUrls.filter(url => !!url),
+            video_urls: uploadedVideoUrls.filter(url => !!url),
+          };
+          await updateServiceListing(newListingId, mediaUpdateData);
+          console.log(`Listing ${newListingId} updated with media URLs.`);
+        }
+
+        toast({
+          title: "Anuncio creado con éxito",
+          description: intendedInitialStatus === "pending_approval"
+            ? "Tu anuncio ha sido enviado para revisión y las imágenes/videos procesados."
+            : `Tu anuncio ha sido guardado como ${intendedInitialStatus === "draft" ? "borrador" : intendedInitialStatus} y las imágenes/videos procesados.`,
+        });
+        router.push(`/dashboard/servicios/success?id=${newListingId}`);
+
+      } else if (mode === "edit" && listing?.id) {
+        const currentListingId = listing.id;
+        console.log(`Starting 'edit' mode submission for listing ID: ${currentListingId}, user: ${userId}`);
+
+        // Log current state
+        console.log("Current media state before submission (edit mode):", {
+          existingImageUrls,
+          existingVideoUrls,
+          imagesToDelete,
+          videosToDelete,
+          selectedImageFiles: selectedImageFiles.map(f => f.name),
+          selectedVideoFiles: selectedVideoFiles.map(f => f.name)
+        });
+
+        // 1. Handle deletions from Supabase Storage
+        for (const url of imagesToDelete) await deleteSupabaseFile(url);
+        for (const url of videosToDelete) await deleteSupabaseFile(url);
+
+        // 2. Handle uploads to Supabase Storage
+        const newUploadedImageUrls = await Promise.all(
+          selectedImageFiles.map(file => uploadSupabaseFile(file, userId, currentListingId, 'images'))
+        );
+        const newUploadedVideoUrls = await Promise.all(
+          selectedVideoFiles.map(file => uploadSupabaseFile(file, userId, currentListingId, 'videos'))
+        );
+
+        // Combine existing (not deleted) and newly uploaded URLs
+        const finalImageUrls = [
+          ...existingImageUrls.filter(url => !imagesToDelete.includes(url)), 
+          ...newUploadedImageUrls
+        ].filter(url => !!url);
+        const finalVideoUrls = [
+          ...existingVideoUrls.filter(url => !videosToDelete.includes(url)), 
+          ...newUploadedVideoUrls
+        ].filter(url => !!url);
+        
+        // 3. Prepare data for backend
+        let intendedUserFacingStatus = values.status;
+        if (listing.status === "draft" && values.status === "active") {
+          intendedUserFacingStatus = "pending_approval";
+        }
+        // Add other status transition logic if needed, e.g., from rejected to pending_approval
+
+        const dataForBackend: ServiceListingFormData = {
+          ...values,
+          category_id: Number(values.category_id),
+          subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined,
+          status: intendedUserFacingStatus === "active" || intendedUserFacingStatus === "pending_approval"
             ? "active"
             : intendedUserFacingStatus === "paused"
             ? "paused"
             : "draft",
-        image_urls: finalImageUrls.filter(url => !!url), // Ensure no empty/null URLs
-        video_urls: finalVideoUrls.filter(url => !!url),
-      };
-
-      // 4. Call backend actions
-      if (mode === "create") {
-        // If using pathPrefixId = uuidv4() for uploads before creation, the backend needs to know this ID
-        // or the paths need to be updated by backend after real ID is known.
-        // For now, assuming backend can handle URLs as provided.
-        const result = await createServiceListing(dataForBackend);
-        toast({
-          title: "Anuncio creado",
-          description: intendedUserFacingStatus === "pending_approval"
-            ? "Tu anuncio ha sido enviado para revisión."
-            : `Tu anuncio ha sido guardado como ${intendedUserFacingStatus === "draft" ? "borrador" : intendedUserFacingStatus}.`,
-        });
-        if (result && result.data && result.data.id) {
-          router.push(`/dashboard/servicios/success?id=${result.data.id}`);
-        } else {
-          router.push("/dashboard/servicios");
-          console.warn("Service listing created, but ID not found in response for redirection.");
-        }
-      } else if (mode === "edit" && listing) {
-        await updateServiceListing(listing.id, dataForBackend);
+          image_urls: finalImageUrls,
+          video_urls: finalVideoUrls,
+        };
+        
+        // 4. Call updateServiceListing
+        await updateServiceListing(currentListingId, dataForBackend);
         toast({
           title: "Anuncio actualizado",
           description: intendedUserFacingStatus === "pending_approval"
             ? "Tus cambios han sido enviados para revisión."
             : `Tu anuncio ha sido actualizado (estado: ${intendedUserFacingStatus}).`,
         });
-        router.push(`/dashboard/servicios/${listing.id}`);
+        router.push(`/dashboard/servicios/${currentListingId}`);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
-        title: "Error al guardar",
-        description: error instanceof Error ? error.message : "Ha ocurrido un error al guardar el anuncio",
+        title: "Error al guardar el anuncio",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.",
         variant: "destructive",
       });
     } finally {
       setIsUploading(false);
       setIsSubmitting(false);
-      // Clear selections after submission attempt
-      // setSelectedImageFiles([]); setImagePreviews([]);
-      // setSelectedVideoFiles([]); setVideoPreviews([]);
-      // setImagesToDelete([]); setVideosToDelete([]);
+      // Clear selections after submission attempt, regardless of success/failure
+      setSelectedImageFiles([]); 
+      setImagePreviews([]);
+      setSelectedVideoFiles([]); 
+      setVideoPreviews([]);
+      setImagesToDelete([]); 
+      setVideosToDelete([]);
+      // Reset file input fields
+      if (imageInputRef.current) imageInputRef.current.value = "";
+      if (videoInputRef.current) videoInputRef.current.value = "";
     }
   }
 
