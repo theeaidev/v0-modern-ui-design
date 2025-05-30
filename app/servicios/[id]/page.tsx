@@ -1,5 +1,6 @@
-import Link from "next/link"
-import Image from "next/image"
+import Link from "next/link";
+import NextImage from "next/image";
+import { ServiceMediaGallery } from "@/components/service-media-gallery";
 import { ArrowLeft, Calendar, Clock, MapPin, Share2, Star, Heart, Flag, PlusCircle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -15,6 +16,41 @@ import { getServiceListingById, getRelatedServicesByCategory } from "@/app/actio
 import { ServiceShareButton } from "@/components/service-share-button";
 import { MainNav } from "@/components/main-nav";
 
+// Define type for advertiser data within MappedServiceData
+interface MappedServiceAdvertiser {
+  name: string;
+  title: string;
+  image: string;
+  memberSince: string;
+  responseRate: string;
+  responseTime: string;
+  verified: boolean;
+  otherAds: number;
+}
+
+// Define type for the main service object mapped from DB data
+interface MappedServiceData {
+  id: string;
+  user_id: string;
+  title: string;
+  category: string;
+  description: string;
+  longDescription: string;
+  image: string | undefined; // Primary image URL for the service
+  provider: string;
+  location: string;
+  rating: number;
+  reviews: number;
+  price: string;
+  duration: string;
+  availability: string[];
+  features: string[];
+  publishedAt: Date;
+  isVerified: boolean;
+  advertiser: MappedServiceAdvertiser;
+  relatedServices: RelatedService[];
+}
+
 // Define type for related services
 type RelatedService = {
   id: string | number;
@@ -27,7 +63,7 @@ type RelatedService = {
 };
 
 // Helper function to fetch and map ad data
-async function fetchAndMapAdById(id: string) {
+async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> {
   const dbAdData = await getServiceListingById(id);
 
   if (!dbAdData) {
@@ -80,6 +116,7 @@ async function fetchAndMapAdById(id: string) {
 
   const service = {
     id: dbAdData.id.toString(),
+    user_id: dbAdData.user_id, // Added user_id mapping
     title: dbAdData.title || "Título no disponible",
     category: dbAdData.category?.name || "Categoría desconocida",
     description: dbAdData.description || "Descripción breve no disponible.",
@@ -119,7 +156,8 @@ async function fetchAndMapAdById(id: string) {
 }
 
 export default async function ServicioDetailPage({ params }: { params: { id: string } }) {
-  const service = await fetchAndMapAdById(params.id);
+  const service: MappedServiceData | null = await fetchAndMapAdById(params.id);
+  
 
   if (!service) {
     return (
@@ -160,7 +198,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
 
         {/* Service Banner */}
         <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
-          <Image src={service.image || "/placeholder.svg"} alt={service.title} fill className="object-cover" priority />
+          <ServiceMediaGallery listingId={service.id} userId={service.user_id} title={service.title} initialPrimaryImageUrl={service.image || undefined} />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 container py-6">
             <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-white mb-4 hover:underline">
@@ -220,35 +258,21 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
               <Tabs defaultValue="descripcion" className="mb-8">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="descripcion">Descripción</TabsTrigger>
-                 {/*  <TabsTrigger value="detalles">Detalles</TabsTrigger> */}
+                  {/* <TabsTrigger value="detalles">Detalles</TabsTrigger> */}
                   <TabsTrigger value="anunciante">Anunciante</TabsTrigger>
                 </TabsList>
                 <TabsContent value="descripcion" className="pt-6">
-                  <div className="prose prose-lg max-w-none">
-                    <div dangerouslySetInnerHTML={{ __html: service.longDescription }} />
-                  </div>
+                  <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: service.longDescription }} />
                 </TabsContent>
                 <TabsContent value="detalles" className="pt-6">
+                  {/* Content for "detalles" tab */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Características</h3>
                       <ul className="space-y-2">
                         {service.features.map((feature: string, index: number) => (
                           <li key={index} className="flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="h-5 w-5 mr-2 text-primary"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 text-primary"><polyline points="20 6 9 17 4 12" /></svg>
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -269,7 +293,6 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <div className="mt-8">
                     <h3 className="text-lg font-semibold mb-4">Ubicación</h3>
                     <div className="aspect-video w-full bg-muted rounded-lg overflow-hidden">
-                      {/* Map placeholder */}
                       <div className="w-full h-full bg-muted flex items-center justify-center">
                         <MapPin className="h-12 w-12 text-muted-foreground/50" />
                       </div>
@@ -282,9 +305,9 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                 </TabsContent>
                 <TabsContent value="anunciante" className="pt-6">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div className="relative w-24 h-24 rounded-full overflow-hidden">
-                      <Image
-                        src={service.advertiser.image || "/placeholder.svg"}
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0">
+                      <NextImage
+                        src={service.advertiser.image || "/placeholder.svg?text=Anunciante"}
                         alt={service.advertiser.name}
                         fill
                         className="object-cover"
@@ -293,211 +316,88 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <div className="flex-1">
                       <h3 className="text-xl font-bold">{service.advertiser.name}</h3>
                       <p className="text-muted-foreground">{service.advertiser.title}</p>
-                      <div className="flex items-center mt-2">
+                      <div className="flex items-center mt-2 flex-wrap">
                         {service.advertiser.verified && (
-                          <Badge
-                            variant="outline"
-                            className="border-green-500 text-green-500 flex items-center gap-1 mr-3"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="h-3.5 w-3.5"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
+                          <Badge variant="outline" className="border-green-500 text-green-500 flex items-center gap-1 mr-3 mb-1 sm:mb-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><polyline points="20 6 9 17 4 12" /></svg>
                             Verificado
                           </Badge>
                         )}
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-muted-foreground mb-1 sm:mb-0">
                           Miembro desde {service.advertiser.memberSince}
                         </span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-{/*                         <div>
-                          <p className="text-sm text-muted-foreground">Tasa de respuesta</p>
-                          <p className="font-medium">{service.advertiser.responseRate}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Tiempo de respuesta</p>
-                          <p className="font-medium">{service.advertiser.responseTime}</p>
-                        </div> */}
                         <div>
                           <p className="text-sm text-muted-foreground">Otros anuncios</p>
                           <p className="font-medium">{service.advertiser.otherAds} anuncios activos</p>
                         </div>
                       </div>
-   {/*                    <div className="mt-6">
-                        <Button variant="outline" className="w-full sm:w-auto">
-                          Ver perfil completo
-                        </Button>
-                      </div> */}
                     </div>
                   </div>
                 </TabsContent>
-              </Tabs>
+              </Tabs> {/* End of Tabs component */} 
 
+              {/* Contact Form Section */} 
               <div className="mt-12">
                 <h2 className="text-2xl font-bold mb-6">Contactar con este anunciante</h2>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label htmlFor="name" className="block text-sm font-medium">
-                        Nombre
-                      </label>
+                      <label htmlFor="name" className="block text-sm font-medium text-card-foreground">Nombre</label>
                       <Input id="name" placeholder="Tu nombre" />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-medium">
-                        Correo electrónico
-                      </label>
+                      <label htmlFor="email" className="block text-sm font-medium text-card-foreground">Correo electrónico</label>
                       <Input id="email" type="email" placeholder="tu@email.com" />
                     </div>
                   </div>
                   <div className="space-y-2 overflow-visible">
-                    <label htmlFor="message" className="block text-sm font-medium">
-                      Mensaje
-                    </label>
-                    <Textarea
-                      id="message"
-                      placeholder="Me gustaría obtener más información sobre este servicio..."
-                      rows={5}
-                    />
+                    <label htmlFor="message" className="block text-sm font-medium text-card-foreground">Mensaje</label>
+                    <Textarea id="message" placeholder={`Me gustaría obtener más información sobre "${service.title}"...`} rows={5} />
                   </div>
                   <Button className="w-full sm:w-auto">Enviar mensaje</Button>
                 </div>
               </div>
-            </div>
+            </div> {/* End of lg:col-span-2 */} 
 
-{/*             <div>
-              <Card className="sticky top-24">
-                <CardHeader>
-                  <CardTitle>Información del anuncio</CardTitle>
-                  <CardDescription>Detalles sobre {service.title}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Precio:</span>
-                    <span className="font-medium">{service.price} / sesión</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Duración:</span>
-                    <span className="font-medium flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {service.duration}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-muted-foreground">Disponibilidad:</span>
-                    <ul className="space-y-1">
-                      {service.availability.map((time: string, index: number) => (
-                        <li key={index} className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 text-primary" />
-                          <span className="text-sm">{time}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-muted-foreground">Características:</span>
-                    <ul className="space-y-1">
-                      {service.features.map((feature: string, index: number) => (
-                        <li key={index} className="flex items-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4 mr-2 text-primary"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Proveedor:</span>
-                    <span className="font-medium">{service.provider}</span>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col gap-4">
-                  <Button className="w-full">Contactar ahora</Button>
-                  <ServiceShareButton 
-                    serviceId={service.id} 
-                    serviceTitle={service.title} 
-                    serviceDescription={service.description} 
-                    displayMode="fullWidthText" 
-                  />
-                </CardFooter>
-              </Card>
-            </div> */}
-          </div>
-
-          {/* Related Services */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">Anuncios relacionados</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {service.relatedServices.map((relatedService: RelatedService) => (
-                <Card
-                  key={relatedService.id}
-                  className="overflow-hidden group transition-all duration-300 hover:shadow-lg"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={relatedService.image || "/placeholder.svg"}
-                      alt={relatedService.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    {relatedService.price && (
-                      <div className="absolute bottom-3 right-3 bg-background/90 text-foreground px-3 py-1 rounded-md font-medium">
-                        {relatedService.price}
-                      </div>
-                    )}
-                  </div>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{relatedService.title}</CardTitle>
-                        <CardDescription className="flex items-center mt-1">
-                          <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                          {relatedService.location}
-                        </CardDescription>
-                      </div>
+            {/* Related Services Section */} 
+            <div className="mt-16">
+              <h2 className="text-2xl font-bold mb-6">Anuncios relacionados</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {service.relatedServices.map((relatedServiceItem: RelatedService) => (
+                  <Card key={relatedServiceItem.id} className="overflow-hidden group transition-all duration-300 hover:shadow-lg">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                    <ServiceMediaGallery listingId={relatedServiceItem.id} userId={relatedServiceItem.user_id} title={relatedServiceItem.title} initialPrimaryImageUrl={relatedServiceItem.image || undefined} />
+                      {relatedServiceItem.price && (
+                        <div className="absolute bottom-3 right-3 bg-background/90 text-foreground px-3 py-1 rounded-md font-medium text-sm">
+                          {relatedServiceItem.price}
+                        </div>
+                      )}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground line-clamp-2">{relatedService.description}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Link href={`/servicios/${relatedService.id}`} className="w-full">
-                      <Button
-                        variant="outline"
-                        className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
-                      >
-                        Ver anuncio
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
+                    <CardHeader>
+                      <CardTitle className="text-lg truncate" title={relatedServiceItem.title}>{relatedServiceItem.title}</CardTitle>
+                      <CardDescription className="flex items-center mt-1 text-sm">
+                        <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                        {relatedServiceItem.location}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground line-clamp-2 text-sm">{relatedServiceItem.description}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Link href={`/servicios/${relatedServiceItem.id.toString()}`} className="w-full">
+                        <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground">
+                          Ver anuncio
+                        </Button>
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </div> {/* Closes Related Services container <div className="mt-16"> */}
+          </div> {/* Closes <div className="w-full overflow-visible"> */}
+        </div> {/* Closes <div className="container py-12"> */}
       </main>
 
       {/* Footer */}
