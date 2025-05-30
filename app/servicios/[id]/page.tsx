@@ -201,7 +201,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
         {/* Service Banner */}
         <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
           <ServiceMediaGallery listingId={service.id} userId={service.user_id} title={service.title} initialPrimaryImageUrl={service.image || undefined} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
           <div className="absolute bottom-0 left-0 right-0 container py-6">
             <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-white mb-4 hover:underline">
               <ArrowLeft className="mr-2 h-4 w-4" />

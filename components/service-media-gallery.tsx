@@ -184,12 +184,13 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
               autoPlay={false}
               muted
               loop
+              style={{ pointerEvents: 'auto' }}
               onError={(e) => {
                 console.error(`Failed to load video: ${(e.currentTarget as HTMLVideoElement).src}`);
                 (e.currentTarget as HTMLVideoElement).style.display = 'none';
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors pointer-events-none">
               <PlayCircle className="h-14 w-14 sm:h-16 sm:w-16 text-white/80 group-hover:text-white" />
             </div>
           </div>
@@ -209,12 +210,13 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
               }
               priority
               sizes={variant === 'card' ? '(max-width: 640px) 100vw, 400px' : '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 60vw'}
+              style={{ pointerEvents: 'auto' }}
               onError={(e) => {
                 console.error(`Failed to load image: ${imageToDisplay}`);
                 (e.target as HTMLImageElement).src = placeholderUrl;
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none">
               <Maximize className="h-10 w-10 sm:h-12 sm:w-12 text-white/70 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
