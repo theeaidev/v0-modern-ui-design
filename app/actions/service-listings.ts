@@ -189,6 +189,7 @@ export async function getRelatedServicesByCategory(categoryId: number, currentSe
       .from("service_listings")
       .select(`
         id,
+        user_id,
         title,
         description,
         price,
@@ -216,6 +217,7 @@ export async function getRelatedServicesByCategory(categoryId: number, currentSe
       
       return {
         id: service.id,
+        user_id: service.user_id, // Include user_id for media fetching
         title: service.title,
         description: service.description,
         price: service.price ? `${service.price}€` : null,

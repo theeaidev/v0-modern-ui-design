@@ -54,6 +54,7 @@ interface MappedServiceData {
 // Define type for related services
 type RelatedService = {
   id: string | number;
+  user_id: string; // Added user_id field for media fetching
   title: string;
   description: string;
   image: string | null;
@@ -105,6 +106,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     relatedServices = [
       {
         id: 'placeholder-1',
+        user_id: dbAdData.user_id, // Use the current service's user_id for the placeholder
         title: "Servicio relacionado",
         description: "Este es un servicio de ejemplo que se muestra cuando no hay servicios relacionados disponibles.",
         image: "/placeholder.svg",
@@ -368,7 +370,12 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                 {service.relatedServices.map((relatedServiceItem: RelatedService) => (
                   <Card key={relatedServiceItem.id} className="overflow-hidden group transition-all duration-300 hover:shadow-lg">
                     <div className="relative aspect-[4/3] overflow-hidden">
-                    <ServiceMediaGallery listingId={relatedServiceItem.id} userId={relatedServiceItem.user_id} title={relatedServiceItem.title} initialPrimaryImageUrl={relatedServiceItem.image || undefined} />
+                    <ServiceMediaGallery 
+                      listingId={relatedServiceItem.id.toString()} 
+                      userId={relatedServiceItem.user_id} 
+                      title={relatedServiceItem.title} 
+                      initialPrimaryImageUrl={relatedServiceItem.image || undefined} 
+                    />
                       {relatedServiceItem.price && (
                         <div className="absolute bottom-3 right-3 bg-background/90 text-foreground px-3 py-1 rounded-md font-medium text-sm">
                           {relatedServiceItem.price}

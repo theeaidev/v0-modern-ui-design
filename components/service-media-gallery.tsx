@@ -158,71 +158,90 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
   }
 
   return (
-    <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden group bg-muted">
+    <div
+      className="relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[480px] xl:h-[540px] max-h-[70vw] rounded-lg overflow-hidden group bg-muted shadow-sm"
+    >
       {itemToDisplay ? (
         itemToDisplay.type === 'video' ? (
-          <div className="relative h-full w-full cursor-pointer" onClick={() => openModalWithMedia(itemToDisplay!)}>
+          <div
+            className="relative h-full w-full cursor-pointer"
+            onClick={() => openModalWithMedia(itemToDisplay!)}
+          >
             <video
-              key={itemToDisplay.url} 
+              key={itemToDisplay.url}
               src={itemToDisplay.url}
-              className="h-full w-full object-cover"
-              controls={false} autoPlay={false} muted loop
+              className="h-full w-full object-cover rounded-md sm:rounded-lg"
+              controls={false}
+              autoPlay={false}
+              muted
+              loop
               onError={(e) => {
                 console.error(`Failed to load video: ${(e.currentTarget as HTMLVideoElement).src}`);
-                (e.currentTarget as HTMLVideoElement).style.display = 'none'; 
+                (e.currentTarget as HTMLVideoElement).style.display = 'none';
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
-              <PlayCircle className="h-16 w-16 text-white/80 group-hover:text-white" />
+              <PlayCircle className="h-14 w-14 sm:h-16 sm:w-16 text-white/80 group-hover:text-white" />
             </div>
           </div>
         ) : (
-          <div className="relative h-full w-full cursor-pointer" onClick={() => openModalWithMedia(itemToDisplay!)}>
+          <div
+            className="relative h-full w-full cursor-pointer"
+            onClick={() => openModalWithMedia(itemToDisplay!)}
+          >
             <NextImage
               src={imageToDisplay}
               alt={title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover rounded-md sm:rounded-lg transition-transform duration-300 group-hover:scale-105"
               priority
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 60vw"
               onError={(e) => {
                 console.error(`Failed to load image: ${imageToDisplay}`);
                 (e.target as HTMLImageElement).src = placeholderUrl;
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
-              <Maximize className="h-12 w-12 text-white/70 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Maximize className="h-10 w-10 sm:h-12 sm:w-12 text-white/70 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
         )
       ) : (
-         <NextImage src={placeholderUrl} alt="Placeholder" fill className="object-cover" />
+         <NextImage src={placeholderUrl} alt="Placeholder" fill className="object-cover rounded-md sm:rounded-lg" />
       )}
 
       {mediaCount > 1 && (
         <>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute left-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white z-10"
+          {/* Navigation Buttons */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-1 sm:left-2 top-1/2 h-8 w-8 sm:h-10 sm:w-10 -translate-y-1/2 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white z-10 focus:outline-none focus:ring-2 focus:ring-primary"
             onClick={goToPrevMediaItem}
+            tabIndex={0}
+            aria-label="Anterior"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white z-10"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 sm:right-2 top-1/2 h-8 w-8 sm:h-10 sm:w-10 -translate-y-1/2 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white z-10 focus:outline-none focus:ring-2 focus:ring-primary"
             onClick={goToNextMediaItem}
+            tabIndex={0}
+            aria-label="Siguiente"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex space-x-1.5">
+          {/* Dot Indicators */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex space-x-2 sm:space-x-1.5">
             {allMediaItems.map((_, index) => (
               <button
                 key={index}
                 onClick={(e) => { e.stopPropagation(); setCurrentMediaIndex(index); }}
-                className={`h-2 w-2 rounded-full ${currentMediaIndex === index ? 'bg-white' : 'bg-white/50 hover:bg-white/75'}`}
+                className={`h-3 w-3 sm:h-2 sm:w-2 rounded-full border border-white/60 focus:outline-none focus:ring-2 focus:ring-primary ${currentMediaIndex === index ? 'bg-white' : 'bg-white/50 hover:bg-white/75'}`}
                 aria-label={`Go to media ${index + 1}`}
+                tabIndex={0}
               />
             ))}
           </div>
@@ -230,12 +249,26 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
       )}
       
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl p-0 bg-black border-0">
+        <DialogContent className="max-w-[96vw] sm:max-w-2xl md:max-w-3xl p-0 bg-black border-0 rounded-lg overflow-hidden flex items-center justify-center">
           {modalMedia && (
             modalMedia.type === 'video' ? (
-              <video src={modalMedia.url} className="w-full max-h-[80vh] object-contain" controls autoPlay />
+              <video
+                src={modalMedia.url}
+                className="w-full max-h-[80vh] object-contain bg-black"
+                controls
+                autoPlay
+                style={{ borderRadius: '0.5rem' }}
+              />
             ) : (
-              <NextImage src={modalMedia.url} alt={title} width={1920} height={1080} className="w-full max-h-[80vh] object-contain" />
+              <NextImage
+                src={modalMedia.url}
+                alt={title}
+                width={1920}
+                height={1080}
+                className="w-full max-h-[80vh] object-contain bg-black rounded-lg"
+                style={{ borderRadius: '0.5rem' }}
+                sizes="(max-width: 640px) 96vw, (max-width: 1024px) 80vw, 60vw"
+              />
             )
           )}
         </DialogContent>
