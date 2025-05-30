@@ -15,6 +15,7 @@ import { SiteFooter } from "@/components/site-footer"
 import { getServiceListingById, getRelatedServicesByCategory } from "@/app/actions/service-listings";
 import { ServiceShareButton } from "@/components/service-share-button";
 import { MainNav } from "@/components/main-nav";
+import { ServiceAdvertiserInfo } from "@/components/service-advertiser-info";
 
 // Define type for advertiser data within MappedServiceData
 interface MappedServiceAdvertiser {
@@ -345,39 +346,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   </div>
                 </TabsContent>
                 <TabsContent value="anunciante" className="pt-6">
-                  <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0">
-                      <NextImage
-                        src={service.advertiser.imagePath || "/placeholder.svg?text=Anunciante"}
-                        alt={service.advertiser.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold">
-                        {service.advertiser.name}
-                      </h3>
-                      <p className="text-muted-foreground">{service.advertiser.title}</p>
-                      <div className="flex items-center mt-2 flex-wrap">
-                        {service.advertiser.verified && (
-                          <Badge variant="outline" className="border-green-500 text-green-500 flex items-center gap-1 mr-3 mb-1 sm:mb-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><polyline points="20 6 9 17 4 12" /></svg>
-                            Verificado
-                          </Badge>
-                        )}
-                        <span className="text-sm text-muted-foreground mb-1 sm:mb-0">
-                          Miembro desde {service.advertiser.memberSince}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Otros anuncios</p>
-                          <p className="font-medium">{service.advertiser.otherAds} anuncios activos</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ServiceAdvertiserInfo advertiser={service.advertiser} />
                 </TabsContent>
               </Tabs> {/* End of Tabs component */} 
 
