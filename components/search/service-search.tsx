@@ -166,10 +166,11 @@ export function ServiceSearch({
                     <div key={service.id} className="w-full md:p-1 lg:p-2 lg:max-w-lg lg:mx-auto">
                       <AdCard
                         id={service.id}
+                        userId={service.user_id}
                         title={service.title}
                         category={categoryName}
                         description={service.description}
-                        image={imageUrl}
+                        imagePath={imageUrl}
                         badge={service.is_featured ? "Destacado" : null}
                         price={service.price ? `${service.price}€` : "Consultar"}
                         location={service.city || service.location || ""}
