@@ -6,7 +6,7 @@ import { cookies } from "next/headers"
 
 export async function getProfile() {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get the current user
     const {
@@ -44,7 +44,7 @@ export async function getProfile() {
 
 export async function updateProfile(formData: FormData) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get the current user
     const {

@@ -339,7 +339,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <div className="flex flex-col md:flex-row gap-6 items-start">
                     <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0">
                       <NextImage
-                        src={service.advertiser.image || "/placeholder.svg?text=Anunciante"}
+                        src={service.advertiser.imagePath || "/placeholder.svg?text=Anunciante"}
                         alt={service.advertiser.name}
                         fill
                         className="object-cover"
