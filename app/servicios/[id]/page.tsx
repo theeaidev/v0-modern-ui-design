@@ -32,6 +32,12 @@ interface MappedServiceAdvertiser {
 interface MappedServiceData {
   id: string;
   user_id: string;
+  user?: {
+    id: string;
+    email?: string;
+    full_name?: string;
+  };
+  user_email?: string; // Added user email field
   title: string;
   category: string;
   description: string;
@@ -119,6 +125,8 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
   const service = {
     id: dbAdData.id.toString(),
     user_id: dbAdData.user_id, // Added user_id mapping
+        user: dbAdData.user,
+    user_email: dbAdData.user?.email, // Added user email
     title: dbAdData.title || "Título no disponible",
     category: dbAdData.category?.name || "Categoría desconocida",
     description: dbAdData.description || "Descripción breve no disponible.",
@@ -141,7 +149,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     isVerified: dbAdData.is_verified ?? false, // Ad verification status
 
     advertiser: {
-      name: dbAdData.user?.full_name || "Anunciante Anónimo",
+      name: dbAdData.user?.email?.split("@")[0] || dbAdData.user?.full_name || "Usuario",
       title: "Especialista en el área (Mock Title)", // dbAdData.user doesn't have a specific professional title field
       imagePath: dbAdData.user?.avatar_url || "/placeholder.svg?height=100&width=100&text=Advertiser",
       memberSince: "Marzo 2021 (Mock)", // dbAdData.user doesn't have member_since; consider adding to profiles if needed
@@ -154,6 +162,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     relatedServices: relatedServices, // Kept as mock per instructions
   };
 
+  console.log("Final service object:", JSON.stringify(service, null, 2));
   return service;
 }
 
@@ -276,10 +285,10 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <p className="text-muted-foreground">por sesión</p>
                 </div>
                 <div className="flex gap-2">
-{/*                   <Button variant="outline" size="icon" className="rounded-full">
+                   <Button variant="outline" size="icon" className="rounded-full">
                     <Heart className="h-5 w-5" />
                     <span className="sr-only">Guardar</span>
-                  </Button> */}
+                  </Button>
                   <ServiceShareButton 
                     serviceId={service.id} 
                     serviceTitle={service.title} 
@@ -346,7 +355,9 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold">{service.advertiser.name}</h3>
+                      <h3 className="text-xl font-bold">
+                        {service.advertiser.name}
+                      </h3>
                       <p className="text-muted-foreground">{service.advertiser.title}</p>
                       <div className="flex items-center mt-2 flex-wrap">
                         {service.advertiser.verified && (
