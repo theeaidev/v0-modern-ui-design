@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteFooter } from "@/components/site-footer"
 import { getServiceListingById, getRelatedServicesByCategory } from "@/app/actions/service-listings";
 import { ServiceShareButton } from "@/components/service-share-button";
+import { ServiceFavoriteButton } from "@/components/service-favorite-button"; // Add this import
 import { MainNav } from "@/components/main-nav";
 import { ServiceAdvertiserInfo } from "@/components/service-advertiser-info";
 
@@ -293,10 +294,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <p className="text-muted-foreground">por sesión</p>
                 </div>
                 <div className="flex gap-2">
-                   <Button variant="outline" size="icon" className="rounded-full">
-                    <Heart className="h-5 w-5" />
-                    <span className="sr-only">Guardar</span>
-                  </Button>
+                   <ServiceFavoriteButton serviceId={service.id} />
                   <ServiceShareButton 
                     serviceId={service.id} 
                     serviceTitle={service.title} 
