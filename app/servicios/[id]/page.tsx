@@ -201,21 +201,21 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
         {/* Service Banner */}
         <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
           <ServiceMediaGallery listingId={service.id} userId={service.user_id} title={service.title} initialPrimaryImageUrl={service.image || undefined} />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 container py-6">
             <Link href="/servicios" className="inline-flex items-center text-sm font-medium text-white mb-4 hover:underline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a servicios
             </Link>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
+              <Badge variant="secondary" className="text-white">
                 {service.category}
               </Badge>
-              <div className="flex items-center text-white">
+{/*               <div className="flex items-center text-white">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                 <span>{service.rating}</span>
                 <span className="text-xs ml-1">({service.reviews} reseñas)</span>
-              </div>
+              </div> */}
               {service.isVerified && (
                 <Badge variant="outline" className="bg-green-500/20 text-green-500 border-green-500/30">
                   Anuncio verificado
@@ -375,6 +375,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                       userId={relatedServiceItem.user_id} 
                       title={relatedServiceItem.title} 
                       initialPrimaryImageUrl={relatedServiceItem.image || undefined} 
+                      variant="card"
                     />
                       {relatedServiceItem.price && (
                         <div className="absolute bottom-3 right-3 bg-background/90 text-foreground px-3 py-1 rounded-md font-medium text-sm">
@@ -385,11 +386,17 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <CardHeader>
                       <CardTitle className="text-lg truncate" title={relatedServiceItem.title}>{relatedServiceItem.title}</CardTitle>
                       <CardDescription className="flex items-center mt-1 text-sm">
+                        
                         <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
                         {relatedServiceItem.location}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
+                    <Link href={`/servicios?categoria=${service.category}`} className="hover:text-foreground">
+              <Badge variant="secondary" className="text-white">
+                {service.category}
+              </Badge>
+            </Link>
                       <p className="text-muted-foreground line-clamp-2 text-sm">{relatedServiceItem.description}</p>
                     </CardContent>
                     <CardFooter>

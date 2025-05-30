@@ -51,9 +51,13 @@ interface ServiceMediaGalleryProps {
   userId: string;
   title: string;
   initialPrimaryImageUrl?: string; // Optional: for immediate display while fetching
+  /**
+   * Variant for layout: 'main' (large banner, default) or 'card' (compact for card/grid usage)
+   */
+  variant?: 'main' | 'card';
 }
 
-export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryImageUrl }: ServiceMediaGalleryProps) {
+export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryImageUrl, variant = 'main' }: ServiceMediaGalleryProps) {
   const [allMediaItems, setAllMediaItems] = useState<{ type: 'image' | 'video'; url: string }[]>([]);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isLoadingMedia, setIsLoadingMedia] = useState(true);
@@ -157,10 +161,15 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
     imageToDisplay = placeholderUrl;
   }
 
+  // Responsive container classes depending on variant
+  const containerClassName =
+    variant === 'card'
+      ? 'relative w-full aspect-[4/3] h-auto rounded-md overflow-hidden group bg-muted shadow-sm'
+      : 'relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[480px] xl:h-[540px] max-h-[70vw] rounded-lg overflow-hidden group bg-muted shadow-sm';
+
   return (
-    <div
-      className="relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[480px] xl:h-[540px] max-h-[70vw] rounded-lg overflow-hidden group bg-muted shadow-sm"
-    >
+    <div className={containerClassName}>
+
       {itemToDisplay ? (
         itemToDisplay.type === 'video' ? (
           <div
@@ -170,7 +179,7 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
             <video
               key={itemToDisplay.url}
               src={itemToDisplay.url}
-              className="h-full w-full object-cover rounded-md sm:rounded-lg"
+              className={variant === 'card' ? 'h-full w-full object-cover rounded-md' : 'h-full w-full object-cover rounded-md sm:rounded-lg'}
               controls={false}
               autoPlay={false}
               muted
@@ -193,9 +202,13 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
               src={imageToDisplay}
               alt={title}
               fill
-              className="object-cover rounded-md sm:rounded-lg transition-transform duration-300 group-hover:scale-105"
+              className={
+                variant === 'card'
+                  ? 'object-cover rounded-md transition-transform duration-300 group-hover:scale-105'
+                  : 'object-cover rounded-md sm:rounded-lg transition-transform duration-300 group-hover:scale-105'
+              }
               priority
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 60vw"
+              sizes={variant === 'card' ? '(max-width: 640px) 100vw, 400px' : '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 60vw'}
               onError={(e) => {
                 console.error(`Failed to load image: ${imageToDisplay}`);
                 (e.target as HTMLImageElement).src = placeholderUrl;
@@ -207,7 +220,7 @@ export function ServiceMediaGallery({ listingId, userId, title, initialPrimaryIm
           </div>
         )
       ) : (
-         <NextImage src={placeholderUrl} alt="Placeholder" fill className="object-cover rounded-md sm:rounded-lg" />
+         <NextImage src={placeholderUrl} alt="Placeholder" fill className={variant === 'card' ? 'object-cover rounded-md' : 'object-cover rounded-md sm:rounded-lg'} />
       )}
 
       {mediaCount > 1 && (
