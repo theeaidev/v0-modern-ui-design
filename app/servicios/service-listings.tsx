@@ -49,7 +49,7 @@ export async function ServiceListings({
         category,
         subcategory,
         description: listing.description || "",
-        image: imageUrl,
+        imagePath: imageUrl,
         badge: listing.is_featured ? "Destacado" : null,
         price: listing.price || "",
         location: listing.city || "Online",
@@ -61,12 +61,17 @@ export async function ServiceListings({
         verified: listing.is_verified,
         isNew: new Date(listing.created_at) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days
         publishedAt: new Date(listing.created_at),
+        userId: listing.user_id || 'unknown',
       }
     })
 
     // Combine database listings with sample data
     // In a production environment, you might want to only show sample data if there are no real listings
-    const combinedListings = [...dbListings, ...serviciosData]
+    const sampleListings = serviciosData.map(servicio => ({
+      ...servicio,
+      userId: servicio.userId || servicio.user_id || 'unknown',
+    }))
+    const combinedListings = [...dbListings, ...sampleListings]
 
     return {
       listings: combinedListings,
@@ -76,10 +81,14 @@ export async function ServiceListings({
   } catch (error) {
     console.error("Error fetching service listings:", error)
     // Return only sample data if there's an error
+    const sampleListings = serviciosData.map(servicio => ({
+      ...servicio,
+      userId: servicio.userId || servicio.user_id || 'unknown',
+    }))
     return {
-      listings: serviciosData,
-      total: serviciosData.length,
-      totalPages: Math.ceil(serviciosData.length / 12),
+      listings: sampleListings,
+      total: sampleListings.length,
+      totalPages: Math.ceil(sampleListings.length / 12),
     }
   }
 }

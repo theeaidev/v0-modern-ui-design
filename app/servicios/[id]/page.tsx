@@ -20,7 +20,7 @@ import { MainNav } from "@/components/main-nav";
 interface MappedServiceAdvertiser {
   name: string;
   title: string;
-  image: string;
+  imagePath: string;
   memberSince: string;
   responseRate: string;
   responseTime: string;
@@ -36,7 +36,7 @@ interface MappedServiceData {
   category: string;
   description: string;
   longDescription: string;
-  image: string | undefined; // Primary image URL for the service
+  imagePath: string | undefined; // Primary image URL for the service
   provider: string;
   location: string;
   rating: number;
@@ -57,7 +57,7 @@ type RelatedService = {
   user_id: string; // Added user_id field for media fetching
   title: string;
   description: string;
-  image: string | null;
+  imagePath: string | null;
   price: string | null;
   location: string;
   category?: string;
@@ -109,7 +109,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
         user_id: dbAdData.user_id, // Use the current service's user_id for the placeholder
         title: "Servicio relacionado",
         description: "Este es un servicio de ejemplo que se muestra cuando no hay servicios relacionados disponibles.",
-        image: "/placeholder.svg",
+        imagePath: "/placeholder.svg",
         price: null,
         location: "España",
       }
@@ -124,7 +124,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     description: dbAdData.description || "Descripción breve no disponible.",
     // Use dbAdData.long_description if it exists in your table, otherwise fallback to mock
     longDescription: (dbAdData as any).long_description || mockLongDescription,
-    image: dbAdData.images?.[0]?.url || "/placeholder.svg?height=600&width=1200&text=No+Image",
+    imagePath: dbAdData.images?.[0]?.url || "/placeholder.svg?height=600&width=1200&text=No+Image",
     provider: "Centro de Bienestar Ejemplo (Mock Provider)", // Kept as mock per previous state
     location: dbAdData.city || (dbAdData as any).address || "Ubicación no especificada", // (dbAdData as any).address assumes 'address' might be a field
     rating: dbAdData.average_rating || 0,
@@ -143,7 +143,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     advertiser: {
       name: dbAdData.user?.full_name || "Anunciante Anónimo",
       title: "Especialista en el área (Mock Title)", // dbAdData.user doesn't have a specific professional title field
-      image: dbAdData.user?.avatar_url || "/placeholder.svg?height=100&width=100&text=Advertiser",
+      imagePath: dbAdData.user?.avatar_url || "/placeholder.svg?height=100&width=100&text=Advertiser",
       memberSince: "Marzo 2021 (Mock)", // dbAdData.user doesn't have member_since; consider adding to profiles if needed
       responseRate: "98% (Mock)",
       responseTime: "En menos de 2 horas (Mock)",
@@ -200,7 +200,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
 
         {/* Service Banner */}
         <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
-          <ServiceMediaGallery listingId={service.id} userId={service.user_id} title={service.title} initialPrimaryImageUrl={service.image || undefined} />
+          <ServiceMediaGallery listingId={service.id} userId={service.user_id} title={service.title} initialPrimaryImageUrl={service.imagePath || undefined} />
           {/* Gradient overlay only on desktop */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none hidden sm:block" />
           {/* Overlay text only on desktop */}
@@ -404,7 +404,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                       listingId={relatedServiceItem.id.toString()} 
                       userId={relatedServiceItem.user_id} 
                       title={relatedServiceItem.title} 
-                      initialPrimaryImageUrl={relatedServiceItem.image || undefined} 
+                      initialPrimaryImageUrl={relatedServiceItem.imagePath || undefined} 
                       variant="card"
                     />
                       {relatedServiceItem.price && (

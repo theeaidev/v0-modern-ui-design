@@ -54,6 +54,8 @@ interface ServiceListingItem {
   verified: boolean;
   isNew: boolean;
   publishedAt: Date;
+  userId: string; // Ensure userId is present for AdCard
+  user_id?: string; // for backward compatibility if needed
 }
 
 interface FilterState {
@@ -111,8 +113,18 @@ export function ServiceListingsPage() {
           category_id: categoria ? getCategoryIdByName(categoria) : undefined,
         })
 
-        setAllServices(listings)
-        setFilteredServices(listings)
+        setAllServices(
+  listings.map(servicio => ({
+    ...servicio,
+    userId: servicio.userId || servicio.user_id || 'unknown',
+  })) as ServiceListingItem[]
+)
+setFilteredServices(
+  listings.map(servicio => ({
+    ...servicio,
+    userId: servicio.userId || servicio.user_id || 'unknown',
+  })) as ServiceListingItem[]
+)
         setTotalListings(total)
         setTotalPages(totalPages)
         setCurrentPage(page)
@@ -128,8 +140,8 @@ export function ServiceListingsPage() {
       } catch (error) {
         console.error("Error loading initial data:", error)
         // Fallback to sample data
-        setAllServices(serviciosData)
-        setFilteredServices(serviciosData)
+        setAllServices(serviciosData.map(servicio => ({ ...servicio })))
+        setFilteredServices(serviciosData.map(servicio => ({ ...servicio })))
         setTotalListings(serviciosData.length)
         setTotalPages(Math.ceil(serviciosData.length / 12))
       } finally {
@@ -941,6 +953,7 @@ export function ServiceListingsPage() {
                         verified={servicio.verified}
                         isNew={servicio.isNew}
                         publishedAt={servicio.publishedAt}
+                        userId={servicio.userId}
                       />
                     );
                   })}

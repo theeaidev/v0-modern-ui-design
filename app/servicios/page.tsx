@@ -53,7 +53,7 @@ interface Servicio {
   category: string
   subcategory: string
   description: string
-  image: string
+  imagePath: string
   badge: string | null
   price: string
   location: string
@@ -829,7 +829,7 @@ function ServiceListingsPageContent() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                   {/*  <DropdownMenuItem>Relevancia</DropdownMenuItem> */}
+                    {/*  <DropdownMenuItem>Relevancia</DropdownMenuItem> */}
                     <DropdownMenuItem>Más recientes</DropdownMenuItem>
                     <DropdownMenuItem>Precio: menor a mayor</DropdownMenuItem>
                     <DropdownMenuItem>Precio: mayor a menor</DropdownMenuItem>
@@ -849,7 +849,7 @@ function ServiceListingsPageContent() {
                       category={servicio.category}
                       subcategory={servicio.subcategory}
                       description={servicio.description}
-                      image={servicio.image}
+                      imagePath={servicio.imagePath}
                       badge={servicio.badge}
                       price={servicio.price}
                       location={servicio.location}
@@ -957,7 +957,7 @@ const serviciosData: Servicio[] = [
     subcategory: "Comida colombiana",
     description:
       "Auténtica comida colombiana con los mejores sabores tradicionales. Arepas, bandeja paisa y mucho más.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Destacado",
     price: "Menú 12€",
     location: "Madrid",
@@ -978,7 +978,7 @@ const serviciosData: Servicio[] = [
     subcategory: "Peluquería",
     description:
       "Cortes, peinados, tratamientos y coloración para todo tipo de cabello. Especialistas en cabello latino.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Desde 15€",
     location: "Barcelona",
@@ -998,7 +998,7 @@ const serviciosData: Servicio[] = [
     category: "Servicios",
     subcategory: "Extranjería",
     description: "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Verificado",
     price: "Consulta 40€",
     location: "Madrid",
@@ -1018,7 +1018,7 @@ const serviciosData: Servicio[] = [
     category: "Empleo",
     subcategory: "Tiempo completo",
     description: "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Urgente",
     price: "1.200€/mes",
     location: "Valencia",
@@ -1037,7 +1037,7 @@ const serviciosData: Servicio[] = [
     category: "Formación",
     subcategory: "Cursos",
     description: "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Nuevo",
     price: "120€",
     location: "Barcelona",
@@ -1057,7 +1057,7 @@ const serviciosData: Servicio[] = [
     category: "Productos",
     subcategory: "Alimentos",
     description: "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
     location: "Online",
@@ -1075,7 +1075,7 @@ const serviciosData: Servicio[] = [
     category: "Servicios",
     subcategory: "Masajes",
     description: "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "35€/sesión",
     location: "Sevilla",
@@ -1095,7 +1095,7 @@ const serviciosData: Servicio[] = [
     category: "Empleo",
     subcategory: "Por horas",
     description: "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "10€/hora",
     location: "Madrid",
@@ -1113,7 +1113,7 @@ const serviciosData: Servicio[] = [
     category: "Formación",
     subcategory: "Talleres",
     description: "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Popular",
     price: "50€/mes",
     location: "Barcelona",
@@ -1133,7 +1133,7 @@ const serviciosData: Servicio[] = [
     category: "Productos",
     subcategory: "Artesanía",
     description: "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
     location: "Madrid",
@@ -1153,7 +1153,7 @@ const serviciosData: Servicio[] = [
     category: "Restaurantes",
     subcategory: "Comida venezolana",
     description: "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Menú 10€",
     location: "Valencia",
@@ -1173,7 +1173,7 @@ const serviciosData: Servicio[] = [
     category: "Formación",
     subcategory: "Certificaciones",
     description: "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Certificado",
     price: "200€/curso",
     location: "Málaga",

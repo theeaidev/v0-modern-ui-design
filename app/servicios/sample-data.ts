@@ -7,7 +7,7 @@ export const serviciosData = [
     subcategory: "Comida colombiana",
     description:
       "Auténtica comida colombiana con los mejores sabores tradicionales. Arepas, bandeja paisa y mucho más.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Destacado",
     price: "Menú 12€",
     location: "Madrid",
@@ -19,7 +19,8 @@ export const serviciosData = [
     coordinates: { lat: 40.4256, lng: -3.6868 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás
+    publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás,
+userId: "user-1",
   },
   {
     id: "2",
@@ -28,7 +29,7 @@ export const serviciosData = [
     subcategory: "Peluquería",
     description:
       "Cortes, peinados, tratamientos y coloración para todo tipo de cabello. Especialistas en cabello latino.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Desde 15€",
     location: "Barcelona",
@@ -40,7 +41,8 @@ export const serviciosData = [
     coordinates: { lat: 41.3975, lng: 2.1702 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás
+    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás,
+userId: "user-2",
   },
   {
     id: "3",
@@ -48,7 +50,7 @@ export const serviciosData = [
     category: "Servicios",
     subcategory: "Extranjería",
     description: "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Verificado",
     price: "Consulta 40€",
     location: "Madrid",
@@ -60,7 +62,8 @@ export const serviciosData = [
     coordinates: { lat: 40.423, lng: -3.673 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás
+    publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás,
+userId: "user-3",
   },
   {
     id: "4",
@@ -68,7 +71,7 @@ export const serviciosData = [
     category: "Empleo",
     subcategory: "Tiempo completo",
     description: "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Urgente",
     price: "1.200€/mes",
     location: "Valencia",
@@ -79,7 +82,8 @@ export const serviciosData = [
     coordinates: { lat: 39.4702, lng: -0.3768 },
     verified: false,
     isNew: true,
-    publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás
+    publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás,
+userId: "user-4"
   },
   {
     id: "5",
@@ -87,7 +91,7 @@ export const serviciosData = [
     category: "Formación",
     subcategory: "Cursos",
     description: "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Nuevo",
     price: "120€",
     location: "Barcelona",
@@ -99,7 +103,8 @@ export const serviciosData = [
     coordinates: { lat: 41.392, lng: 2.165 },
     verified: false,
     isNew: true,
-    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás
+    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás,
+userId: "user-5"
   },
   {
     id: "6",
@@ -107,7 +112,7 @@ export const serviciosData = [
     category: "Productos",
     subcategory: "Alimentos",
     description: "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
     location: "Online",
@@ -117,7 +122,8 @@ export const serviciosData = [
     email: "info@productosmexicanos.es",
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 días atrás
+    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 días atrás,
+userId: "user-6"
   },
   {
     id: "7",
@@ -125,7 +131,7 @@ export const serviciosData = [
     category: "Servicios",
     subcategory: "Masajes",
     description: "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "35€/sesión",
     location: "Sevilla",
@@ -137,7 +143,8 @@ export const serviciosData = [
     coordinates: { lat: 37.3886, lng: -5.9953 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 días atrás
+    publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 días atrás,
+userId: "user-7"
   },
   {
     id: "8",
@@ -145,7 +152,7 @@ export const serviciosData = [
     category: "Empleo",
     subcategory: "Por horas",
     description: "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "10€/hora",
     location: "Madrid",
@@ -155,7 +162,8 @@ export const serviciosData = [
     address: "Barrio Salamanca, Madrid",
     verified: false,
     isNew: false,
-    publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 días atrás
+    publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 días atrás,
+userId: "user-8"
   },
   {
     id: "9",
@@ -163,7 +171,7 @@ export const serviciosData = [
     category: "Formación",
     subcategory: "Talleres",
     description: "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Popular",
     price: "50€/mes",
     location: "Barcelona",
@@ -175,7 +183,8 @@ export const serviciosData = [
     coordinates: { lat: 41.395, lng: 2.1527 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 días atrás
+    publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 días atrás,
+userId: "user-9"
   },
   {
     id: "10",
@@ -183,7 +192,7 @@ export const serviciosData = [
     category: "Productos",
     subcategory: "Artesanía",
     description: "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Varios",
     location: "Madrid",
@@ -195,7 +204,8 @@ export const serviciosData = [
     coordinates: { lat: 40.426, lng: -3.702 },
     verified: false,
     isNew: true,
-    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 días atrás
+    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 días atrás,
+userId: "user-10"
   },
   {
     id: "11",
@@ -203,7 +213,7 @@ export const serviciosData = [
     category: "Restaurantes",
     subcategory: "Comida venezolana",
     description: "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: null,
     price: "Menú 10€",
     location: "Valencia",
@@ -215,7 +225,8 @@ export const serviciosData = [
     coordinates: { lat: 39.465, lng: -0.335 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), // 25 días atrás
+    publishedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), // 25 días atrás,
+userId: "user-11"
   },
   {
     id: "12",
@@ -223,7 +234,7 @@ export const serviciosData = [
     category: "Formación",
     subcategory: "Certificaciones",
     description: "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
-    image: "/placeholder.svg?height=300&width=400",
+    imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Certificado",
     price: "200€/curso",
     location: "Málaga",
@@ -235,6 +246,7 @@ export const serviciosData = [
     coordinates: { lat: 36.7213, lng: -4.4214 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000), // 18 días atrás
+    publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000), // 18 días atrás,
+userId: "user-12"
   },
 ]
