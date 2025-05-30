@@ -2,25 +2,25 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/contexts/auth-context"
 
 interface ServiceAdvertiserProps {
   advertiser: {
     name: string;
     imagePath: string;
-    memberSince: string;
+    memberSince: string; // This should be the formatted date string or a raw date string
     verified: boolean;
     otherAds: number;
+    email?: string;
+    // created_at is not directly used for display here, memberSince covers the join date
   };
 }
 
 export function ServiceAdvertiserInfo({ advertiser }: ServiceAdvertiserProps) {
-  const { user } = useAuth();
-  
-  // Get username from email just like in dashboard page
-  const displayName = user?.email?.split("@")[0] || advertiser.name || "Usuario";
+  // advertiser.name should be pre-populated with full_name or a fallback by the parent component
+  const displayName = advertiser.name || (advertiser.email ? advertiser.email.split("@")[0] : "Usuario");
   
   // Format date safely just like in dashboard
+  // formatDate can be a utility function if needed elsewhere, or kept here if specific
   const formatDate = (timestamp: string) => {
     if (!timestamp) return "Fecha desconocida";
 
@@ -38,17 +38,18 @@ export function ServiceAdvertiserInfo({ advertiser }: ServiceAdvertiserProps) {
   
   // Get user initials for avatar fallback, matching dashboard logic
   const getUserInitials = () => {
-    if (displayName) {
+    // Use the already determined displayName
+    if (displayName && displayName !== "Usuario") {
       return displayName
         .split(" ")
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join("")
         .toUpperCase()
         .substring(0, 2);
     }
     
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
+    if (advertiser.email) {
+      return advertiser.email.charAt(0).toUpperCase();
     }
     
     return "U";
@@ -77,14 +78,14 @@ export function ServiceAdvertiserInfo({ advertiser }: ServiceAdvertiserProps) {
             </Badge>
           )}
           <span className="text-sm text-muted-foreground mb-1 sm:mb-0">
-            Miembro desde {user?.created_at ? formatDate(user.created_at) : advertiser.memberSince}
+            Miembro desde {advertiser.memberSince ? formatDate(advertiser.memberSince) : "Fecha desconocida"}
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
+{/*           <div>
             <p className="text-sm text-muted-foreground">Otros anuncios</p>
             <p className="font-medium">{advertiser.otherAds} anuncios activos</p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

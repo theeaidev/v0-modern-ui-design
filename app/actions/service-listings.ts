@@ -255,23 +255,48 @@ export async function getServiceListingById(id: string) {
       throw new Error(listingError.message)
     }
     
-    // Then separately get the user profile data using the user_id
-    const { data: userData, error: userError } = await supabase
+    // Fetch advertiser's profile data from 'profiles' table
+    let advertiserProfile: any = null;
+    const { data: fetchedProfileData, error: profileError } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, is_verified")
+      .select("id, full_name, avatar_url, is_verified, updated_at") // Added updated_at
       .eq("id", listing.user_id)
-      .single()
-      
-    if (userError) {
-      console.warn("Error fetching user data:", userError)
-      // Continue even if user data can't be fetched
+      .single();
+
+    if (profileError) {
+      console.warn(`Error fetching profile for user ${listing.user_id}:`, profileError.message);
+    } else {
+      advertiserProfile = fetchedProfileData;
     }
-    
-    // Combine the data
+
+    // Attempt to fetch advertiser's email from auth.users via an RPC call
+    // Replace 'get_user_email_by_id' with your actual RPC function name if different
+    let advertiserEmail: string | undefined;
+    try {
+      const { data: emailData, error: emailError } = await supabase
+        .rpc('get_user_email_by_id', { p_user_id: listing.user_id }); // Ensure param name matches your RPC
+
+      if (emailError) {
+        console.warn(`Error fetching email for user ${listing.user_id} via RPC:`, emailError.message);
+      } else if (emailData) {
+        advertiserEmail = typeof emailData === 'string' ? emailData : emailData.email; // Adapt based on RPC return
+      }
+    } catch (rpcError: any) {
+      console.warn(`RPC call failed for get_user_email_by_id with user ${listing.user_id}:`, rpcError.message);
+    }
+
+    // Combine all the data
     const data = {
       ...listing,
-      user: userData || null
-    }
+      user: {
+        id: advertiserProfile?.id || listing.user_id,
+        full_name: advertiserProfile?.full_name,
+        avatar_url: advertiserProfile?.avatar_url,
+        is_verified: advertiserProfile?.is_verified,
+        profile_updated_at: advertiserProfile?.updated_at, // For 'member since'
+        email: advertiserEmail,
+      }
+    };
 
     // Get reviews count and average rating
     const { data: reviewsData, error: reviewsError } = await supabase

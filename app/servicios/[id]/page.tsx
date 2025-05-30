@@ -150,14 +150,21 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     isVerified: dbAdData.is_verified ?? false, // Ad verification status
 
     advertiser: {
-      name: dbAdData.user?.email?.split("@")[0] || dbAdData.user?.full_name || "Usuario",
-      title: "Especialista en el área (Mock Title)", // dbAdData.user doesn't have a specific professional title field
+      // Use full_name from the fetched user (advertiser) profile data
+      name: dbAdData.user?.full_name || (dbAdData.user?.email ? dbAdData.user.email.split("@")[0] : "Usuario"),
+      title: "Especialista en el área (Mock Title)", // Placeholder, as not in user profile schema
       imagePath: dbAdData.user?.avatar_url || "/placeholder.svg?height=100&width=100&text=Advertiser",
-      memberSince: "Marzo 2021 (Mock)", // dbAdData.user doesn't have member_since; consider adding to profiles if needed
-      responseRate: "98% (Mock)",
-      responseTime: "En menos de 2 horas (Mock)",
-      verified: dbAdData.user?.is_verified ?? false, // Advertiser's profile verification status
-      otherAds: 3, // This would require another query; kept as mock
+      // Use profile_updated_at from the fetched user profile for 'member since'
+      memberSince: dbAdData.user?.profile_updated_at ? dbAdData.user.profile_updated_at : "Fecha desconocida",
+      responseRate: "98% (Mock)", // Placeholder
+      responseTime: "En menos de 2 horas (Mock)", // Placeholder
+      verified: dbAdData.user?.is_verified ?? false,
+      otherAds: 3, // Placeholder, would require another query
+      email: dbAdData.user?.email, // Email fetched via RPC in getServiceListingById
+      // 'created_at' for the advertiser prop should be their profile's 'updated_at' or similar join date
+      // The 'dbAdData.created_at' is the ad's creation date, not the user's join date.
+      // We're using profile_updated_at for memberSince, which is more appropriate.
+      created_at: dbAdData.user?.profile_updated_at, // Using profile_updated_at for consistency with memberSince
     },
 
     relatedServices: relatedServices, // Kept as mock per instructions
@@ -346,7 +353,10 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   </div>
                 </TabsContent>
                 <TabsContent value="anunciante" className="pt-6">
-                  <ServiceAdvertiserInfo advertiser={service.advertiser} />
+                  <ServiceAdvertiserInfo 
+                    advertiser={service.advertiser} 
+                    advertiserUserId={service.user_id} 
+                  />
                 </TabsContent>
               </Tabs> {/* End of Tabs component */} 
 
