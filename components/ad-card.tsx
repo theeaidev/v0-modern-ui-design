@@ -194,9 +194,7 @@ export function AdCard({
         <Button
           variant="ghost"
           size="icon"
-          className={`absolute top-3 ${
-            badge ? "right-16" : "right-3"
-          } bg-background/50 backdrop-blur-sm hover:bg-background/70 transition-colors ${
+          className={`absolute top-3 right-3 bg-background/50 backdrop-blur-sm hover:bg-background/70 transition-colors ${
             isFavorite ? "text-red-500" : "text-muted-foreground"
           }`}
           onClick={handleFavoriteToggle}

@@ -105,7 +105,7 @@ export function SiteFooter() {
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-primary mt-0.5" />
-                <span className="text-sm text-muted-foreground">info@serviciosdirectorio.com</span>
+                <span className="text-sm text-muted-foreground">info@directoriolatinos.com</span>
               </li>
             </ul>
           </div>

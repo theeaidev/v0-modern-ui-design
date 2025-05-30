@@ -37,6 +37,7 @@ const services = [
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás
+    userId: 'sample-user',
   },
   {
     id: 2,
@@ -56,6 +57,7 @@ const services = [
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás
+    userId: 'sample-user',
   },
   {
     id: 3,
@@ -75,6 +77,7 @@ const services = [
     verified: false,
     isNew: true,
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás
+    userId: 'sample-user',
   },
   {
     id: 4,
@@ -94,6 +97,7 @@ const services = [
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 días atrás
+    userId: 'sample-user',
   },
   {
     id: 5,
@@ -113,6 +117,7 @@ const services = [
     verified: false,
     isNew: false,
     publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás
+    userId: 'sample-user',
   },
   {
     id: 6,
@@ -132,6 +137,7 @@ const services = [
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 días atrás
+    userId: 'sample-user',
   },
   {
     id: 7,
@@ -151,6 +157,7 @@ const services = [
     verified: false,
     isNew: true,
     publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás
+    userId: 'sample-user',
   },
   {
     id: 8,
@@ -170,6 +177,7 @@ const services = [
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 días atrás
+    userId: 'sample-user',
   },
 ]
 
@@ -359,6 +367,7 @@ export default function HomeClient() {
             verified: listing.is_verified,
             isNew: new Date(listing.created_at) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days
             publishedAt: new Date(listing.created_at),
+            userId: listing.user_id || listing.userId || listing.owner_id || '',
           }
         })
 
@@ -367,9 +376,14 @@ export default function HomeClient() {
 
         // If we have enough featured listings from the database, use only those
         // Otherwise, supplement with sample data if needed
+        // Ensure all sample data has a userId for consistency
+        const sampleFeatured = services.filter(s => s.badge === "Destacado").map(s => ({
+          ...s,
+          userId: s.userId || 'sample-user',
+        }));
         const combinedListings = validDbListings.length >= 8 
           ? validDbListings 
-          : [...validDbListings, ...services.filter(s => s.badge === "Destacado").slice(0, 8 - validDbListings.length)]
+          : [...validDbListings, ...sampleFeatured.slice(0, 8 - validDbListings.length)];
         setFeaturedListings(combinedListings)
       } catch (error) {
         console.error("Error fetching featured listings:", error)
@@ -518,8 +532,15 @@ export default function HomeClient() {
                   </div>
                 ))
               : // Loaded state - show real listings combined with sample data
-                featuredListings.map((service) => (
-                  <ErrorBoundary
+                featuredListings.map((service) => {
+  console.log('[HomeClient] service:', {
+    id: service.id,
+    userId: service.userId,
+    imagePath: service.imagePath,
+    service
+  });
+  return (
+    <ErrorBoundary
                     key={service.id}
                     fallback={<div className="p-4 border rounded">Error rendering service card</div>}
                   >
@@ -529,7 +550,7 @@ export default function HomeClient() {
                       title={service.title}
                       category={service.category}
                       description={service.description}
-                      image={service.image}
+                      imagePath={service.imagePath}
                       badge={service.badge}
                       price={service.price}
                       location={service.location}
@@ -542,9 +563,12 @@ export default function HomeClient() {
                       verified={service.verified}
                       isNew={service.isNew}
                       publishedAt={service.publishedAt}
+                      userId={service.userId}
                     />
                   </ErrorBoundary>
-                ))}
+                );
+              })
+            }
           </div>
           <div className="flex justify-center mt-12">
           <Link href="/servicios">
@@ -804,7 +828,7 @@ export default function HomeClient() {
               <div className="mt-8 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <Mail className="h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">info@serviciosdirectorio.com</span>
+                  <span className="text-muted-foreground">info@directoriolatinos.com</span>
                 </div>
               </div>
             </div>
