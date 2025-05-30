@@ -111,8 +111,9 @@ export interface ServiceListingWithDetails extends ServiceListing {
 }
 
 export interface ServiceListingFormData {
-  title: string
-  description: string
+  title: string;
+  slug?: string;
+  description: string;
   long_description?: string
   category_id: number
   subcategory_id?: number

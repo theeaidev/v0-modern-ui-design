@@ -507,11 +507,16 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
         // 4. Update the listing with media URLs if any were uploaded
         if (uploadedImageUrls.length > 0 || uploadedVideoUrls.length > 0) {
-          const mediaUpdateData = {
-            image_urls: uploadedImageUrls.filter(url => !!url),
-            video_urls: uploadedVideoUrls.filter(url => !!url),
+          const updatePayload: ServiceListingFormData = {
+            ...formData, // data from the onSubmit function parameter
+            image_urls: uploadedImageUrls.filter(url => !!url).length > 0 
+                          ? uploadedImageUrls.filter(url => !!url) 
+                          : formData.image_urls || [], // Use newly uploaded or existing, ensure it's an array
+            video_urls: uploadedVideoUrls.filter(url => !!url).length > 0 
+                          ? uploadedVideoUrls.filter(url => !!url) 
+                          : formData.video_urls || [], // Use newly uploaded or existing, ensure it's an array
           };
-          await updateServiceListing(newListingId, mediaUpdateData);
+          await updateServiceListing(newListingId, updatePayload);
           console.log(`Listing ${newListingId} updated with media URLs.`);
         }
 

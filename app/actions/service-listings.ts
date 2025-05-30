@@ -463,37 +463,56 @@ export async function createServiceListing(formData: ServiceListingFormData) {
     revalidatePath("/dashboard/servicios")
 
     return { success: true, data }
-  } catch (error) {
-    console.error("Error creating service listing:", error)
-    throw error
+  } catch (error: any) {
+    console.error("Error creating service listing:", error.message);
+    throw error;
   }
 }
 
 // Update an existing service listing
 export async function updateServiceListing(id: string, formData: ServiceListingFormData) {
   try {
-    const supabase = await createServerClient()
-
-    // Get the current user
-    const { data: { user } } = await supabase.auth.getUser()
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("You must be logged in to update a service listing")
+      throw new Error("You must be logged in to update a service listing");
     }
 
-    // Check if the user owns the listing
+    // Check if the user owns the listing or is an admin
     const { data: listing, error: listingError } = await supabase
       .from("service_listings")
-      .select("user_id")
+      .select("user_id, title")
       .eq("id", id)
-      .single()
+      .single();
 
     if (listingError) {
-      throw new Error(listingError.message)
+      throw new Error(`Error fetching listing details: ${listingError.message}`);
+    }
+    if (!listing) {
+      throw new Error("Listing not found.");
     }
 
     if (listing.user_id !== user.id) {
-      throw new Error("You do not have permission to update this listing")
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+      if (profileError || !profile || !profile.is_admin) {
+        throw new Error("You do not have permission to update this listing");
+      }
+    }
+
+    // Generate a new slug if the title has changed
+    let slug = formData.slug; // Keep existing slug by default
+    if (formData.title && formData.title !== listing.title) { // Assuming 'listing' fetched above also includes 'title'
+      const { data: slugData, error: slugError } = await supabase.rpc("generate_slug", { title: formData.title });
+      if (slugError) {
+        console.warn(`Error generating new slug: ${slugError.message}. Proceeding with old slug or provided one.`);
+      } else {
+        slug = slugData;
+      }
     }
 
     // Update the service listing
@@ -501,6 +520,7 @@ export async function updateServiceListing(id: string, formData: ServiceListingF
       .from("service_listings")
       .update({
         title: formData.title,
+        slug: slug, // Use the potentially new slug
         description: formData.description,
         long_description: formData.long_description || null,
         category_id: formData.category_id,
@@ -517,68 +537,146 @@ export async function updateServiceListing(id: string, formData: ServiceListingF
         contact_whatsapp: formData.contact_whatsapp || null,
         contact_website: formData.contact_website || null,
         status: formData.status,
+        // image_urls and video_urls are typically handled separately via storage uploads
+        // and then updating these arrays in the DB if needed.
+        // For this update, we assume they are either not changing or handled by another process.
       })
       .eq("id", id)
       .select()
-      .single()
+      .single();
 
     if (error) {
-      throw new Error(error.message)
+      throw new Error(`Error updating service listing: ${error.message}`);
     }
 
-    revalidatePath("/servicios")
-    revalidatePath(`/servicios/${id}`)
-    revalidatePath("/dashboard/servicios")
-    revalidatePath(`/dashboard/servicios/${id}`)
+    revalidatePath("/servicios");
+    revalidatePath(`/servicios/${id}`);
+    revalidatePath("/dashboard/servicios");
+    revalidatePath(`/dashboard/servicios/${id}`);
+    revalidatePath("/admin/listings");
 
-    return { success: true, data }
-  } catch (error) {
-    console.error("Error updating service listing:", error)
-    throw error
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Error updating service listing:", error.message);
+    throw error;
   }
 }
 
 // Delete a service listing
-export async function deleteServiceListing(id: string) {
+export async function deleteServiceListing(id: string) { // id is the listingId
   try {
-    const supabase = await createServerClient()
-
-    // Get the current user
-    const { data: { user } } = await supabase.auth.getUser()
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("You must be logged in to delete a service listing")
+      throw new Error("You must be logged in to delete a service listing");
     }
 
-    // Check if the user owns the listing
-    const { data: listing, error: listingError } = await supabase
+    // Step 1: Fetch the listing to get user_id and confirm ownership or admin status
+    const { data: listingData, error: fetchError } = await supabase
       .from("service_listings")
-      .select("user_id")
+      .select("user_id") // Only need user_id to construct storage path and check ownership
       .eq("id", id)
-      .single()
+      .single();
 
-    if (listingError) {
-      throw new Error(listingError.message)
+    if (fetchError) {
+      throw new Error(`Error fetching service listing details: ${fetchError.message}`);
+    }
+    if (!listingData) {
+      throw new Error("Service listing not found.");
     }
 
-    if (listing.user_id !== user.id) {
-      throw new Error("You do not have permission to delete this listing")
+    const ownerUserId = listingData.user_id; // The user_id of the listing owner
+
+    // Check if the current user is the owner or an admin
+    if (ownerUserId !== user.id) {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile || !profile.is_admin) {
+        throw new Error("You do not have permission to delete this listing.");
+      }
     }
 
-    // Delete the service listing
-    const { error } = await supabase.from("service_listings").delete().eq("id", id)
+    // Step 2: List all files in the listing's directory in storage
+    const filesToDelete: string[] = [];
+    // Path in Supabase Storage is typically 'user_id/listing_id/images/filename.jpg'
+    // or 'user_id/listing_id/videos/filename.mp4'
+    const baseListingPath = `${ownerUserId}/${id}`;
 
-    if (error) {
-      throw new Error(error.message)
+    const subfoldersToScan = ['images', 'videos']; // Add other subfolders if they exist
+
+    for (const subfolder of subfoldersToScan) {
+      const fullPathPrefix = `${baseListingPath}/${subfolder}`;
+      const { data: mediaFiles, error: listError } = await supabase.storage
+        .from("service-listings") // Your bucket name
+        .list(fullPathPrefix);
+
+      if (listError) {
+        // Log warning but continue, as the folder might not exist (e.g., no videos uploaded)
+        console.warn(`Could not list files in ${fullPathPrefix}: ${listError.message}. This might be normal if the folder is empty or doesn't exist.`);
+      } else if (mediaFiles && mediaFiles.length > 0) {
+        for (const file of mediaFiles) {
+          if (file.id) { // Ensure it's an actual file object, not a placeholder for an empty folder
+            filesToDelete.push(`${fullPathPrefix}/${file.name}`);
+          }
+        }
+      }
     }
 
-    revalidatePath("/servicios")
-    revalidatePath("/dashboard/servicios")
+    // Step 3: Delete files from Supabase Storage if any were found
+    if (filesToDelete.length > 0) {
+      console.log(`Attempting to delete ${filesToDelete.length} files from storage for listing ${id}:`, filesToDelete);
+      const { data: storageDeleteData, error: storageError } = await supabase.storage
+        .from("service-listings") // Your bucket name
+        .remove(filesToDelete);
 
-    return { success: true }
-  } catch (error) {
-    console.error("Error deleting service listing:", error)
-    throw error
+      if (storageError) {
+        // Log error but continue to attempt DB record deletion
+        console.error("Error deleting files from storage:", storageError.message, { filesToDelete });
+      } else {
+        console.log("Successfully deleted files from storage:", filesToDelete, storageDeleteData);
+      }
+    } else {
+      console.log(`No files found in storage for listing ${id} at path prefix ${baseListingPath} to delete.`);
+    }
+
+    // Step 4: Delete records from the 'service_images' table (if it's still used for other metadata)
+    // This step might be optional if 'service_images' is not used or if ON DELETE CASCADE is set up in DB
+    const { error: serviceImagesDeleteError } = await supabase
+      .from("service_images")
+      .delete()
+      .eq("service_id", id);
+
+    if (serviceImagesDeleteError) {
+      // This might not be a critical error if the table is empty or doesn't exist for this listing
+      console.warn(`Warning or error deleting records from service_images for service_id ${id}:`, serviceImagesDeleteError.message);
+    }
+
+    // Step 5: Delete the main service listing record from the database
+    const { error: deleteError } = await supabase
+      .from("service_listings")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      throw new Error(`Error deleting service listing from database: ${deleteError.message}`);
+    }
+
+    // Step 6: Revalidate relevant paths to update caches
+    revalidatePath("/servicios");
+    revalidatePath("/dashboard/servicios");
+    revalidatePath(`/servicios/${id}`); // Revalidate specific listing path if it was public
+    revalidatePath("/admin/listings"); // If there's an admin listings page
+
+    return { success: true };
+
+  } catch (error: any) {
+    console.error("Detailed error in deleteServiceListing:", error.message, error.stack);
+    throw error;
   }
 }
 
