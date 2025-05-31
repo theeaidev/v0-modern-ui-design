@@ -15,6 +15,7 @@ export async function getServiceListings({
   sort = "newest",
   user_id,
   status,
+  is_featured,
 }: {
   page?: number
   limit?: number
@@ -25,6 +26,7 @@ export async function getServiceListings({
   sort?: "newest" | "oldest" | "price_low" | "price_high" | "popular"
   user_id?: string
   status?: "draft" | "active" | "paused" | "expired" | "rejected" | "pending_approval"
+  is_featured?: boolean
 }) {
   try {
     const supabase = await createServerClient()
@@ -69,6 +71,10 @@ export async function getServiceListings({
     } else if (!user_id) {
       // If not filtering by user_id, only show active listings by default
       query = query.in("status", ["active"])
+    }
+
+    if (is_featured) {
+      query = query.eq("is_featured", true)
     }
 
     // Apply sorting

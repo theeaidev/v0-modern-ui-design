@@ -322,6 +322,7 @@ export default function HomeClient() {
           page: 1,
           limit: 8,
           sort: "newest",
+          is_featured: true,
         })
         
         // Filter only featured listings
