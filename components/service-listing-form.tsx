@@ -322,8 +322,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   };
 
   const markExistingImageForDeletion = (url: string) => {
-    setImagesToDelete(prev => [...prev, url]);
-    setExistingImageUrls(prev => prev.filter(u => u !== url));
+    setImagesToDelete((prev: string[]) => [...prev, url]);
+    setExistingImageUrls((prev: string[]) => prev.filter(u => u !== url));
   };
 
   const handleVideoFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -427,7 +427,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   }
 
   // Handle form submission
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues, event?: React.BaseSyntheticEvent) {
+    const submissionFormData = event?.target ? new FormData(event.target as HTMLFormElement) : new FormData();
     if (!currentUser) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -470,7 +471,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
         console.log("Starting 'create' mode submission for user:", userId);
         // 1. Prepare initial data (no media URLs, no client-generated ID for the record)
         let intendedInitialStatus = values.status;
-        if (values.status === "active") {
+        if (submissionFormData.get('deleteCoverImage') === 'true') {
           intendedInitialStatus = "pending_approval";
         }
 
@@ -508,13 +509,9 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
         // 4. Update the listing with media URLs if any were uploaded
         if (uploadedImageUrls.length > 0 || uploadedVideoUrls.length > 0) {
           const updatePayload: ServiceListingFormData = {
-            ...formData, // data from the onSubmit function parameter
-            image_urls: uploadedImageUrls.filter(url => !!url).length > 0 
-                          ? uploadedImageUrls.filter(url => !!url) 
-                          : formData.image_urls || [], // Use newly uploaded or existing, ensure it's an array
-            video_urls: uploadedVideoUrls.filter(url => !!url).length > 0 
-                          ? uploadedVideoUrls.filter(url => !!url) 
-                          : formData.video_urls || [], // Use newly uploaded or existing, ensure it's an array
+            ...initialDataForBackend,
+            image_urls: uploadedImageUrls.filter(url => !!url),
+            video_urls: uploadedVideoUrls.filter(url => !!url),
           };
           await updateServiceListing(newListingId, updatePayload);
           console.log(`Listing ${newListingId} updated with media URLs.`);
