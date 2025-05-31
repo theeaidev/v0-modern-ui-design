@@ -696,10 +696,12 @@ export default function HomeClient() {
               </div>
             </div>
             <div className="flex justify-center mt-12">
-              <Button size="lg" className="gap-2">
-                <PlusCircle className="h-5 w-5" />
-                Publicar mi anuncio
-              </Button>
+              <Link href="/dashboard/servicios/nuevo">
+                <Button size="lg" className="gap-2">
+                  <PlusCircle className="h-5 w-5" />
+                  Publicar mi anuncio
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
