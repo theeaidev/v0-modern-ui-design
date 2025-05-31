@@ -1,4 +1,6 @@
-"use client"
+"use client";
+
+import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -15,44 +17,82 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/contexts/auth-context"
+import { useAuth } from "@/contexts/auth-context";
+import { getProfileData } from "../app/actions/profile-actions";
+import type { Database } from "../types/supabase";
+
+// Define Profile type
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export function UserDropdown() {
-  const { user, signOut } = useAuth()
-  const router = useRouter()
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+  const [profileData, setProfileData] = useState<Profile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      if (user?.id) {
+        setIsLoadingProfile(true);
+        try {
+          const { profile, error } = await getProfileData(user.id);
+          if (error) {
+            console.error("[UserDropdown] Error fetching profile data:", error);
+            setProfileData(null);
+          } else {
+            setProfileData(profile);
+          }
+        } catch (e) {
+          console.error("[UserDropdown] Unexpected error fetching profile:", e);
+          setProfileData(null);
+        } finally {
+          setIsLoadingProfile(false);
+        }
+      } else {
+        setProfileData(null);
+        setIsLoadingProfile(false);
+      }
+    }
+
+    fetchProfile();
+  }, [user?.id]);
 
   const handleSignOut = async () => {
-    await signOut()
-    router.push("/")
-    router.refresh()
-  }
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
-  // Get user initials for avatar fallback
   const getUserInitials = () => {
-    if (!user?.email) return "U"
-
-    // If we have a full name in user metadata, use that for initials
-    if (user.user_metadata?.full_name) {
-      return user.user_metadata.full_name
+    const nameForInitials = profileData?.full_name || user?.user_metadata?.full_name;
+    if (nameForInitials) {
+      return nameForInitials
         .split(" ")
+        .filter(n => n)
         .map((n) => n[0])
         .join("")
         .toUpperCase()
-        .substring(0, 2)
+        .substring(0, 2);
     }
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
 
-    return user.email.charAt(0).toUpperCase()
-  }
+  const displayName = isLoadingProfile 
+    ? "Cargando..." 
+    : profileData?.full_name || user?.user_metadata?.full_name || "Sin nombre";
+
+  const avatarSrc = profileData?.avatar_url || user?.user_metadata?.avatar_url || "/placeholder.svg";
+  const avatarAlt = profileData?.full_name || user?.user_metadata?.full_name || "User";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={user?.user_metadata?.avatar_url || "/placeholder.svg"}
-              alt={user?.user_metadata?.full_name || user?.email || "User"}
-            />
+            <AvatarImage src={avatarSrc} alt={avatarAlt} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
         </Button>
@@ -60,8 +100,7 @@ export function UserDropdown() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user?.user_metadata?.full_name || user?.email}</p>
-            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -84,13 +123,6 @@ export function UserDropdown() {
               <span>Favoritos</span>
             </Link>
           </DropdownMenuItem>
-
-{/*           <DropdownMenuItem asChild>
-            <Link href="/dashboard/profile" className="flex items-center cursor-pointer">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Ajustes</span>
-            </Link>
-          </DropdownMenuItem> */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
@@ -99,5 +131,5 @@ export function UserDropdown() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
