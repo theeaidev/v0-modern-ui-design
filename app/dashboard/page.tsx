@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { getSupabaseBrowserClient } from "@/lib/supabase"
 import { getFavoritedServiceListings } from "@/app/actions/service-listings"
+import { updateProfileData } from "@/app/actions/profile-actions" // Added import
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth()
@@ -46,8 +47,9 @@ export default function DashboardPage() {
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
   const [fetchAttempted, setFetchAttempted] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState<string>("") 
-  const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string>("")
+  const [fullName, setFullName] = useState<string>("") // Added for name
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false) // Renamed from isUpdatingAvatar
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const [favoritedAds, setFavoritedAds] = useState<{ id: string; title: string | null }[]>([])
@@ -154,45 +156,42 @@ export default function DashboardPage() {
     }
   }, [user, fetchAttempted])
 
-  const handleUpdateAvatar = async () => {
-    if (!avatarUrl.trim()) {
-      toast.error("Por favor, introduce una URL válida")
-      return
-    }
-
+  // Handler to update profile (name and avatar)
+  const handleUpdateProfile = async () => {
     if (!user) {
-      toast.error("Debes iniciar sesión para realizar esta acción")
+      toast.error("Debes iniciar sesión para actualizar tu perfil.")
       return
     }
 
-    setIsUpdatingAvatar(true)
+    setIsUpdatingProfile(true)
     try {
-      const supabase = getSupabaseBrowserClient()
-      
-      const { error } = await supabase
-        .from("profiles")
-        .update({ avatar_url: avatarUrl })
-        .eq("id", user.id)
-
-      if (error) {
-        console.error("Error updating avatar URL:", error)
-        toast.error("No se pudo actualizar la imagen de perfil. Por favor, inténtalo de nuevo.")
-        return
+      const updates = {
+        full_name: fullName,
+        avatar_url: avatarUrl,
       }
 
-      // Update local state
-      setProfileData((prev: any) => ({
-        ...prev,
-        avatar_url: avatarUrl
-      }))
+      const { success, error } = await updateProfileData(user.id, updates)
 
-      toast.success("Imagen de perfil actualizada correctamente")
-      setIsDialogOpen(false)
-    } catch (err) {
-      console.error("Unexpected error updating avatar URL:", err)
-      toast.error("Ocurrió un error al actualizar la imagen de perfil")
+      if (error || !success) {
+        throw new Error(error || "Error desconocido al actualizar el perfil.")
+      }
+
+      // Update local profile data optimistically
+      setProfileData((prevProfile: any) => ({
+        ...prevProfile,
+        ...updates,
+      }))
+      // Also update the individual state for inputs if they are not directly bound to profileData
+      setAvatarUrl(updates.avatar_url)
+      setFullName(updates.full_name)
+
+      toast.success("Perfil actualizado correctamente.")
+      setIsDialogOpen(false) // Close dialog on success
+    } catch (error: any) {
+      console.error("Error updating profile:", error)
+      toast.error(`Error al actualizar el perfil: ${error.message}`)
     } finally {
-      setIsUpdatingAvatar(false)
+      setIsUpdatingProfile(false)
     }
   }
 
@@ -297,17 +296,29 @@ export default function DashboardPage() {
                           className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-background border shadow hover:bg-muted"
                         >
                           <PencilIcon className="h-4 w-4" />
-                          <span className="sr-only">Cambiar imagen de perfil</span>
+                          <span className="sr-only">Editar perfil</span>
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Cambiar imagen de perfil</DialogTitle>
+                          <DialogTitle>Editar perfil</DialogTitle>
                           <DialogDescription>
-                            Introduce la URL de una imagen para usarla como foto de perfil.
+                            Actualiza tu nombre y foto de perfil.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
+                        <div className="grid gap-6 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="full-name" className="text-right">
+                              Nombre completo
+                            </Label>
+                            <Input 
+                              id="full-name" 
+                              value={fullName} 
+                              onChange={(e) => setFullName(e.target.value)}
+                              placeholder="Tu nombre completo"
+                              className="col-span-3"
+                            />
+                          </div>
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="avatar-url" className="text-right">
                               URL de imagen
@@ -330,10 +341,10 @@ export default function DashboardPage() {
                             Cancelar
                           </Button>
                           <Button 
-                            onClick={handleUpdateAvatar} 
-                            disabled={isUpdatingAvatar}
+                            onClick={handleUpdateProfile} 
+                            disabled={isUpdatingProfile}
                           >
-                            {isUpdatingAvatar ? "Guardando..." : "Guardar cambios"}
+                            {isUpdatingProfile ? "Guardando..." : "Guardar cambios"}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
