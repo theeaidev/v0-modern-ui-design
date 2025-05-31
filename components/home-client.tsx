@@ -184,7 +184,7 @@ const services = [
 // Categories data
 const categories = [
   {
-    name: "Bienestar",
+    name: "Comunidad",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +204,7 @@ const categories = [
    /*  count: 124, */
   },
   {
-    name: "Salud",
+    name: "Servicios",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -224,7 +224,7 @@ const categories = [
     /* count: 89, */
   },
   {
-    name: "Formación",
+    name: "Inmobilaria",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -266,7 +266,7 @@ const categories = [
     /* count: 54, */
   },
   {
-    name: "Inmobiliaria",
+    name: "Eventos",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -287,7 +287,7 @@ const categories = [
     /* count: 42, */
   },
   {
-    name: "Eventos",
+    name: "Servicios",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -419,7 +419,7 @@ export default function HomeClient() {
       <section className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-orange-500/20 z-0" />
         <div
-          className="absolute inset-0 z-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-30"
+          className="absolute inset-0 z-0 bg-cover bg-center opacity-30"
           aria-hidden="true"
         />
         <div className="container relative z-10 py-24 md:py-32 lg:py-40">
@@ -728,7 +728,7 @@ export default function HomeClient() {
               </div>
               <div className="order-1 lg:order-2 relative aspect-video lg:aspect-square">
                 <Image
-                  src="/placeholder.svg?height=600&width=600"
+                  src="/logo.png"
                   alt="Quiénes somos"
                   fill
                   className="object-cover rounded-lg"
@@ -756,7 +756,7 @@ export default function HomeClient() {
                   name="María García"
                   role="Terapeuta"
                   category="Empleo"
-                  avatar="/placeholder.svg?height=48&width=48"
+                  avatar="/terapeuta.jpg"
                   rating={5}
                   text="Desde que publiqué mi anuncio en esta plataforma, mi agenda está completa. La visibilidad que me ha dado es increíble y los clientes valoran mucho encontrarme aquí."
                   accentColor="bg-blue-500/20"
@@ -769,7 +769,7 @@ export default function HomeClient() {
                   name="Carlos Rodríguez"
                   role="Agente"
                   category="Inmobiliaria"
-                  avatar="/placeholder.svg?height=48&width=48"
+                  avatar="/man.jpg"
                   rating={5}
                   text="Excelente plataforma para dar a conocer mis propiedades. La interfaz es intuitiva y el soporte al cliente muy eficiente cuando lo he necesitado."
                   accentColor="bg-green-500/20"
@@ -782,7 +782,7 @@ export default function HomeClient() {
                   name="Isabel Romero"
                   role="Profesora de yoga"
                   category="Formación"
-                  avatar="/placeholder.svg?height=48&width=48"
+                  avatar="/yoga.jpg"
                   rating={5}
                   text="He podido llegar a muchas más personas interesadas en mis clases. Esta plataforma me ha ayudado a ganar visibilidad y aumentar mi número de alumnos."
                   accentColor="bg-purple-500/20"
