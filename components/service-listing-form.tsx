@@ -522,6 +522,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
             // Include all required fields from the form values
             title: values.title,
             description: values.description,
+            long_description: values.long_description,
             category_id: values.category_id,
             price_type: values.price_type,
             country: values.country,
