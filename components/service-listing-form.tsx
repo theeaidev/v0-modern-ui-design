@@ -322,8 +322,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   };
 
   const markExistingImageForDeletion = (url: string) => {
-    setImagesToDelete((prev: string[]) => [...prev, url]);
-    setExistingImageUrls((prev: string[]) => prev.filter(u => u !== url));
+    setImagesToDelete(prev => [...prev, url]);
+    setExistingImageUrls(prev => prev.filter(u => u !== url));
   };
 
   const handleVideoFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -365,9 +365,19 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     };
   }, [imagePreviews, videoPreviews]);
 
+  // Helper function to sanitize file names for Supabase Storage
+  function sanitizeFileName(name: string): string {
+    return name
+      .normalize("NFD")                   // Remove accents
+      .replace(/[\u0300-\u036f]/g, "")   // Remove diacritics
+      .replace(/[^a-z0-9_.-]/gi, "_");    // Replace invalid characters
+  }
+
   // Helper to upload a single file
   async function uploadSupabaseFile(file: File, userId: string, listingId: string, mediaType: 'images' | 'videos'): Promise<string> {
-    const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '_')}`;
+    // Sanitize the file name to avoid Supabase 'Invalid key' errors
+    const sanitizedFileName = sanitizeFileName(file.name);
+    const fileName = `${sanitizedFileName}`;
     const filePath = `${userId}/${listingId}/${mediaType}/${fileName}`;
 
     const { data, error } = await supabase.storage
@@ -427,8 +437,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
   }
 
   // Handle form submission
-  async function onSubmit(values: FormValues, event?: React.BaseSyntheticEvent) {
-    const submissionFormData = event?.target ? new FormData(event.target as HTMLFormElement) : new FormData();
+  async function onSubmit(values: FormValues) {
     if (!currentUser) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -471,7 +480,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
         console.log("Starting 'create' mode submission for user:", userId);
         // 1. Prepare initial data (no media URLs, no client-generated ID for the record)
         let intendedInitialStatus = values.status;
-        if (submissionFormData.get('deleteCoverImage') === 'true') {
+        if (values.status === "active") {
           intendedInitialStatus = "pending_approval";
         }
 
@@ -508,12 +517,22 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
 
         // 4. Update the listing with media URLs if any were uploaded
         if (uploadedImageUrls.length > 0 || uploadedVideoUrls.length > 0) {
-          const updatePayload: ServiceListingFormData = {
-            ...initialDataForBackend,
+          // Get the existing service listing data to include required fields
+          const mediaUpdateData = {
+            // Include all required fields from the form values
+            title: values.title,
+            description: values.description,
+            category_id: values.category_id,
+            price_type: values.price_type,
+            country: values.country,
+            // Ensure status is compatible with ServiceListingFormData type
+            status: values.status === 'pending_approval' || values.status === 'rejected' || values.status === 'expired' 
+              ? 'draft' : values.status as 'draft' | 'active' | 'paused',
+            // Add the media URLs
             image_urls: uploadedImageUrls.filter(url => !!url),
             video_urls: uploadedVideoUrls.filter(url => !!url),
           };
-          await updateServiceListing(newListingId, updatePayload);
+          await updateServiceListing(newListingId, mediaUpdateData);
           console.log(`Listing ${newListingId} updated with media URLs.`);
         }
 
