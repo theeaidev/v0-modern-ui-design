@@ -13,9 +13,10 @@ interface ServiceAdvertiserProps {
     email?: string;
     // created_at is not directly used for display here, memberSince covers the join date
   };
+  advertiserUserId?: string; // Added to support user ID for additional operations
 }
 
-export function ServiceAdvertiserInfo({ advertiser }: ServiceAdvertiserProps) {
+export function ServiceAdvertiserInfo({ advertiser, advertiserUserId }: ServiceAdvertiserProps) {
   // advertiser.name should be pre-populated with full_name or a fallback by the parent component
   const displayName = advertiser.name || (advertiser.email ? advertiser.email.split("@")[0] : "Usuario");
   

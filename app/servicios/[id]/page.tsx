@@ -105,7 +105,18 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
   // Fetch related services from the same category
   let relatedServices: RelatedService[] = [];
   if (dbAdData && dbAdData.category_id) {
-    relatedServices = await getRelatedServicesByCategory(dbAdData.category_id, dbAdData.id.toString());
+    const fetchedRelatedServices = await getRelatedServicesByCategory(dbAdData.category_id, dbAdData.id.toString());
+    // Map the returned data to match the RelatedService type
+    relatedServices = fetchedRelatedServices.map(service => ({
+      id: service.id,
+      user_id: service.user_id,
+      title: service.title,
+      description: service.description,
+      price: service.price,
+      location: service.location,
+      category: service.category,
+      imagePath: service.image || null, // Map 'image' to 'imagePath'
+    }));
   }
   
   // Fallback to default placeholder services if none found from DB
@@ -133,7 +144,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     category: dbAdData.category?.name || "Categoría desconocida",
     description: dbAdData.description || "Descripción breve no disponible.",
     // Use dbAdData.long_description if it exists in your table, otherwise fallback to mock
-    longDescription: (dbAdData as any).long_description || mockLongDescription,
+    longDescription: dbAdData.long_description || mockLongDescription,
     imagePath: dbAdData.images?.[0]?.url || "/placeholder.svg?height=600&width=1200&text=No+Image",
     provider: "Centro de Bienestar Ejemplo (Mock Provider)", // Kept as mock per previous state
     location: dbAdData.city || (dbAdData as any).address || "Ubicación no especificada", // (dbAdData as any).address assumes 'address' might be a field
