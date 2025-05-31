@@ -500,7 +500,7 @@ export function ServiceListingCard({ listing, showActions = true }: ServiceListi
           <div className="mt-4 flex flex-wrap gap-2 justify-between items-center">
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/dashboard/servicios/${listing.id}/edit`}>
+                <Link href={`/dashboard/servicios/${listing.id}/editar`}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Editar
                 </Link>
