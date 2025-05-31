@@ -12,6 +12,7 @@ type AuthContextType = {
   signUp: (
     email: string,
     password: string,
+    name: string,
   ) => Promise<{
     error: any | null
     data: any | null

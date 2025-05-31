@@ -42,7 +42,7 @@ export default function RegisterPage() {
     setError(null)
 
     try {
-      const { error, data } = await signUp(email, password)
+      const { error, data } = await signUp(email, password, name)
 
       if (error) {
         setError(error.message)
