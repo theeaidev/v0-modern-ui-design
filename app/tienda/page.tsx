@@ -170,17 +170,11 @@ export default function TiendaPage() {
                         <div className="h-3 w-3 rounded-full bg-green-500"></div>
                         <div className="h-10 w-0.5 bg-green-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 2</span>
-                        <span className="text-xs text-muted-foreground mt-1">Gratis</span>
                       </div>
                       <div className="flex flex-col items-center">
                         <div className="h-3 w-3 rounded-full bg-red-500"></div>
                         <div className="h-10 w-0.5 bg-red-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 3</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                        <div className="h-10 w-0.5 bg-red-500"></div>
-                        <span className="text-xs text-muted-foreground mt-1">Mes 4</span>
                       </div>
                     </div>
                   </div>
@@ -277,7 +271,6 @@ export default function TiendaPage() {
                         <div className="h-3 w-3 rounded-full bg-blue-500"></div>
                         <div className="h-10 w-0.5 bg-blue-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 2</span>
-                        <span className="text-xs text-muted-foreground ">Gratis</span>
                       </div>
                       <div className="flex flex-col items-center">
                         <div className="h-3 w-3 rounded-full bg-red-500"></div>
@@ -514,15 +507,15 @@ export default function TiendaPage() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span>Importe:</span>
-                        <span className="font-medium">{selectedPlan === "basica" ? "5 €" : "10 €"} / mes</span>
+                        <span className="font-medium">{selectedPlan === "basica" ? "10 €" : "20 €"} / mes</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span>Duración:</span>
                         <span className="font-medium">{selectedPlan === "basica" ? "2 meses" : "3 meses"}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span>Total a pagar (Con Descuento Aplicado a Nuevos Clientes):</span>
-                        <span className="font-bold text-lg">{selectedPlan === "basica" ? "5 €" : "10 €"}</span>
+                        <span>Total a pagar:</span>
+                        <span className="font-bold text-lg">{selectedPlan === "basica" ? "10 €" : "20 € (1 mes gratis)"}</span>
                       </div>
                       <Separator />
 
@@ -593,7 +586,7 @@ export default function TiendaPage() {
                             {paymentMethod === "paypal" && (
                               <p className="text-sm text-amber-800">
                                 Serás redirigido a PayPal para completar el pago de{" "}
-                                <strong>{selectedPlan === "basica" ? "5 €" : "10 €"}</strong> al confirmar.
+                                <strong>{selectedPlan === "basica" ? "10 €" : "20 €"}</strong> al confirmar.
                               </p>
                             )}
                             {paymentMethod === "transfer" && (
@@ -612,7 +605,7 @@ export default function TiendaPage() {
                             {paymentMethod === "subscription" && (
                               <p className="text-sm text-amber-800">
                                 Se realizará un cargo mensual de{" "}
-                                <strong>{selectedPlan === "basica" ? "5 €" : "10 €"}</strong> a tu tarjeta. Puedes
+                                <strong>{selectedPlan === "basica" ? "10 €" : "20 €"}</strong> a tu tarjeta. Puedes
                                 cancelar la suscripción en cualquier momento desde tu perfil.
                               </p>
                             )}
