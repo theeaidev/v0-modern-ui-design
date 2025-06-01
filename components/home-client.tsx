@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Mail, Search, PlusCircle, ArrowRight, Briefcase, GraduationCap } from "lucide-react"
+import { Mail, Search, PlusCircle, ArrowRight, Briefcase, GraduationCap, CheckCircle } from "lucide-react"
 import { ServiceSearchClient } from "@/components/search/service-search-client"
 import { Home as HomeIcon } from "@/components/home" // Import the Home component
 
@@ -313,6 +313,37 @@ const categories = [
 export default function HomeClient() {
   const [featuredListings, setFeaturedListings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [success, setSuccess] = useState(false)
+
+
+  /* Formulario de contacto */
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+        body: JSON.stringify({
+            access_key: "ebc84ac2-0f98-4711-9a30-db8f98345448",
+            name: e.target.name.value,
+            email: e.target.email.value,
+            message: e.target.message.value,
+        }),
+    });
+    const result = await response.json();
+    if (result.success) {
+        console.log(result);
+        setSuccess(true);
+        form.reset();
+
+        // Oculta el mensaje después de unos segundos
+        setTimeout(() => setSuccess(false), 3000);
+    }
+
+  }
 
   useEffect(() => {
     async function fetchFeaturedListings() {
@@ -808,38 +839,54 @@ export default function HomeClient() {
             </div>
             <div className="max-w-2xl mx-auto">
               <div className="space-y-6">
+                <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <label htmlFor="name" className="block text-sm font-medium">
                     Nombre
                   </label>
-                  <Input id="name" placeholder="Tu nombre" />
+                  <Input id="name" name="name" placeholder="Tu nombre" />
                 </div>
                 <div className="space-y-4">
                   <label htmlFor="email" className="block text-sm font-medium">
                     Correo electrónico
                   </label>
-                  <Input id="email" type="email" placeholder="tu@email.com" />
+                  <Input id="email" name="email" type="email" placeholder="tu@email.com" />
                 </div>
                 <div className="space-y-4">
                   <label htmlFor="message" className="block text-sm font-medium">
                     Mensaje
                   </label>
-                  <Textarea id="message" placeholder="¿En qué podemos ayudarte?" rows={5} />
+                  <Textarea id="message" name="message" placeholder="¿En qué podemos ayudarte?" rows={5} />
                 </div>
-                <Button className="w-full md:w-auto">Enviar mensaje</Button>
-              </div>
-              <div className="flex items-start gap-2 mt-6">
+
+ {/* ✅ Checkbox de privacidad */}
+ <div className="flex items-start gap-2 mt-3 mb-3">
           <input
             type="checkbox"
             id="privacy"
+            name="privacy"
             className="mt-1"
             required
           />
           <label htmlFor="privacy" className="text-sm text-muted-foreground">
-            He leído y acepto la <a href="/politica-de-privacidad" className="underline text-primary">Política de Privacidad</a>.
+            He leído y acepto la{" "}
+            <a href="/politica-de-privacidad" className="underline text-primary">
+              Política de Privacidad
+            </a>.
           </label>
-        </div>
+        </div>  
 
+                <Button className="w-full md:w-auto">Enviar mensaje</Button>
+                {success && (
+          <div className="flex items-center gap-2 text-green-600 bg-green-100 border border-green-300 rounded-md p-4 mt-4">
+            <CheckCircle className="w-5 h-5" />
+            <p className="text-sm">
+              ¡Gracias por tu mensaje! Te responderemos lo antes posible.
+            </p>
+          </div>
+        )}
+                </form>
+              </div>
               <div className="mt-8 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <Mail className="h-5 w-5 text-primary" />
