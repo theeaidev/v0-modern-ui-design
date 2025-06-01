@@ -760,14 +760,15 @@ export default function HomeClient() {
                   <Button variant="outline">Únete a nosotros</Button>
                 </div> */}
               </div>
-              <div className="order-1 lg:order-2 relative aspect-video lg:aspect-square">
-                <Image
-                  src="/logo.png"
-                  alt="Quiénes somos"
-                  fill
-                  className="object-cover rounded-lg"
-                />
-              </div>
+              <div className="order-1 lg:order-2 relative w-full max-w-xs mx-auto aspect-square lg:aspect-square">
+  <Image
+    src="/logo.png"
+    alt="Quiénes somos"
+    fill
+    className="object-contain rounded-lg"
+  />
+</div>
+
             </div>
           </div>
         </section>
