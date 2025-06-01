@@ -3,6 +3,7 @@
 import { createServerClient } from "@/lib/supabase-server"
 import { revalidatePath } from "next/cache"
 import type { ServiceListingFormData } from "@/types/service"
+import { notFound } from "next/navigation"
 
 // Get all service listings with pagination and filters
 export async function getServiceListings({
@@ -258,7 +259,7 @@ export async function getServiceListingById(id: string) {
       .single()
 
     if (listingError) {
-      throw new Error(listingError.message)
+      notFound();
     }
     
     // Fetch advertiser's profile data from 'profiles' table

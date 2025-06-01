@@ -17,6 +17,7 @@ import { ServiceShareButton } from "@/components/service-share-button";
 import { ServiceFavoriteButton } from "@/components/service-favorite-button"; // Add this import
 import { MainNav } from "@/components/main-nav";
 import { ServiceAdvertiserInfo } from "@/components/service-advertiser-info";
+import { notFound } from "next/navigation";
 
 // Define type for advertiser data within MappedServiceData
 interface MappedServiceAdvertiser {
@@ -77,7 +78,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
 
   if (!dbAdData) {
     console.log(`Ad with ID "${id}" not found in database.`);
-    return null;
+    notFound();
   }
 
   // Log the raw data from Supabase for debugging purposes (server-side)
