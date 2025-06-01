@@ -224,7 +224,7 @@ const categories = [
     /* count: 89, */
   },
   {
-    name: "Inmobilaria",
+    name: "Inmobiliaria",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -266,7 +266,7 @@ const categories = [
     /* count: 54, */
   },
   {
-    name: "Eventos",
+    name: "Otros",
     icon: () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -595,8 +595,8 @@ export default function HomeClient() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {categories.map((category) => (
                 <Link
-                  key={category.name}
-                  href="#"
+                  key={category.name} 
+                  href={`/servicios?categoria=${category.name}`}
                   className="flex flex-col items-center p-4 rounded-lg bg-background hover:bg-primary/5 border transition-colors"
                 >
                   <div className="w-12 h-12 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
