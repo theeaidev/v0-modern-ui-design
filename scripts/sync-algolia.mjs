@@ -1,7 +1,7 @@
 // sync-algolia.mjs
 // This script syncs service listings from Supabase to Algolia
 
-// Import environment variables from .env.local
+// Import environment variables from .env.local (if it exists) or use process.env
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -11,20 +11,30 @@ const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Load environment variables
+// Load environment variables - check if .env.local exists first
+let env = {};
 const envPath = join(__dirname, '..', '.env.local');
-const env = fs.readFileSync(envPath, 'utf8')
-  .split('\n')
-  .filter(line => line && !line.startsWith('#'))
-  .reduce((acc, line) => {
-    const [key, value] = line.split('=');
-    if (key && value) {
-      acc[key.trim()] = value.trim().replace(/^["']|["']$/g, '');
-    }
-    return acc;
-  }, {});
 
-// Configure Algolia with credentials from .env.local
+if (fs.existsSync(envPath)) {
+  // Load from .env.local if it exists (local development)
+  console.log('Loading environment variables from .env.local');
+  env = fs.readFileSync(envPath, 'utf8')
+    .split('\n')
+    .filter(line => line && !line.startsWith('#'))
+    .reduce((acc, line) => {
+      const [key, value] = line.split('=');
+      if (key && value) {
+        acc[key.trim()] = value.trim().replace(/^["']|["']$/g, '');
+      }
+      return acc;
+    }, {});
+} else {
+  // Use process.env directly (CI/CD environments like GitHub Actions)
+  console.log('Loading environment variables from process.env');
+  env = process.env;
+}
+
+// Configure Algolia with credentials
 const ALGOLIA_APP_ID = env.NEXT_PUBLIC_ALGOLIA_APP_ID;
 const ALGOLIA_ADMIN_API_KEY = env.ALGOLIA_ADMIN_API_KEY;
 const ALGOLIA_INDEX_NAME = env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'service_listings';
@@ -32,6 +42,23 @@ const ALGOLIA_INDEX_NAME = env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'service_listin
 // Configure Supabase
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Validate required environment variables
+const requiredVars = {
+  ALGOLIA_APP_ID,
+  ALGOLIA_ADMIN_API_KEY,
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY
+};
+
+const missingVars = Object.entries(requiredVars)
+  .filter(([key, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingVars.join(', '));
+  process.exit(1);
+}
 
 console.log('Starting Algolia sync with:');
 console.log(`- App ID: ${ALGOLIA_APP_ID}`);
