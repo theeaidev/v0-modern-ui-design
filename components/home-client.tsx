@@ -828,6 +828,18 @@ export default function HomeClient() {
                 </div>
                 <Button className="w-full md:w-auto">Enviar mensaje</Button>
               </div>
+              <div className="flex items-start gap-2 mt-6">
+          <input
+            type="checkbox"
+            id="privacy"
+            className="mt-1"
+            required
+          />
+          <label htmlFor="privacy" className="text-sm text-muted-foreground">
+            He leído y acepto la <a href="/politica-de-privacidad" className="underline text-primary">Política de Privacidad</a>.
+          </label>
+        </div>
+
               <div className="mt-8 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <Mail className="h-5 w-5 text-primary" />

@@ -120,7 +120,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           data: {
             name,
-          }
+          },
+          emailRedirectTo: `https://directoriolatinos.com/dashboard`,
         }
       })
       console.log("[AUTH CONTEXT] Sign up result:", !!data, "error:", !!error)
@@ -160,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("[AUTH CONTEXT] Reset password called for email:", email)
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `https://directoriolatinos.com/reset-password`,
       })
       console.log("[AUTH CONTEXT] Reset password result:", !!data, "error:", !!error)
       return { data, error }

@@ -110,29 +110,11 @@ export function SiteFooter() {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-semibold mb-4">Suscríbete</h3>
+            <h3 className="text-lg font-semibold mb-4">Planes Premium para Empresas</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Suscríbete a nuestras novedades y recibe alertas sobre nuevos anuncios en tu área.
+              Publica más anuncios, aumenta tu visibilidad y llega a más clientes potenciales. Con nuestros planes
+              Premium, tu negocio destacará sobre la competencia y atraerá más oportunidades. ¡Haz crecer tu empresa hoy!
             </p>
-            <div className="flex gap-2">
-              <Input placeholder="Tu email" className="max-w-[220px]" />
-              <Button>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -140,17 +122,17 @@ export function SiteFooter() {
         <div className="border-t mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground text-center md:text-left">
-              © {new Date().getFullYear()} Directorio Latinos. Todos los derechos reservados.
+              © {new Date().getFullYear()} Directorios Latinos sl. Todos los derechos reservados.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/politica-de-privacidad" className="text-sm text-muted-foreground hover:text-foreground">
                 Política de Privacidad
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/politica-de-cookies" className="text-sm text-muted-foreground hover:text-foreground">
                 Política de Cookies
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/aviso-legal" className="text-sm text-muted-foreground hover:text-foreground">
                 Aviso Legal
               </Link>
             </div>
