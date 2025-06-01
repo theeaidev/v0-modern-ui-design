@@ -331,6 +331,7 @@ export default function HomeClient() {
             name: e.target.name.value,
             email: e.target.email.value,
             message: e.target.message.value,
+            subject: "Mensaje del Formulario de Directorio Latinos",
         }),
     });
     const result = await response.json();
@@ -840,11 +841,14 @@ export default function HomeClient() {
             <div className="max-w-2xl mx-auto">
               <div className="space-y-6">
                 <form onSubmit={handleSubmit}>
+                  
                 <div className="space-y-4">
+                  
                   <label htmlFor="name" className="block text-sm font-medium">
                     Nombre
                   </label>
                   <Input id="name" name="name" placeholder="Tu nombre" />
+                  <input type="hidden" name="subject" value="Mensaje del Formulario de Directorio Latinos" />
                 </div>
                 <div className="space-y-4">
                   <label htmlFor="email" className="block text-sm font-medium">
