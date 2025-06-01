@@ -39,7 +39,7 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle>Anuncios Activos</CardTitle>
             <CardDescription>Anuncios publicados</CardDescription>
@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
               Gestionar usuarios
             </Link>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   )
