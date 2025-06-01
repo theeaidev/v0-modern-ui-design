@@ -252,16 +252,61 @@ async function syncToAlgolia() {
     console.log('7. Initializing Algolia client...');
     const client = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY);
     
-    console.log('8. Uploading records to Algolia...');
-    const result = await client.saveObjects({
+    console.log('8. Getting current Algolia index to compare...');
+    
+    // Get all current objects in Algolia to identify what needs to be deleted
+    let algoliaObjects = [];
+    try {
+      const searchResponse = await client.search({
+        requests: [{
+          indexName: ALGOLIA_INDEX_NAME,
+          query: '',
+          hitsPerPage: 1000,
+          attributesToRetrieve: ['objectID']
+        }]
+      });
+      
+      if (searchResponse.results && searchResponse.results[0]) {
+        algoliaObjects = searchResponse.results[0].hits.map(hit => hit.objectID);
+      }
+      
+      console.log(`Found ${algoliaObjects.length} existing records in Algolia`);
+    } catch (error) {
+      console.warn('Warning: Could not fetch existing Algolia records:', error.message);
+      algoliaObjects = [];
+    }
+    
+    // Get current active listing IDs from Supabase
+    const currentListingIds = new Set(records.map(record => record.objectID));
+    
+    // Find objects that exist in Algolia but not in current active listings (need to be deleted)
+    const objectsToDelete = algoliaObjects.filter(id => !currentListingIds.has(id));
+    
+    console.log('9. Updating/adding records to Algolia...');
+    const saveResult = await client.saveObjects({
       indexName: ALGOLIA_INDEX_NAME,
       objects: records
     });
     
-    console.log(`✅ Successfully synced ${records.length} records to Algolia.`);
-    console.log('Sync completed successfully.');
+    console.log(`✅ Successfully updated/added ${records.length} records to Algolia.`);
     
-    return { success: true, count: records.length };
+    // Delete objects that no longer exist or are no longer active
+    if (objectsToDelete.length > 0) {
+      console.log(`10. Deleting ${objectsToDelete.length} obsolete records from Algolia...`);
+      const deleteResult = await client.deleteObjects({
+        indexName: ALGOLIA_INDEX_NAME,
+        objectIDs: objectsToDelete
+      });
+      console.log(`✅ Successfully deleted ${objectsToDelete.length} obsolete records from Algolia.`);
+    } else {
+      console.log('10. No obsolete records to delete from Algolia.');
+    }
+    
+    console.log(`\n🎉 Sync completed successfully!`);
+    console.log(`- Added/Updated: ${records.length} records`);
+    console.log(`- Deleted: ${objectsToDelete.length} records`);
+    
+    return { success: true, count: records.length, deleted: objectsToDelete.length };
   } catch (error) {
     console.error('\n❌ Error syncing to Algolia:');
     console.error(error);
