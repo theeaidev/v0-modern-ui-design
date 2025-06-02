@@ -1,7 +1,7 @@
 import Link from "next/link";
 import NextImage from "next/image";
 import { ServiceMediaGallery } from "@/components/service-media-gallery";
-import { ArrowLeft, Calendar, Clock, MapPin, Share2, Star, Heart, Flag, PlusCircle } from "lucide-react"
+import { ArrowLeft, Calendar, Clock, MapPin, Share2, Star, Heart, Flag, PlusCircle, Mail, Phone, MessageCircle, Globe } from "lucide-react"
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -58,6 +58,10 @@ interface MappedServiceData {
   isVerified: boolean;
   advertiser: MappedServiceAdvertiser;
   relatedServices: RelatedService[];
+  contact_email?: string;
+  contact_phone?: string;
+  contact_whatsapp?: string;
+  contact_website?: string;
 }
 
 // Define type for related services
@@ -181,6 +185,11 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     },
 
     relatedServices: relatedServices, // Kept as mock per instructions
+    // Map contact fields
+    contact_email: (dbAdData as any).contact_email || undefined,
+    contact_phone: (dbAdData as any).contact_phone || undefined,
+    contact_whatsapp: (dbAdData as any).contact_whatsapp || undefined,
+    contact_website: (dbAdData as any).contact_website || undefined,
   };
 
   console.log("Final service object:", JSON.stringify(service, null, 2));
@@ -374,23 +383,71 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
               <div className="mt-12">
                 <h2 className="text-2xl font-bold mb-6">Contactar con este anunciante</h2>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label htmlFor="name" className="block text-sm font-medium text-card-foreground">Nombre</label>
-                      <Input id="name" placeholder="Tu nombre" />
+                  {service.contact_email && (
+                    <a 
+                      href={`mailto:${service.contact_email}`}
+                      className="flex items-center gap-x-3 p-4 rounded-lg border bg-card hover:bg-muted transition-colors group"
+                    >
+                      <Mail className="h-5 w-5 text-muted-foreground group-hover:text-blue-600 transition-colors" />
+                      <div>
+                        <p className="font-semibold text-card-foreground">Correo electrónico</p>
+                        <p className="text-sm text-blue-600 group-hover:underline">{service.contact_email}</p>
+                      </div>
+                    </a>
+                  )}
+                  {service.contact_phone && (
+                    <a 
+                      href={`tel:${service.contact_phone}`}
+                      className="flex items-center gap-x-3 p-4 rounded-lg border bg-card hover:bg-muted transition-colors group"
+                    >
+                      <Phone className="h-5 w-5 text-muted-foreground group-hover:text-green-600 transition-colors" />
+                      <div>
+                        <p className="font-semibold text-card-foreground">Teléfono</p>
+                        <p className="text-sm text-green-600 group-hover:underline">{service.contact_phone}</p>
+                      </div>
+                    </a>
+                  )}
+                  {service.contact_whatsapp && (
+                    <a 
+                      href={`https://wa.me/${service.contact_whatsapp.replace(/\D/g, '')}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-x-3 p-4 rounded-lg border bg-card hover:bg-muted transition-colors group"
+                    >
+                      <MessageCircle className="h-5 w-5 text-muted-foreground group-hover:text-emerald-600 transition-colors" />
+                      <div>
+                        <p className="font-semibold text-card-foreground">WhatsApp</p>
+                        <p className="text-sm text-emerald-600 group-hover:underline">{service.contact_whatsapp}</p>
+                      </div>
+                    </a>
+                  )}
+                  {service.contact_website && (
+                    <a 
+                      href={service.contact_website.startsWith('http') ? service.contact_website : `https://${service.contact_website}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-x-3 p-4 rounded-lg border bg-card hover:bg-muted transition-colors group"
+                    >
+                      <Globe className="h-5 w-5 text-muted-foreground group-hover:text-indigo-600 transition-colors" />
+                      <div>
+                        <p className="font-semibold text-card-foreground">Sitio web</p>
+                        <p className="text-sm text-indigo-600 group-hover:underline">{service.contact_website}</p>
+                      </div>
+                    </a>
+                  )}
+                  {!(service.contact_email || service.contact_phone || service.contact_whatsapp || service.contact_website) && (
+                    <div className="p-4 border rounded-lg bg-muted">
+                      <p className="text-sm text-muted-foreground text-center">
+                        El anunciante no ha proporcionado métodos de contacto directo.
+                      </p>
                     </div>
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-medium text-card-foreground">Correo electrónico</label>
-                      <Input id="email" type="email" placeholder="tu@email.com" />
-                    </div>
-                  </div>
-                  <div className="space-y-2 overflow-visible">
-                    <label htmlFor="message" className="block text-sm font-medium text-card-foreground">Mensaje</label>
-                    <Textarea id="message" placeholder={`Me gustaría obtener más información sobre "${service.title}"...`} rows={5} />
-                  </div>
-                  <Button className="w-full sm:w-auto">Enviar mensaje</Button>
-                </div>
-              </div>
+                  )}
+                  <p className="text-xs text-muted-foreground pt-2 text-center">
+                    También puedes intentar contactar usando el formulario de mensaje de la plataforma (si está disponible más abajo).
+                  </p>
+                </div> {/* End of space-y-4 for contact methods */}
+                {/* The original contact form can be re-added here if needed, or a new one built. */} 
+              </div> {/* End of Contact Form Section <div className="mt-12"> */}
             </div> {/* End of lg:col-span-2 */} 
 
             {/* Related Services Section */} 
@@ -416,17 +473,16 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     <CardHeader>
                       <CardTitle className="text-lg truncate" title={relatedServiceItem.title}>{relatedServiceItem.title}</CardTitle>
                       <CardDescription className="flex items-center mt-1 text-sm">
-                        
                         <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
                         {relatedServiceItem.location}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                    <Link href={`/servicios?categoria=${service.category}`} className="hover:text-foreground">
-              <Badge variant="secondary" className="text-white">
-                {service.category}
-              </Badge>
-            </Link>
+                      <Link href={`/servicios?categoria=${service.category}`} className="hover:text-foreground">
+                        <Badge variant="secondary" className="text-white mb-2">
+                          {service.category}
+                        </Badge>
+                      </Link>
                       <p className="text-muted-foreground line-clamp-2 text-sm">{relatedServiceItem.description}</p>
                     </CardContent>
                     <CardFooter>
