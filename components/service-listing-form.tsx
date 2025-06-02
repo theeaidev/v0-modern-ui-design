@@ -634,6 +634,44 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
     }
   }
 
+  const fieldLabelsForButton: Record<string, string> = {
+    title: "Título",
+    description: "Descripción",
+    category_id: "Categoría",
+    contact_email: "Email",
+  };
+  // Based on the Zod schema, these are the core user-input fields without defaults that are mandatory.
+  const mandatoryKeysForButton: (keyof FormValues)[] = ["title", "description", "category_id", "contact_email"];
+
+  const getButtonText = (): string => {
+    if (isUploading) return 'Subiendo archivos...';
+    if (isSubmitting) return `Procesando...`; // Generic for both create/edit modes during submission
+
+    const { errors, submitCount, isValid } = form.formState;
+
+    if (submitCount > 0 && !isValid) {
+      const missingMandatoryFields = mandatoryKeysForButton
+        .filter(key => errors[key])
+        .map(key => fieldLabelsForButton[key] || key);
+
+      if (missingMandatoryFields.length > 0) {
+        if (missingMandatoryFields.length === 1) {
+          return `Falta: ${missingMandatoryFields[0]}`;
+        }
+        if (missingMandatoryFields.length === 2) {
+          return `Faltan: ${missingMandatoryFields.join(' y ')}`;
+        }
+        return `Faltan ${missingMandatoryFields.length} campos`;
+      }
+      // If errors exist but not in our 'mandatoryKeysForButton' list, show a generic message
+      if (Object.keys(errors).length > 0) {
+        return "Revisa el formulario";
+      }
+    }
+
+    return mode === "create" ? "Crear anuncio" : "Actualizar anuncio";
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -1129,7 +1167,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
               </Button>
               <Button type="submit" disabled={isSubmitting || isUploading}>
                 {(isSubmitting || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isUploading ? 'Subiendo archivos...' : (mode === "create" ? "Crear anuncio" : "Actualizar anuncio")}
+                {getButtonText()}
               </Button>
             </div>
           </TabsContent>
