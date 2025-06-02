@@ -442,9 +442,9 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                       </p>
                     </div>
                   )}
-                  <p className="text-xs text-muted-foreground pt-2 text-center">
+ {/*                  <p className="text-xs text-muted-foreground pt-2 text-center">
                     También puedes intentar contactar usando el formulario de mensaje de la plataforma (si está disponible más abajo).
-                  </p>
+                  </p> */}
                 </div> {/* End of space-y-4 for contact methods */}
                 {/* The original contact form can be re-added here if needed, or a new one built. */} 
               </div> {/* End of Contact Form Section <div className="mt-12"> */}
