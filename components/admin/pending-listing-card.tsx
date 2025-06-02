@@ -84,7 +84,7 @@ export function PendingListingCard({ listing }: PendingListingCardProps) {
             <div className="mt-1 text-sm text-muted-foreground">
               <span>Por: {listing.user.full_name}</span>
               <span className="mx-2">•</span>
-              <span>{new Date(listing.created_at).toLocaleDateString()}</span>
+              <span>Fecha de publicacion: {new Date(listing.created_at).toLocaleDateString()}</span>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild>
@@ -97,9 +97,9 @@ export function PendingListingCard({ listing }: PendingListingCardProps) {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="relative aspect-video overflow-hidden rounded-md">
+{/*           <div className="relative aspect-video overflow-hidden rounded-md">
             <Image src={imageUrl || "/placeholder.svg"} alt={listing.title} fill className="object-cover" />
-          </div>
+          </div> */}
           <div className="md:col-span-2">
             <div className="mb-2 text-sm">
               <strong>Categoría:</strong> {listing.category?.name}
