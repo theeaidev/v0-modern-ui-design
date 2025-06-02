@@ -263,7 +263,7 @@ export default function TiendaPage() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-blue-500 mr-2 mt-0.5 shrink-0" />
                       <span>
-                        Anuncio visible durante <strong>3 meses</strong>
+                        Anuncio visible durante <strong>3 meses</strong> El tercer mes es <strong>gratuito.</strong>
                       </span>
                     </li>
                     <li className="flex items-start">
