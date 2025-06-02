@@ -579,7 +579,7 @@ export default function TiendaPage() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span>Duración:</span>
+                        <span>Duración del anuncio:</span>
                         <span className="font-medium">
                           {selectedPlan === "basica"
                             ? "2 meses"
@@ -592,10 +592,10 @@ export default function TiendaPage() {
                         <span>Total a pagar:</span>
                         <span className="font-bold text-lg">
                           {selectedPlan === "basica"
-                            ? "10 €"
+                            ? "5 €"
                             : isGoldPlan
                               ? "25 €"
-                              : "20 € (1 mes gratis)"}
+                              : "10 €"}
                         </span>
                       </div>
                       <Separator />
