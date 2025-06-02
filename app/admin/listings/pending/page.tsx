@@ -3,6 +3,7 @@ import { PendingListingCard } from "@/components/admin/pending-listing-card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
+import { MainNav } from "@/components/main-nav"
 
 // Prevent prerendering during build
 export const dynamic = 'force-dynamic'
@@ -30,6 +31,7 @@ export default async function PendingListingsPage() {
 
   return (
     <div className="space-y-6">
+      <MainNav />
       <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" asChild>
           <Link href="/admin">

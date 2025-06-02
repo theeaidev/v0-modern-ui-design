@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createServerClient } from "@/lib/supabase-server"
+import { MainNav } from "@/components/main-nav"
 
 // Prevent prerendering during build
 export const dynamic = 'force-dynamic'
@@ -23,6 +24,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <MainNav />
       <h1 className="text-3xl font-bold">Panel de Administración</h1>
 
       <div className="grid gap-6 md:grid-cols-3">

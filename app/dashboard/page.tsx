@@ -548,9 +548,9 @@ export default function DashboardPage() {
                           ) : favoritedAds.length > 0 ? (
                             <ul className="space-y-4">
                               {favoritedAds.map(ad => (
-                                <li key={ad.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
-                                  <span className="font-medium truncate pr-2" title={ad.title || 'Anuncio sin título'}>{ad.title || "Anuncio sin título"}</span>
-                                  <div className="flex items-center space-x-2">
+                                <li key={ad.id} className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between p-3 bg-muted/50 rounded-md">
+                                  <span className="font-medium truncate w-full mb-2 sm:mb-0 sm:flex-1 sm:min-w-0 sm:pr-2" title={ad.title || 'Anuncio sin título'}>{ad.title || "Anuncio sin título"}</span>
+                                  <div className="flex items-center space-x-2 self-end sm:self-center">
                                     <Button variant="outline" size="sm" asChild>
                                       <Link href={`/servicios/${ad.id}`} className="flex items-center gap-1.5">
                                         <Eye className="h-4 w-4" />
