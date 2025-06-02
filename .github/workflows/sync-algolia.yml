@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs daily at midnight UTC. You can change this cron expression as needed.
     # See https://crontab.guru/ for help with cron expressions.
-    - cron: '0 0 * * *'
+    - cron: '0 */12 * * *'
   workflow_dispatch: # Allows manual triggering
   
 
