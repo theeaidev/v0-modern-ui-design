@@ -419,7 +419,7 @@ export default function TiendaPage() {
                           <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                           Duración
                         </span>
-                        <span className="font-medium">{isGoldPlan ? "6 meses" : "3 meses"}</span>
+                        <span className="font-medium">{isGoldPlan ? "6 meses" : "3 meses (El tercer mes es gratis)"}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="flex items-center">
@@ -565,7 +565,7 @@ export default function TiendaPage() {
                       <div className="flex justify-between items-center">
                         <span>Plan seleccionado:</span>
                         <Badge className={selectedPlan === "basica" ? "bg-green-500" : (isGoldPlan ? "bg-amber-500" : "bg-blue-500")}>
-                          {selectedPlan === "basica" ? "Básico" : "Premium"}
+                          {selectedPlan === "basica" ? "Básico" : (isGoldPlan ? "Premium Gold" : "Premium")}
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
