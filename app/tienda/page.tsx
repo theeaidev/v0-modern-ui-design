@@ -189,8 +189,8 @@ export default function TiendaPage() {
                         <span className="text-xs text-muted-foreground mt-1">Mes 2</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                        <div className="h-10 w-0.5 bg-red-500"></div>
+                        <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+                        <div className="h-10 w-0.5 bg-yellow-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 3</span>
                       </div>
                     </div>
@@ -263,7 +263,7 @@ export default function TiendaPage() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-blue-500 mr-2 mt-0.5 shrink-0" />
                       <span>
-                        Anuncio visible durante <strong>3 meses</strong> El tercer mes es <strong>gratuito.</strong>
+                        Anuncio visible durante <strong>3 meses.</strong> El tercer mes es <strong>gratuito.</strong>
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -281,14 +281,14 @@ export default function TiendaPage() {
                     <div className="flex items-center justify-around px-1">
                       {[1, 2, 3].map((month) => (
                         <div key={month} className="flex flex-col items-center">
-                          <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                          <div className="h-10 w-0.5 bg-blue-500"></div>
+                          <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                          <div className="h-10 w-0.5 bg-green-500"></div>
                           <span className="text-xs text-muted-foreground mt-1">Mes {month}</span>
                         </div>
                       ))}
                       <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                        <div className="h-10 w-0.5 bg-red-500"></div>
+                        <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+                        <div className="h-10 w-0.5 bg-yellow-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">Mes 4</span>
                       </div>
                     </div>
@@ -379,14 +379,14 @@ export default function TiendaPage() {
                     <div className="flex items-center justify-around px-1">
                       {[1, 2, 3, 4, 5, 6].map((month) => (
                         <div key={month} className="flex flex-col items-center">
-                          <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                          <div className="h-10 w-0.5 bg-amber-500"></div>
+                          <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                          <div className="h-10 w-0.5 bg-green-500"></div>
                           <span className="text-xs text-muted-foreground mt-1">M{month}</span>
                         </div>
                       ))}
                       <div className="flex flex-col items-center">
-                        <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                        <div className="h-10 w-0.5 bg-red-500"></div>
+                        <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+                        <div className="h-10 w-0.5 bg-yellow-500"></div>
                         <span className="text-xs text-muted-foreground mt-1">M7</span>
                       </div>
                     </div>
@@ -853,7 +853,7 @@ export default function TiendaPage() {
                                       ? "25 € (pago único por 6 meses)"
                                       : "10 € / mes"}
                                 </strong>{" "}
-                                {selectedPlan === "premium" ? "a tu tarjeta. Puedes" : selectedPlan === "gold" ? "a tu tarjeta. Puedes" : "mensual a tu tarjeta. Puedes"}
+                                {selectedPlan === "premium" ? "a tu tarjeta. Puedes " : selectedPlan === "gold" ? "a tu tarjeta. Puedes " : "mensual a tu tarjeta. Puedes"}
                                 cancelar la suscripción en cualquier momento desde tu perfil.
                               </p>
                             )}
