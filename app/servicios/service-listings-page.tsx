@@ -55,7 +55,6 @@ interface ServiceListingItem {
   isNew: boolean;
   publishedAt: Date;
   userId: string; // Ensure userId is present for AdCard
-  user_id?: string; // for backward compatibility if needed
 }
 
 interface FilterState {
@@ -387,90 +386,48 @@ setFilteredServices(
 
   // Get unique cities from data
   const uniqueCities = [
-    "A Coruña",
-    "Álava",
-    "Albacete",
-    "Alicante",
-    "Almería",
-    "Asturias",
-    "Ávila",
-    "Badajoz",
-    "Barcelona",
-    "Burgos",
-    "Cáceres",
-    "Cádiz",
-    "Cantabria",
-    "Castellón",
-    "Ciudad Real",
-    "Córdoba",
-    "Cuenca",
-    "Girona",
-    "Granada",
-    "Guadalajara",
-    "Guipúzcoa",
-    "Huelva",
-    "Huesca",
-    "Islas Baleares",
-    "Jaén",
-    "La Rioja",
-    "Las Palmas",
-    "León",
-    "Lleida",
-    "Lugo",
-    "Madrid",
-    "Málaga",
-    "Murcia",
-    "Navarra",
-    "Ourense",
-    "Palencia",
-    "Pontevedra",
-    "Salamanca",
-    "Santa Cruz de Tenerife",
-    "Segovia",
-    "Sevilla",
-    "Soria",
-    "Tarragona",
-    "Teruel",
-    "Toledo",
-    "Valencia",
-    "Valladolid",
-    "Vizcaya",
-    "Zamora",
-    "Zaragoza",
+    "Baíña",
+    "Figaredo",
+    "Gallegos",
+    "Loredo",
+    "Mieres",
+    "La Peña",
+    "Rebollada",
+    "Santa Cruz",
+    "Santa Rosa",
+    "Santullano",
+    "Seana",
+    "Turón",
+    "Urbiés",
+    "Ujo",
+    "Valdecuna",
     "Online",
   ]
 
   // Get unique categories and subcategories
   const categoriesMap: Record<string, string[]> = {
-    Restaurantes: ["Comida dominicana", "Comida colombiana", "Comida mexicana", "Comida peruana", "Comida venezolana"],
+    Restaurantes: ["Sidrería", "Asturiana", "Tradicional", "Tapas", "Parrilla"],
     Servicios: ["Peluquería", "Masajes", "Extranjería", "Limpieza", "Mudanzas"],
     Empleo: ["Tiempo completo", "Medio tiempo", "Por horas"],
     Formación: ["Cursos", "Talleres", "Certificaciones"],
     Productos: ["Alimentos", "Ropa", "Artesanía"],
     Comunidad: ["Asociación", "Compartir coche", "Compartir piso"],
     Inmobiliaria: [
-      "Vivienda en Argentina",
-      "Vivienda en Bolivia",
-      "Vivienda en Brasil",
-      "Vivienda en Chile",
-      "Vivienda en Colombia",
-      "Vivienda en Costa Rica",
-      "Vivienda en Cuba",
-      "Vivienda en Ecuador",
-      "Vivienda en El Salvador",
-      "Vivienda en Guatemala",
-      "Vivienda en Honduras",
-      "Vivienda en México",
-      "Vivienda en Nicaragua",
-      "Vivienda en Panamá",
-      "Vivienda en Paraguay",
-      "Vivienda en Perú",
-      "Vivienda en Puerto Rico",
-      "Vivienda en República Dominicana",
-      "Vivienda en Uruguay",
-      "Vivienda en Venezuela",
-      "Vivienda en Haití",
-      "Vivienda en Guayana Francesa",
+      "Vivienda en Baíña",
+      "Vivienda en Figaredo",
+      "Vivienda en Gallegos",
+      "Vivienda en Loredo",
+      "Vivienda en Mieres",
+      "Vivienda en La Peña",
+      "Vivienda en Rebollada",
+      "Vivienda en Santa Cruz",
+      "Vivienda en Santa Rosa",
+      "Vivienda en Santullano",
+      "Vivienda en Seana",
+      "Vivienda en Turón",
+      "Vivienda en Urbiés",
+      "Vivienda en Ujo",
+      "Vivienda en Valdecuna",
     ],
     Otros: [],
   }
@@ -779,7 +736,7 @@ setFilteredServices(
                   <div>
                     <h3 className="font-medium mb-3 flex items-center">
                       <MapPin className="h-4 w-4 mr-2 text-primary" />
-                      Provincia
+                      Parroquias
                     </h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-2 filter-scrollbar">
                       <div className="flex items-center space-x-2 group">

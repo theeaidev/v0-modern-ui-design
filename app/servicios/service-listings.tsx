@@ -69,9 +69,9 @@ export async function ServiceListings({
     // In a production environment, you might want to only show sample data if there are no real listings
     const sampleListings = serviciosData.map(servicio => ({
       ...servicio,
-      userId: servicio.userId || servicio.user_id || 'unknown',
+      userId: servicio.userId || 'unknown',
     }))
-    const combinedListings = [...dbListings, ...sampleListings]
+    const combinedListings = [/* ...dbListings, */ ...sampleListings]
 
     return {
       listings: combinedListings,
@@ -83,7 +83,7 @@ export async function ServiceListings({
     // Return only sample data if there's an error
     const sampleListings = serviciosData.map(servicio => ({
       ...servicio,
-      userId: servicio.userId || servicio.user_id || 'unknown',
+      userId: servicio.userId || 'unknown',
     }))
     return {
       listings: sampleListings,

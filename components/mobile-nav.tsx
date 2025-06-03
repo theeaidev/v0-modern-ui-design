@@ -86,7 +86,7 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                   }`}
                 ></span>
               </Link>
-              <Link
+{/*               <Link
                 href="/tienda"
                 className={`text-lg font-medium ${
                   currentPath === "/tienda" ? "text-emerald-400" : "text-gray-800 hover:text-emerald-400"
@@ -94,7 +94,7 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                 onClick={() => setIsSheetOpen(false)}
               >
                 Precios
-              </Link>
+              </Link> */}
               <Link
                 href="/#about"
                 className={`text-lg font-medium ${

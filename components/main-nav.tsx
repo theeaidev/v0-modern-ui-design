@@ -56,9 +56,9 @@ export function MainNav() {
               }`}
             ></span>
           </Link>
-          <Link href="/tienda" className="text-sm font-medium hover:text-primary">
+ {/*          <Link href="/tienda" className="text-sm font-medium hover:text-primary">
             Precios
-          </Link>
+          </Link> */}
           <Link href="/#about" className="text-sm font-medium hover:text-primary">
             Quiénes somos
           </Link>

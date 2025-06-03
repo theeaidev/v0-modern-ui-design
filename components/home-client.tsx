@@ -41,19 +41,19 @@ const services = [
   },
   {
     id: 2,
-    title: "Masaje terapéutico",
-    category: "Salud",
-    description: "Técnicas profesionales para aliviar tensiones y mejorar la circulación.",
-    imagePath: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "45€/hora",
-    location: "Barcelona",
+    title: "Moda Astur",
+    category: "Ropa",
+    description: "Tienda de moda con las últimas tendencias y marcas locales.",
+    imagePath: "https://template.canva.com/EAFCbKLQ_LE/1/0/1600w-FBKZMKJ8Vpw.jpg",
+    badge: "Destacado",
+    price: "Desde 15€",
+    location: "Mieres",
     phone: "+34 623 456 789",
     whatsapp: "+34623456789",
-    website: "masajesterapeuticos.com",
-    email: "contacto@masajesterapeuticos.com",
-    address: "Av. Diagonal 405, Barcelona",
-    coordinates: { lat: 41.3975, lng: 2.1702 },
+    website: "modaastur.com",
+    email: "contacto@modaastur.com",
+    address: "Calle Manuel Llaneza 10, Mieres",
+    coordinates: { lat: 43.2456, lng: -5.7765 },
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás
@@ -81,19 +81,19 @@ const services = [
   },
   {
     id: 4,
-    title: "Nutrición personalizada",
-    category: "Salud",
-    description: "Planes alimenticios adaptados a tus necesidades y objetivos.",
+    title: "Electro Turón",
+    category: "Electrónica",
+    description: "Tienda de electrónica,electrodomésticos y servicio técnico.",
     imagePath: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "80€/consulta",
-    location: "Sevilla",
+    badge: "Destacado",
+    price: "Varios precios",
+    location: "Turón",
     phone: "+34 645 678 901",
     whatsapp: "+34645678901",
-    website: "nutricionpersonalizada.com",
-    email: "info@nutricionpersonalizada.com",
-    address: "Av. de la Constitución 20, Sevilla",
-    coordinates: { lat: 37.3886, lng: -5.9953 },
+    website: "electroturon.com",
+    email: "info@electroturon.com",
+    address: "Calle El Horreo 7, Turón, Mieres",
+    coordinates: { lat: 43.2123, lng: -5.7543 },
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 días atrás
@@ -101,39 +101,39 @@ const services = [
   },
   {
     id: 5,
-    title: "Coaching personal",
-    category: "Desarrollo",
-    description: "Acompañamiento para alcanzar tus metas personales y profesionales.",
+    title: "Pastelería Dulce Carbón",
+    category: "Pastelería",
+    description: "Repostería artesanal con especialidad en moscovitas y carbayones.",
     imagePath: "/placeholder.svg?height=300&width=400",
-    badge: null,
-    price: "70€/sesión",
-    location: "Bilbao",
+    badge: "Destacado",
+    price: "3,50€/ración",
+    location: "Figaredo",
     phone: "+34 656 789 012",
     whatsapp: "+34656789012",
-    website: "coachingpersonal.es",
-    email: "contacto@coachingpersonal.es",
-    address: "Gran Vía 30, Bilbao",
-    coordinates: { lat: 43.263, lng: -2.935 },
-    verified: false,
+    website: "dulcecarbon.es",
+    email: "contacto@dulcecarbon.es",
+    address: "Avenida de Figaredo 12, Figaredo, Mieres",
+    coordinates: { lat: 43.2345, lng: -5.7834 },
+    verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás
     userId: 'sample-user',
   },
   {
     id: 6,
-    title: "Fisioterapia",
-    category: "Salud",
-    description: "Tratamientos especializados para lesiones y problemas musculares.",
+    title: "Mesón La Estación",
+    category: "Restaurante",
+    description: "Cocina casera y carnes a la brasa en un ambiente familiar y acogedor.",
     imagePath: "/placeholder.svg?height=300&width=400",
     badge: "Destacado",
-    price: "50€/sesión",
-    location: "Málaga",
+    price: "18€/menú",
+    location: "Ujo",
     phone: "+34 667 890 123",
     whatsapp: "+34667890123",
-    website: "fisioterapiamalaga.com",
-    email: "info@fisioterapiamalaga.com",
-    address: "Paseo Marítimo 25, Málaga",
-    coordinates: { lat: 36.7213, lng: -4.4214 },
+    website: "mesonlaestacion.com",
+    email: "info@mesonlaestacion.com",
+    address: "Calle La Estación 5, Ujo, Mieres",
+    coordinates: { lat: 43.1982, lng: -5.7762 },
     verified: true,
     isNew: false,
     publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 días atrás
@@ -413,11 +413,12 @@ export default function HomeClient() {
         const sampleFeatured = services.filter(s => s.badge === "Destacado").map(s => ({
           ...s,
           userId: s.userId || 'sample-user',
+          imagePath: s.imagePath || '/placeholder.svg?height=300&width=400',
         }));
-        const combinedListings = validDbListings.length >= 8 
+/*         const combinedListings = validDbListings.length >= 8 
           ? validDbListings 
-          : [...validDbListings, ...sampleFeatured.slice(0, 8 - validDbListings.length)];
-        setFeaturedListings(combinedListings)
+          : [...validDbListings, ...sampleFeatured.slice(0, 8 - validDbListings.length)]; */
+        setFeaturedListings(sampleFeatured)
       } catch (error) {
         console.error("Error fetching featured listings:", error)
         // Use only featured sample data as fallback if there's an error
@@ -456,13 +457,13 @@ export default function HomeClient() {
         />
         <div className="container relative z-10 py-24 md:py-32 lg:py-40">
           <div className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              Publica y encuentra servicios cerca de ti
-            </h1>
-            
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              La plataforma líder para anunciar tus servicios profesionales o encontrar exactamente lo que necesitas
-            </p>
+          <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
+  Descubre comercios y restaurantes cerca de ti
+</h1>
+
+<p className="text-xl text-muted-foreground max-w-2xl">
+  La plataforma líder para dar visibilidad a tu negocio local o encontrar exactamente lo que necesitas en tu zona.
+</p>
             <div className="w-full max-w-2xl mt-8">
               <ServiceSearchClient />
             </div>
@@ -524,16 +525,19 @@ export default function HomeClient() {
       <section className="py-12 bg-primary/5">
         <div className="container">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-8 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">¿Ofreces algún servicio?</h2>
-              <p className="text-muted-foreground">Publica tu anuncio y llega a miles de clientes potenciales</p>
-            </div>
-            <Link href="/dashboard/servicios/nuevo">
-            <Button size="lg" className="whitespace-nowrap gap-2">
-              <PlusCircle className="h-5 w-5" />
-              Publicar anuncio
-            </Button>
-            </Link>
+          <div>
+  <h2 className="text-2xl md:text-3xl font-bold mb-2">¿Tienes un comercio o restaurante?</h2>
+  <p className="text-muted-foreground">
+    Publica tu anuncio y conecta con miles de clientes en tu zona
+  </p>
+</div>
+<Link href="/dashboard/servicios/nuevo">
+  <Button size="lg" className="whitespace-nowrap gap-2">
+    <PlusCircle className="h-5 w-5" />
+    Publicar anuncio
+  </Button>
+</Link>
+
           </div>
         </div>
       </section>
@@ -747,14 +751,15 @@ export default function HomeClient() {
               <div className="order-2 lg:order-1">
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">Quiénes somos</h2>
                 <p className="text-lg text-muted-foreground mb-4">
-                Somos la plataforma líder en publicación de anuncios de servicios comerciales latinoamericanos en España. 
-                </p>
-                <p className="text-lg text-muted-foreground mb-6">
-                Nuestra misión es conectar a proveedores de servicios con clientes potenciales de manera rápida y eficiente. 
-                </p>
-                <p className="text-lg text-muted-foreground mb-6">
-                Hemos ayudado a miles de comerciantes a hacer crecer sus negocios y a clientes a encontrar exactamente el servicio que buscan.
-                </p>
+  Somos la plataforma líder para la publicación de anuncios de comercios y restaurantes locales en Mieres.
+</p>
+<p className="text-lg text-muted-foreground mb-6">
+  Nuestra misión es dar visibilidad a los negocios de la zona y ayudarles a conectar con más clientes cerca de ellos.
+</p>
+<p className="text-lg text-muted-foreground mb-6">
+  Ya hemos ayudado a muchos emprendedores locales a impulsar su comercio y atraer más ventas de forma fácil y efectiva.
+</p>
+
 {/*                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button>Nuestra historia</Button>
                   <Button variant="outline">Únete a nosotros</Button>
