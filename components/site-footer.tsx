@@ -73,11 +73,11 @@ export function SiteFooter() {
                   Empleo
                 </Link>
               </li>
-              <li>
+{/*               <li>
                 <Link href="/tienda" className="text-sm text-muted-foreground hover:text-foreground">
                   Tienda
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/#about" className="text-sm text-muted-foreground hover:text-foreground">
                   Quiénes somos
@@ -122,7 +122,7 @@ export function SiteFooter() {
         <div className="border-t mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground text-center md:text-left">
-              © {new Date().getFullYear()} Directorios Latinos sl. Todos los derechos reservados.
+              © {new Date().getFullYear()} Negocios Locales. Todos los derechos reservados.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
