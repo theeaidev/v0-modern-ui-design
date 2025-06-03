@@ -309,13 +309,13 @@ export default function DashboardPage() {
                         <div className="grid gap-6 py-4">
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="full-name" className="text-right">
-                              Nombre completo
+                              Nombre de Usuario
                             </Label>
                             <Input 
                               id="full-name" 
                               value={fullName} 
                               onChange={(e) => setFullName(e.target.value)}
-                              placeholder="Tu nombre completo"
+                              placeholder="Tu nombre de usuario"
                               className="col-span-3"
                             />
                           </div>
