@@ -84,7 +84,7 @@ const services = [
     title: "Electro Turón",
     category: "Electrónica",
     description: "Tienda de electrónica,electrodomésticos y servicio técnico.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://template.canva.com/EAEwtNcTzFE/1/0/1600w-zMCiDxDBRjQ.jpg",
     badge: "Destacado",
     price: "Varios precios",
     location: "Turón",
