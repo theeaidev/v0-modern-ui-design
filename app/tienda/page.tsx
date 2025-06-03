@@ -853,7 +853,7 @@ export default function TiendaPage() {
                                       ? "25 € (pago único por 6 meses)"
                                       : "10 € / mes"}
                                 </strong>{" "}
-                                {selectedPlan === "premium" ? "a tu tarjeta. Puedes " : selectedPlan === "gold" ? "a tu tarjeta. Puedes " : "mensual a tu tarjeta. Puedes"}
+                                {selectedPlan === "premium" ? "a tu tarjeta. Puedes " : selectedPlan === "gold" ? "a tu tarjeta. Puedes " : "mensual a tu tarjeta. Puedes "}
                                 cancelar la suscripción en cualquier momento desde tu perfil.
                               </p>
                             )}
@@ -867,7 +867,7 @@ export default function TiendaPage() {
                 {selectedPlan && !paymentConfirmed ? (
                   <div className="space-y-6">
                     {(paymentMethod === "bizum" || paymentMethod === "transfer") && (
-                      <div className="space-y-4">
+   /*                    <div className="space-y-4">
                         <Label htmlFor="payment-proof">Comprobante de pago (opcional)</Label>
                         <div className="border-2 border-dashed rounded-lg p-6 text-center">
                           <Input id="payment-proof" type="file" className="hidden" onChange={handleFileChange} />
@@ -885,7 +885,18 @@ export default function TiendaPage() {
                             </div>
                           </Label>
                         </div>
+                      </div> */
+                    <div className="bg-green-50 border border-green-200 rounded-md p-4 mt-6">
+                      <div className="flex">
+                        <Check className="h-5 w-5 text-green-500 mr-2 shrink-0" />
+                        <div>
+                          <p className="text-sm text-green-800">
+                            Para activar más rapido el plan elegido, envíanos el justificante de transferencia a <a href="mailto:info@directoriolatinos.com" className="text-green-800 underline">info@directoriolatinos.com</a>
+                          </p>
+                        </div>
                       </div>
+                    </div>
+
                     )}
 
                     {paymentMethod === "subscription" && (
