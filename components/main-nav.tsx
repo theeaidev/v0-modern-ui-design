@@ -20,8 +20,8 @@ export function MainNav() {
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Directorio Latinos Logo" width={40} height={40} className="rounded-sm" />
           <div className="flex flex-col">
-            <span className="text-xl font-bold">Directorio Latinos</span>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-xl font-bold">Directorio Local Mieres</span>
+{/*             <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-xs font-medium text-gray-500">de</span>
                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-red-500/10 to-yellow-500/10 border border-red-200/50 shadow-sm">
                       <span className="text-[10px] uppercase tracking-wide font-semibold text-red-700">España</span>
@@ -29,7 +29,7 @@ export function MainNav() {
                         <img src="https://flagcdn.com/es.svg" alt="Bandera de España" className="w-full h-full object-cover" />
                       </div>
                     </div>
-                  </div>
+                  </div> */}
           </div>
         </Link>
         <nav className="hidden md:flex gap-6">
@@ -40,7 +40,7 @@ export function MainNav() {
             href="/servicios"
             className={`text-sm font-medium ${pathname === "/servicios" ? "text-primary" : "hover:text-primary"}`}
           >
-            Servicios
+            Negocios Locales
           </Link>
           <Link
             href="/servicios?categoria=Empleo"

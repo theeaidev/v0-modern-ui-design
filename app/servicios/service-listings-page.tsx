@@ -442,9 +442,9 @@ setFilteredServices(
         {/* Page Header */}
         <div className="bg-muted/30 border-b">
           <div className="container py-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Servicios</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">Negocios Locales</h1>
             <p className="text-muted-foreground max-w-3xl">
-             Encuentra servicios latinos, oportunidades de empleo, formación y productos filtrando por ciudad y
+             Encuentra negocios locales, oportunidades de empleo, formación y productos filtrando por ciudad y
               categoría.
             </p>
           </div>
@@ -458,7 +458,7 @@ setFilteredServices(
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Buscar servicios, productos, empleos..."
+                  placeholder="Buscar negocios locales, productos, empleos..."
                   className="pl-10 pr-4"
                   value={filters.searchTerm}
                   onChange={handleSearchChange}

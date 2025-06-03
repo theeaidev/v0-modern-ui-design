@@ -886,7 +886,7 @@ export default function HomeClient() {
           </label>
         </div>  
 
-                <Button className="w-full md:w-auto">Enviar mensaje</Button>
+                <Button disabled className="w-full md:w-auto">Enviar mensaje</Button>
                 {success && (
           <div className="flex items-center gap-2 text-green-600 bg-green-100 border border-green-300 rounded-md p-4 mt-4">
             <CheckCircle className="w-5 h-5" />
@@ -900,7 +900,7 @@ export default function HomeClient() {
               <div className="mt-8 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <Mail className="h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">info@directoriolatinos.com</span>
+                  <span className="text-muted-foreground">info@comerciosyrestauracionmieres.com</span>
                 </div>
               </div>
             </div>

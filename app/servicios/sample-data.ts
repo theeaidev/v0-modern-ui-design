@@ -336,5 +336,48 @@ export const serviciosData = [
     isNew: true,
     publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás
     userId: "user-16"
+  },
+  {
+    id: "17",
+    title: "Dependiente/a para Tienda de Ropa",
+    category: "Empleo",
+    subcategory: "Tiempo completo",
+    description: "Se busca dependiente/a para tienda de ropa en el centro de Mieres. Jornada completa, experiencia en atención al cliente y ventas. Se valora conocimiento en moda y visual merchandising. Incorporación inmediata.",
+    imagePath: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800",
+    badge: "Destacado",
+    price: "1.350€/mes",
+    location: "Mieres",
+    phone: "+34 985 123 456",
+    whatsapp: "+34985123456",
+    website: "modamieres.es",
+    email: "empleo@modamieres.es",
+    address: "Calle Manuel Llaneza 15, Mieres",
+    coordinates: { lat: 43.2481, lng: -5.7745 },
+    verified: true,
+    isNew: true,
+    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás
+    userId: "user-17"
+  },
+  {
+    id: "18",
+    title: "Camarero/a para Sidrería",
+    category: "Empleo",
+    subcategory: "Medio tiempo",
+    description: "Sidrería tradicional en Turón busca camarero/a para fines de semana y festivos. Se requiere experiencia en hostelería, conocimiento de escanciado de sidra y atención al cliente. Ambiente familiar y buen equipo de trabajo.",
+    imagePath: "https://images.unsplash.com/photo-1516788875874-c5912cae7b80?w=800",
+    badge: null,
+    price: "800€/mes",
+    location: "Turón",
+    phone: "+34 985 987 654",
+    whatsapp: "+34985987654",
+    website: "",
+    email: "sidreriaturon@gmail.com",
+    address: "Carretera General 45, Turón, Mieres",
+    coordinates: { lat: 43.1981, lng: -5.7345 },
+    verified: false,
+    isNew: true,
+    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 días atrás
+    userId: "user-18"
   }
+
 ]

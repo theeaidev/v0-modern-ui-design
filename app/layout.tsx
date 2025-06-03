@@ -11,8 +11,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Directorio Latinos: Un espacio para todos, con sabor latino",
-  description: "La plataforma líder para publicar y encontrar anuncios de servicios profesionales latinos",
+  title: "Directorio Local Mieres: Tu espacio para crecer",
+  description: "La plataforma líder para publicar y encontrar anuncios de comercios, restaurantes y negocios locales en Mieres",  
   generator: "v0.dev",
 }
 
