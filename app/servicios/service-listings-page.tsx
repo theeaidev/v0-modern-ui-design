@@ -469,14 +469,14 @@ setFilteredServices(
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex gap-2">
                       <MapPin className="h-4 w-4" />
-                      <span>Ciudad</span>
+                      <span>Parroquia</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto filter-scrollbar">
                     <DropdownMenuLabel className="flex items-center">
                       <MapPin className="h-4 w-4 mr-2 text-primary" />
-                      <span>Seleccionar provincia</span>
+                      <span>Seleccionar parroquia</span>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
