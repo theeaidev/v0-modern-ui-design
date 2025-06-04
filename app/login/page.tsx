@@ -43,7 +43,16 @@ export default function LoginPage() {
       const { error: signInError } = await signIn(email, password)
 
       if (signInError) {
-        setError(signInError.message)
+        // In LoginPage.handleSubmit
+        if (signInError) {
+          if (signInError.message === "Invalid login credentials") { // Or whatever the exact Supabase message is
+            setError("El correo electrónico o la contraseña no son correctos. Por favor, inténtalo de nuevo.");
+          } else {
+            setError(signInError.message); // Fallback to the original message for other errors
+          }
+          setIsLoading(false);
+          return;
+        }
         setIsLoading(false)
         return
       }
