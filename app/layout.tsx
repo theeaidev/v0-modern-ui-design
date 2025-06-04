@@ -7,6 +7,7 @@ import { debugLog } from "@/debug-utils"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/toaster"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -33,6 +34,7 @@ export default function RootLayout({
           <DebugApp>{children}</DebugApp>
           <Toaster />
           <Analytics />
+          <SpeedInsights />
         </AuthProvider>
       </body>
     </html>
