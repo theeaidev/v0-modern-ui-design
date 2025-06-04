@@ -18,6 +18,7 @@ import { ServiceFavoriteButton } from "@/components/service-favorite-button"; //
 import { MainNav } from "@/components/main-nav";
 import { ServiceAdvertiserInfo } from "@/components/service-advertiser-info";
 import { notFound } from "next/navigation";
+import { SanitizedHtml } from "@/components/sanitized-html";
 
 // Define type for advertiser data within MappedServiceData
 interface MappedServiceAdvertiser {
@@ -330,7 +331,7 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   <TabsTrigger value="anunciante">Anunciante</TabsTrigger>
                 </TabsList>
                 <TabsContent value="descripcion" className="pt-6">
-                  <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: service.longDescription }} />
+                  <SanitizedHtml content={service.longDescription} className="prose prose-lg max-w-none" />
                 </TabsContent>
                 <TabsContent value="detalles" className="pt-6">
                   {/* Content for "detalles" tab */}
