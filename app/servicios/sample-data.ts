@@ -41,7 +41,7 @@ userId: "user-1",
     coordinates: { lat: 41.3975, lng: 2.1702 },
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 días atrás,
+    publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás,
 userId: "user-2",
   },
   {
@@ -82,7 +82,7 @@ userId: "user-3",
     coordinates: { lat: 39.4702, lng: -0.3768 },
     verified: false,
     isNew: true,
-    publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 día atrás,
+    publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 días atrás,
 userId: "user-4"
   },
   {
@@ -103,7 +103,7 @@ userId: "user-4"
     coordinates: { lat: 41.392, lng: 2.165 },
     verified: false,
     isNew: true,
-    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 días atrás,
+    publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 días atrás,
 userId: "user-5"
   },
   {
@@ -122,7 +122,7 @@ userId: "user-5"
     email: "info@productosmexicanos.es",
     verified: true,
     isNew: false,
-    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 días atrás,
+    publishedAt: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000), // 22 días atrás,
 userId: "user-6"
   },
   {
@@ -162,7 +162,7 @@ userId: "user-7"
     address: "Barrio Salamanca, Madrid",
     verified: false,
     isNew: false,
-    publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 días atrás,
+    publishedAt: new Date(Date.now() - 22  * 24 * 60 * 60 * 1000), // 22 días atrás,
 userId: "user-8"
   },
   {
@@ -204,7 +204,7 @@ userId: "user-9"
     coordinates: { lat: 40.426, lng: -3.702 },
     verified: false,
     isNew: true,
-    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 días atrás,
+    publishedAt: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000), // 22 días atrás,
 userId: "user-10"
   },
   {

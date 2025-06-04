@@ -26,10 +26,19 @@ import { Separator } from "@/components/ui/separator"
 import { AdCard } from "@/components/ad-card"
 import { MainNav } from "@/components/main-nav"
 import { SiteFooter } from "@/components/site-footer"
-import { ServiceListings } from "./service-listings"
+import { ServiceListings } from "./service-listings";
+
+const ITEMS_PER_PAGE = 12; // Define items per page for pagination
 import { serviciosData } from "./sample-data"
 
 // Define types for our filters and services
+type SortOption = "recent" | "price_asc" | "price_desc";
+
+const sortOptionsMap: Record<SortOption, string> = {
+  recent: "Más recientes",
+  price_asc: "Precio: menor a mayor",
+  price_desc: "Precio: mayor a menor",
+};
 type Ciudad = string
 type Categoria = string
 type Subcategoria = string
@@ -94,7 +103,8 @@ export function ServiceListingsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // State for loading
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
+  const [sortOption, setSortOption] = useState<SortOption>("recent");
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -119,12 +129,8 @@ export function ServiceListingsPage() {
     userId: servicio.userId || servicio.userId || 'unknown',
   })) as ServiceListingItem[]
 )
-setFilteredServices(
-  listings.map(servicio => ({
-    ...servicio,
-    userId: servicio.userId || servicio.userId || 'unknown',
-  })) as ServiceListingItem[]
-)
+// setFilteredServices is now handled by the new useEffect below
+        // to ensure filtering and sorting are applied consistently.
         setTotalListings(total)
         setTotalPages(totalPages)
         setCurrentPage(page)
@@ -141,7 +147,8 @@ setFilteredServices(
         console.error("Error loading initial data:", error)
         // Fallback to sample data
         setAllServices(serviciosData.map(servicio => ({ ...servicio })))
-        setFilteredServices(serviciosData.map(servicio => ({ ...servicio })))
+        // setFilteredServices is now handled by the new useEffect below
+        // setFilteredServices(serviciosData.map(servicio => ({ ...servicio })));
         setTotalListings(serviciosData.length)
         setTotalPages(Math.ceil(serviciosData.length / 12))
       } finally {
@@ -149,8 +156,11 @@ setFilteredServices(
       }
     }
 
-    loadInitialData()
-  }, [searchParams])
+    if (!initialDataLoaded) {
+      loadInitialData();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, initialDataLoaded]); // Added initialDataLoaded to prevent re-fetch on client-side nav that changes searchParams if not truly new page load.
 
   // Helper function to get category ID by name (simplified)
   function getCategoryIdByName(name: string): number | undefined {
@@ -166,6 +176,105 @@ setFilteredServices(
 
     return categoryMap[name]
   }
+
+  // Helper function to parse price strings
+  const parsePrice = (priceString: string | null | undefined): number | null => {
+    if (priceString === null || priceString === undefined) return null;
+    if (typeof priceString !== 'string') return null;
+
+    const lowerPriceString = priceString.toLowerCase();
+    if (lowerPriceString === "gratis" || lowerPriceString === "free") return 0;
+    if (lowerPriceString === "a consultar" || lowerPriceString === "contactar") return null;
+
+    // Remove currency symbols (e.g., €, $), thousands separators (.), and use comma as decimal separator if that's the format
+    // This regex is a bit more general. Adjust if prices are very consistently formatted.
+    const cleanedPrice = priceString
+      .replace(/[€$BsS\/]/g, "")      // Remove common currency symbols
+      .replace(/\.(?=\d{3})/g, "")     // Remove dots used as thousands separators
+      .replace(",", ".");             // Replace comma with dot for decimal
+
+    const price = parseFloat(cleanedPrice);
+    return isNaN(price) ? null : price;
+  };
+
+  // useEffect to filter, sort, and paginate services
+  useEffect(() => {
+    if (!initialDataLoaded) {
+      // Wait for initial data to be loaded
+      return;
+    }
+
+    setIsLoading(true);
+
+    let servicesToDisplay = [...allServices];
+
+    // Apply search term filter
+    if (filters.searchTerm) {
+      const searchTermLower = filters.searchTerm.toLowerCase();
+      servicesToDisplay = servicesToDisplay.filter(
+        (service) =>
+          service.title.toLowerCase().includes(searchTermLower) ||
+          service.description.toLowerCase().includes(searchTermLower)
+      );
+    }
+
+    // Apply city filters
+    if (filters.ciudades.length > 0) {
+      servicesToDisplay = servicesToDisplay.filter((service) =>
+        filters.ciudades.includes(service.location) // Assuming service.location is the city string
+      );
+    }
+
+    // Apply category filters
+    if (filters.categorias.length > 0) {
+      servicesToDisplay = servicesToDisplay.filter((service) =>
+        filters.categorias.includes(service.category)
+      );
+    }
+
+    // Apply subcategory filters
+    if (filters.subcategorias.length > 0) {
+      servicesToDisplay = servicesToDisplay.filter((service) =>
+        filters.subcategorias.includes(service.subcategory)
+      );
+    }
+
+    // Apply sorting
+    if (sortOption === "price_asc") {
+      servicesToDisplay.sort((a, b) => {
+        const priceA = parsePrice(a.price);
+        const priceB = parsePrice(b.price);
+        if (priceA === null && priceB === null) return 0;
+        if (priceA === null) return 1; // Nulls (Gratis, A consultar) at the end for ascending
+        if (priceB === null) return -1;
+        return priceA - priceB;
+      });
+    } else if (sortOption === "price_desc") {
+      servicesToDisplay.sort((a, b) => {
+        const priceA = parsePrice(a.price);
+        const priceB = parsePrice(b.price);
+        if (priceA === null && priceB === null) return 0;
+        if (priceA === null) return 1; // Nulls (Gratis, A consultar) at the end for descending
+        if (priceB === null) return -1;
+        return priceB - priceA;
+      });
+    } else if (sortOption === "recent") {
+      servicesToDisplay.sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      );
+    }
+
+    setTotalListings(servicesToDisplay.length); // Total after filtering
+
+    // Apply pagination
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedServices = servicesToDisplay.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+    setFilteredServices(paginatedServices);
+    setTotalPages(Math.ceil(servicesToDisplay.length / ITEMS_PER_PAGE));
+
+    setIsLoading(false);
+  }, [allServices, filters, sortOption, currentPage, initialDataLoaded]);
 
   // Add this useEffect to handle URL parameters
   useEffect(() => {
@@ -442,7 +551,30 @@ setFilteredServices(
 
   // Get unique categories and subcategories
   const categoriesMap: Record<string, string[]> = {
-    Restaurantes: ["Comida dominicana", "Comida colombiana", "Comida mexicana", "Comida peruana", "Comida venezolana"],
+    Restaurantes: [
+      "Comida argentina",
+      "Comida boliviana",
+      "Comida brasileña",
+      "Comida chilena",
+      "Comida colombiana",
+      "Comida costarricense",
+      "Comida cubana",
+      "Comida ecuatoriana",
+      "Comida salvadoreña",
+      "Comida guatemalteca",
+      "Comida hondureña",
+      "Comida mexicana",
+      "Comida nicaragüense",
+      "Comida panameña",
+      "Comida paraguaya",
+      "Comida peruana",
+      "Comida puertorriqueña",
+      "Comida dominicana",
+      "Comida uruguaya",
+      "Comida venezolana",
+      "Comida haitiana",
+      "Comida de Guayana Francesa"
+    ],
     Servicios: ["Peluquería", "Masajes", "Extranjería", "Limpieza", "Mudanzas"],
     Empleo: ["Tiempo completo", "Medio tiempo", "Por horas"],
     Formación: ["Cursos", "Talleres", "Certificaciones"],
@@ -901,15 +1033,15 @@ setFilteredServices(
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
-                      Ordenar por: Más recientes
+                      Ordenar por: {sortOptionsMap[sortOption]}
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {/* <DropdownMenuItem>Relevancia</DropdownMenuItem> */}
-                    <DropdownMenuItem>Más recientes</DropdownMenuItem>
-                    <DropdownMenuItem>Precio: menor a mayor</DropdownMenuItem>
-                    <DropdownMenuItem>Precio: mayor a menor</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setSortOption("recent")}>Más recientes</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setSortOption("price_asc")}>Precio: menor a mayor</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setSortOption("price_desc")}>Precio: mayor a menor</DropdownMenuItem>
                     {/* <DropdownMenuItem>Mejor valorados</DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
