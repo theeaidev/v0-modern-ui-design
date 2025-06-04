@@ -609,7 +609,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
             ? "Tus cambios han sido enviados para revisión."
             : `Tu anuncio ha sido actualizado (estado: ${intendedUserFacingStatus}).`,
         });
-        router.push(`/dashboard/servicios/${currentListingId}`);
+        router.push(`/dashboard/servicios`);  
+        /* ${currentListingId} */
       }
     } catch (error) {
       console.error("Error submitting form:", error);
