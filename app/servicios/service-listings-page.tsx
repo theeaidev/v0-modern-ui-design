@@ -116,13 +116,13 @@ export function ServiceListingsPage() {
         setAllServices(
   listings.map(servicio => ({
     ...servicio,
-    userId: servicio.userId || servicio.user_id || 'unknown',
+    userId: servicio.userId || servicio.userId || 'unknown',
   })) as ServiceListingItem[]
 )
 setFilteredServices(
   listings.map(servicio => ({
     ...servicio,
-    userId: servicio.userId || servicio.user_id || 'unknown',
+    userId: servicio.userId || servicio.userId || 'unknown',
   })) as ServiceListingItem[]
 )
         setTotalListings(total)
@@ -682,7 +682,7 @@ setFilteredServices(
             {/* Desktop Sidebar Filters */}
             <div className="hidden md:block w-64 shrink-0">
               <div className="sticky top-36">
-                <div className="space-y-6">
+                <div className="space-y-6 max-h-[calc(100vh-180px)] overflow-y-auto pr-2 filter-scrollbar">
                   <div>
                     <h3 className="font-medium mb-3">Categorías</h3>
                     <Accordion
