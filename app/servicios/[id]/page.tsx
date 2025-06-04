@@ -330,8 +330,10 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                   {/* <TabsTrigger value="detalles">Detalles</TabsTrigger> */}
                   <TabsTrigger value="anunciante">Anunciante</TabsTrigger>
                 </TabsList>
-                <TabsContent value="descripcion" className="pt-6">
-                  <SanitizedHtml content={service.longDescription} className="prose prose-lg max-w-none" />
+                <TabsContent value="descripcion" className="pt-6 w-full">
+                  <div className="w-full">
+                    <SanitizedHtml content={service.longDescription} className="prose prose-lg w-full max-w-none" />
+                  </div>
                 </TabsContent>
                 <TabsContent value="detalles" className="pt-6">
                   {/* Content for "detalles" tab */}
@@ -372,11 +374,13 @@ export default async function ServicioDetailPage({ params }: { params: { id: str
                     </p>
                   </div>
                 </TabsContent>
-                <TabsContent value="anunciante" className="pt-6">
-                  <ServiceAdvertiserInfo 
-                    advertiser={service.advertiser} 
-                    advertiserUserId={service.user_id} 
-                  />
+                <TabsContent value="anunciante" className="pt-6 w-full">
+                  <div className="w-full">
+                    <ServiceAdvertiserInfo 
+                      advertiser={service.advertiser} 
+                      advertiserUserId={service.user_id}
+                    />
+                  </div>
                 </TabsContent>
               </Tabs> {/* End of Tabs component */} 
 
