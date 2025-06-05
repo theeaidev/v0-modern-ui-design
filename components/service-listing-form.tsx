@@ -838,28 +838,46 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                 render={({ field }) => {
                   const [isFocused, setIsFocused] = React.useState(false);
 
+                  // Always derive rawNumericValue from the current field.value, stripping any non-digits or '€'.
+                  // This handles initial load (e.g., "25€" from DB) and subsequent updates.
+                  const currentFieldValue = String(field.value || "");
+                  const rawNumericValue = currentFieldValue.replace(/€/g, "").replace(/[^0-9]/g, "");
+
+                  // Determine the value to display in the input field
                   let valueForInput: string;
                   if (isFocused) {
-                    valueForInput = String(field.value || "");
+                    // When focused, display the raw numeric value.
+                    valueForInput = rawNumericValue;
                   } else {
-                    valueForInput = field.value ? String(field.value) + "€" : "";
+                    // When not focused, display with "€" if rawNumericValue is not empty.
+                    valueForInput = rawNumericValue ? rawNumericValue + "€" : "";
                   }
 
                   const handleFocus = () => {
                     setIsFocused(true);
+                    // Ensure the form's internal state (field.value) is the raw numeric value when focusing.
+                    // This is crucial if the initial field.value (e.g., from DB) contained "€".
+                    if (field.value !== rawNumericValue) {
+                      field.onChange(rawNumericValue);
+                    }
                   };
 
                   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
                     setIsFocused(false);
-                    field.onBlur(); // Important for react-hook-form validation
+                    // The `valueForInput` will update due to `isFocused` changing for the display.
+                    // The internal `field.value` should already be the raw numeric value due to `handleChange` or `handleFocus`.
+                    // Re-sanitize and set field.value on blur to be absolutely sure internal state is clean.
+                    const textInInput = e.target.value; // This is what's currently visible in the input
+                    const numericFromInput = textInInput.replace(/€/g, "").replace(/[^0-9]/g, "");
+                    if (field.value !== numericFromInput) {
+                        field.onChange(numericFromInput);
+                    }
+                    field.onBlur(); // Important for react-hook-form's validation and touched state.
                   };
 
                   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                     let inputValue = e.target.value;
-                    // If focused and user pastes/types '€', remove it for numeric processing
-                    if (isFocused && inputValue.endsWith('€')) {
-                        inputValue = inputValue.slice(0, -1);
-                    }
+                    // Extract only digits for the internal form state.
                     const numericValue = inputValue.replace(/[^0-9]/g, '');
                     field.onChange(numericValue); // Update react-hook-form with pure numeric string
                   };
@@ -869,13 +887,13 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
                       <FormLabel>Precio (opcional)</FormLabel>
                       <FormControl>
                         <Input
-                          name={field.name} // From react-hook-form
-                          ref={field.ref}   // From react-hook-form
-                          placeholder="Ej: 25€"
-                          value={valueForInput} // Display formatted value
-                          onChange={handleChange} // Custom handler
-                          onFocus={handleFocus}   // Custom handler
-                          onBlur={handleBlur}     // Custom handler (calls field.onBlur)
+                          name={field.name}
+                          ref={field.ref}
+                          placeholder="Ej: 25" // UPDATED PLACEHOLDER
+                          value={valueForInput} // Display value (raw or with €)
+                          onChange={handleChange}
+                          onFocus={handleFocus}
+                          onBlur={handleBlur}
                         />
                       </FormControl>
                       <FormDescription>Puedes incluir el precio.</FormDescription>
