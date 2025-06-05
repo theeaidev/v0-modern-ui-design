@@ -156,7 +156,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
     location: dbAdData.city || (dbAdData as any).address || "Ubicación no especificada", // (dbAdData as any).address assumes 'address' might be a field
     rating: dbAdData.average_rating || 0,
     reviews: dbAdData.reviews_count || 0,
-    price: dbAdData.price ? `${dbAdData.price}€` : "Consultar", // Assuming price is numeric from DB
+    price: dbAdData.price ? `${dbAdData.price}` : "Consultar", // Assuming price is numeric from DB
     // Use dbAdData.duration_minutes if it exists, otherwise fallback
     duration: (dbAdData as any).duration_minutes ? `${(dbAdData as any).duration_minutes} minutos` : "50 minutos (Mock Duration)", 
     // Use dbAdData.availability_details if it exists (might need parsing if JSON), otherwise fallback

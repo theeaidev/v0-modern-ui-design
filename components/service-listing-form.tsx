@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -488,7 +488,8 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
           ...values,
           category_id: Number(values.category_id),
           subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined,
-          status: intendedInitialStatus === "active" || intendedInitialStatus === "pending_approval" ? "active" : intendedInitialStatus === "paused" ? "paused" : "draft",
+          price: values.price ? `${values.price}€` : undefined,
+          status: intendedInitialStatus === "active" || intendedInitialStatus === "pending_approval" ? "active" : intendedInitialStatus === "draft" ? "draft" : "paused",
         };
 
         // 2. Create the listing to get its ID
@@ -592,6 +593,7 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
           ...values,
           category_id: Number(values.category_id),
           subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : undefined,
+          price: values.price ? `${values.price}€` : undefined,
           status: intendedUserFacingStatus === "active" || intendedUserFacingStatus === "pending_approval"
             ? "active"
             : intendedUserFacingStatus === "paused"
@@ -833,16 +835,54 @@ export function ServiceListingForm({ listing, mode }: ServiceListingFormProps) {
               <FormField
                 control={form.control}
                 name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Precio (opcional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ej: 25€" {...field} value={field.value || ""} />
-                    </FormControl>
-                    <FormDescription>Puedes incluir el precio o un rango de precios.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const [isFocused, setIsFocused] = React.useState(false);
+
+                  let valueForInput: string;
+                  if (isFocused) {
+                    valueForInput = String(field.value || "");
+                  } else {
+                    valueForInput = field.value ? String(field.value) + "€" : "";
+                  }
+
+                  const handleFocus = () => {
+                    setIsFocused(true);
+                  };
+
+                  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+                    setIsFocused(false);
+                    field.onBlur(); // Important for react-hook-form validation
+                  };
+
+                  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                    let inputValue = e.target.value;
+                    // If focused and user pastes/types '€', remove it for numeric processing
+                    if (isFocused && inputValue.endsWith('€')) {
+                        inputValue = inputValue.slice(0, -1);
+                    }
+                    const numericValue = inputValue.replace(/[^0-9]/g, '');
+                    field.onChange(numericValue); // Update react-hook-form with pure numeric string
+                  };
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Precio (opcional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          name={field.name} // From react-hook-form
+                          ref={field.ref}   // From react-hook-form
+                          placeholder="Ej: 25€"
+                          value={valueForInput} // Display formatted value
+                          onChange={handleChange} // Custom handler
+                          onFocus={handleFocus}   // Custom handler
+                          onBlur={handleBlur}     // Custom handler (calls field.onBlur)
+                        />
+                      </FormControl>
+                      <FormDescription>Puedes incluir el precio.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
