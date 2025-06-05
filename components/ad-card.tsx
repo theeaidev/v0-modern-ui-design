@@ -199,7 +199,7 @@ export function AdCard({
           variant="ghost"
           size="icon"
           className={`absolute top-3 right-3 bg-background/50 backdrop-blur-sm hover:bg-background/70 transition-colors ${
-            isFavorite ? "text-red-500" : "text-muted-foreground"
+            isFavorite ? "text-red-500" : "text-foreground"
           }`}
           onClick={handleFavoriteToggle}
           disabled={isLoading}
