@@ -53,6 +53,7 @@ export default function TiendaPage() {
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("bizum")
+  const [externalPaymentInitiated, setExternalPaymentInitiated] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -64,15 +65,22 @@ export default function TiendaPage() {
     setSelectedPlan(plan)
   }
 
+  const handlePaymentMethodChange = (value: string) => {
+    setPaymentMethod(value);
+    setExternalPaymentInitiated(false);
+    setPaymentConfirmed(false);
+    setPaymentProof(null);
+  };
+
   const handlePaymentConfirm = () => {
     if (paymentMethod === "subscription") {
       // Redirect to specific payment links based on the selected plan
       if (selectedPlan === "basica") {
-        router.push("https://checkout.revolut.com/pay/14122323-e9b3-47f2-8ca6-02b7fd3d3da5")
+         window.open("https://checkout.revolut.com/pay/14122323-e9b3-47f2-8ca6-02b7fd3d3da5", "_blank", "noopener noreferrer")
       } else if (selectedPlan === "premium") {
-        router.push("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de")
+         window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer")
       } else if (selectedPlan === "gold") {
-        router.push("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de") // Using same link for now
+         window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer") // Using same link for now
       }
     } else {
       // For other payment methods, just confirm payment
@@ -747,7 +755,7 @@ export default function TiendaPage() {
                       {/* Payment Methods */}
                       <div className="pt-4">
                         <h4 className="font-medium mb-3">Selecciona un método de pago:</h4>
-                        <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="gap-4">
+                        <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange} className="gap-4">
                           <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50 transition-colors">
                             <RadioGroupItem value="bizum" id="bizum" />
                             <Label htmlFor="bizum" className="flex items-center cursor-pointer">
@@ -866,7 +874,8 @@ export default function TiendaPage() {
 
                 {selectedPlan && !paymentConfirmed ? (
                   <div className="space-y-6">
-                    {(paymentMethod === "bizum" || paymentMethod === "transfer") && (
+                    {((paymentMethod === "bizum" || paymentMethod === "transferencia") || 
+                       ((paymentMethod === "paypal" || paymentMethod === "subscription") && externalPaymentInitiated)) && (
    /*                    <div className="space-y-4">
                         <Label htmlFor="payment-proof">Comprobante de pago (opcional)</Label>
                         <div className="border-2 border-dashed rounded-lg p-6 text-center">
@@ -891,7 +900,7 @@ export default function TiendaPage() {
                         <Check className="h-5 w-5 text-green-500 mr-2 shrink-0" />
                         <div>
                           <p className="text-sm text-green-800">
-                            Para activar más rapido el plan elegido, envíanos el justificante de transferencia a <a href="mailto:info@directoriolatinos.com" className="text-green-800 underline">info@directoriolatinos.com</a>
+                            Para activar más rapido el plan elegido, envíanos el justificante de transferencia a <a href="mailto:info@directoriolatinos.com" className="text-green-800 underline">info@directoriolatinos.com</a> y pulsa el botón "He realizado el pago".
                           </p>
                         </div>
                       </div>
@@ -916,26 +925,78 @@ export default function TiendaPage() {
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button className="w-full">
-                          {paymentMethod === "subscription" || paymentMethod === "paypal"
-                            ? "Proceder al pago"
-                            : "He realizado el pago"}
+                        <Button className="w-full" disabled={paymentConfirmed}>
+                          {paymentConfirmed
+                            ? "Pago Confirmado"
+                            : (paymentMethod === "paypal" || paymentMethod === "subscription") && externalPaymentInitiated
+                              ? "He realizado el pago"
+                              : paymentMethod === "bizum" || paymentMethod === "transferencia"
+                                ? "He realizado el pago"
+                                : "Proceder al pago"}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Confirmar pago</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {paymentMethod === "subscription"
-                              ? `¿Confirmas que deseas proceder con la suscripción del plan ${selectedPlan === "basica" ? "Básico" : selectedPlan === "gold" ? "Premium Gold" : "Premium"}? Serás redirigido a nuestra plataforma de pago seguro.`
-                              : paymentMethod === "paypal"
-                                ? "Serás redirigido a PayPal para completar el pago."
-                                : `¿Has realizado el pago por ${paymentMethod === "bizum" ? "Bizum" : "transferencia bancaria"}? Al confirmar, nuestro equipo verificará tu pago y activará tu anuncio lo antes posible.`}
+                            {(paymentMethod === "subscription" || paymentMethod === "paypal") && !externalPaymentInitiated
+                              ? paymentMethod === "subscription"
+                                ? `¿Confirmas que deseas proceder con la suscripción del plan ${
+                                    selectedPlan === "basica"
+                                      ? "Básico"
+                                      : selectedPlan === "gold"
+                                        ? "Premium Gold"
+                                        : "Premium"
+                                  }? Serás redirigido a nuestra plataforma de pago seguro.`
+                                : "Serás redirigido a PayPal para completar el pago."
+                              : `¿Has realizado el pago por ${
+                                  paymentMethod === "bizum"
+                                    ? "Bizum"
+                                    : paymentMethod === "transferencia"
+                                      ? "transferencia bancaria"
+                                      : paymentMethod === "paypal"
+                                        ? "PayPal"
+                                        : "suscripción" // Default for subscription if externalPaymentInitiated is true
+                                }? Al confirmar, nuestro equipo verificará tu pago y activará tu anuncio lo antes posible.`}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={handlePaymentConfirm}>Confirmar</AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={() => {
+                              if ((paymentMethod === "subscription" || paymentMethod === "paypal") && !externalPaymentInitiated) {
+                                // First step for subscription/paypal: redirect and set initiated flag
+                                if (paymentMethod === "subscription") {
+                                  if (selectedPlan === "basica") {
+                                    window.open("https://checkout.revolut.com/pay/14122323-e9b3-47f2-8ca6-02b7fd3d3da5", "_blank", "noopener noreferrer");
+                                  } else if (selectedPlan === "premium") {
+                                    window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer");
+                                  } else if (selectedPlan === "gold") {
+                                    window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer"); // Using same link for now
+                                  }
+                                } else if (paymentMethod === "paypal") {
+                                  // Placeholder for actual PayPal redirection or SDK integration
+                                  if (selectedPlan === "basica") {
+                                    window.open("https://checkout.revolut.com/pay/14122323-e9b3-47f2-8ca6-02b7fd3d3da5", "_blank", "noopener noreferrer");
+                                  } else if (selectedPlan === "premium") {
+                                    window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer");
+                                  } else if (selectedPlan === "gold") {
+                                    window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer"); // Using same link for now
+                                  }
+                                  console.log("Initiating PayPal payment process (placeholder)...");
+                                  // Typically, you would redirect to PayPal or open a PayPal modal here.
+                                }
+                                setExternalPaymentInitiated(true);
+                              } else {
+                                // This is for:
+                                // 1. Bizum or Transferencia (their only confirmation step)
+                                // 2. PayPal or Subscription AFTER externalPaymentInitiated is true (their second confirmation step)
+                                setPaymentConfirmed(true);
+                              }
+                            }}
+                          >
+                            Confirmar
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
