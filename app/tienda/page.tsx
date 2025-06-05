@@ -928,9 +928,9 @@ export default function TiendaPage() {
                         <Button className="w-full" disabled={paymentConfirmed}>
                           {paymentConfirmed
                             ? "Pago Confirmado"
-                            : (paymentMethod === "paypal" || paymentMethod === "subscription") && externalPaymentInitiated
+                            : (paymentMethod === "paypal"|| paymentMethod === "subscription") && externalPaymentInitiated
                               ? "He realizado el pago"
-                              : paymentMethod === "bizum" || paymentMethod === "transferencia"
+                              : paymentMethod === "bizum" || paymentMethod === "transfer"
                                 ? "He realizado el pago"
                                 : "Proceder al pago"}
                         </Button>
@@ -1006,12 +1006,12 @@ export default function TiendaPage() {
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Check className="h-6 w-6 text-green-500" />
                     </div>
-                    <h3 className="text-lg font-medium text-green-800 mb-2">¡Pago confirmado!</h3>
+                    <h3 className="text-lg font-medium text-green-800 mb-2">¡Confirmación Enviada!</h3>
                     <p className="text-green-700 mb-4">
                       {paymentMethod === "subscription"
                         ? "Has sido redirigido a nuestra plataforma de pago. Tu anuncio se activará una vez completado el proceso."
                         : paymentMethod === "paypal"
-                          ? "El pago con PayPal ha sido procesado correctamente. Tu anuncio ya está activo."
+                          ? "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."
                           : "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."}
                     </p>
                     <Button variant="outline" asChild>
