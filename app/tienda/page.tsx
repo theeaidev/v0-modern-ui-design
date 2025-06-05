@@ -874,7 +874,25 @@ export default function TiendaPage() {
 
                 {selectedPlan && !paymentConfirmed ? (
                   <div className="space-y-6">
-                    {((paymentMethod === "bizum" || paymentMethod === "transferencia") || 
+                    
+                    {(paymentMethod === "subscription" || paymentMethod === "paypal") && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                          <div className="flex">
+                            <AlertCircle className="h-5 w-5 text-blue-500 mr-2 shrink-0" />
+                            <div>
+                              <p className="text-sm text-blue-800">
+                                Al hacer clic en "Proceder al pago", serás redirigido a nuestra plataforma de pago seguro para completar la suscripción.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+
+     
+                    {((paymentMethod === "bizum" || paymentMethod === "transfer") || 
                        ((paymentMethod === "paypal" || paymentMethod === "subscription") && externalPaymentInitiated)) && (
    /*                    <div className="space-y-4">
                         <Label htmlFor="payment-proof">Comprobante de pago (opcional)</Label>
@@ -906,21 +924,6 @@ export default function TiendaPage() {
                       </div>
                     </div>
 
-                    )}
-
-                    {paymentMethod === "subscription" && (
-                      <div className="space-y-4">
-                        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                          <div className="flex">
-                            <AlertCircle className="h-5 w-5 text-blue-500 mr-2 shrink-0" />
-                            <div>
-                              <p className="text-sm text-blue-800">
-                                Al hacer clic en "Proceder al pago", serás redirigido a nuestra plataforma de pago seguro para completar la suscripción.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     )}
 
                     <AlertDialog>
@@ -1009,7 +1012,7 @@ export default function TiendaPage() {
                     <h3 className="text-lg font-medium text-green-800 mb-2">¡Confirmación Enviada!</h3>
                     <p className="text-green-700 mb-4">
                       {paymentMethod === "subscription"
-                        ? "Has sido redirigido a nuestra plataforma de pago. Tu anuncio se activará una vez completado el proceso."
+                        ? "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."
                         : paymentMethod === "paypal"
                           ? "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."
                           : "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."}
