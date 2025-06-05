@@ -7,7 +7,7 @@ export const serviciosData = [
     subcategory: "Comida colombiana",
     description:
       "Auténtica comida colombiana con los mejores sabores tradicionales. Arepas, bandeja paisa y mucho más.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1723693407562-bb4fcae76797?auto=format&fit=crop&w=400&q=80", // Colombian food - bandeja paisa
     badge: "Destacado",
     price: "Menú 12€",
     location: "Madrid",
@@ -29,7 +29,7 @@ userId: "user-1",
     subcategory: "Peluquería",
     description:
       "Cortes, peinados, tratamientos y coloración para todo tipo de cabello. Especialistas en cabello latino.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=400&q=80", // Hair salon styling
     badge: null,
     price: "Desde 15€",
     location: "Barcelona",
@@ -50,7 +50,7 @@ userId: "user-2",
     category: "Servicios",
     subcategory: "Extranjería",
     description: "Trámites de residencia, nacionalidad, reagrupación familiar y todo tipo de gestiones migratorias.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80", // Immigration documents
     badge: "Verificado",
     price: "Consulta 40€",
     location: "Madrid",
@@ -71,7 +71,7 @@ userId: "user-3",
     category: "Empleo",
     subcategory: "Tiempo completo",
     description: "Se busca camarero/a con experiencia para restaurante latino. Horario completo, contrato estable.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1651977560788-98792cd34da0?auto=format&fit=crop&w=400&q=80", // Waiter in restaurant
     badge: "Urgente",
     price: "1.200€/mes",
     location: "Valencia",
@@ -91,7 +91,7 @@ userId: "user-4"
     category: "Formación",
     subcategory: "Cursos",
     description: "Aprende a preparar los platos más tradicionales de la República Dominicana con chef profesional.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://sazonytumbao.com/wp-content/uploads/2024/04/image6-1-e1615827745597.jpg", // Dominican cooking class
     badge: "Nuevo",
     price: "120€",
     location: "Barcelona",
@@ -112,7 +112,7 @@ userId: "user-5"
     category: "Productos",
     subcategory: "Alimentos",
     description: "Venta de productos importados de México: salsas, dulces, snacks y más. Envíos a toda España.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1601325979086-d54da2c7419c?auto=format&fit=crop&w=400&q=80", // Mexican food products
     badge: null,
     price: "Varios",
     location: "Online",
@@ -131,7 +131,7 @@ userId: "user-6"
     category: "Servicios",
     subcategory: "Masajes",
     description: "Masajes relajantes, descontracturantes y terapéuticos. Técnicas tradicionales latinoamericanas.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=400&q=80", // Therapeutic massage
     badge: null,
     price: "35€/sesión",
     location: "Sevilla",
@@ -152,7 +152,7 @@ userId: "user-7"
     category: "Empleo",
     subcategory: "Por horas",
     description: "Se busca persona para limpieza de hogar. 4 horas diarias, 3 días a la semana. Zona centro.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80", // Home cleaning
     badge: null,
     price: "10€/hora",
     location: "Madrid",
@@ -171,7 +171,7 @@ userId: "user-8"
     category: "Formación",
     subcategory: "Talleres",
     description: "Aprende salsa, bachata, merengue y más. Clases para todos los niveles. Primera clase gratis.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1545959570-a94084071b5d?auto=format&fit=crop&w=400&q=80", // Latin dance class
     badge: "Popular",
     price: "50€/mes",
     location: "Barcelona",
@@ -192,7 +192,7 @@ userId: "user-9"
     category: "Productos",
     subcategory: "Artesanía",
     description: "Productos artesanales importados de Perú: textiles, cerámica, joyería y decoración.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1730432447768-2e5a86e5256c?auto=format&fit=crop&w=400&q=80", // Peruvian textiles and crafts
     badge: null,
     price: "Varios",
     location: "Madrid",
@@ -213,7 +213,7 @@ userId: "user-10"
     category: "Restaurantes",
     subcategory: "Comida venezolana",
     description: "Auténticas arepas, tequeños, pabellón criollo y más especialidades venezolanas.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1640718534338-466077731ca9?auto=format&fit=crop&w=400&q=80", // Venezuelan arepas
     badge: null,
     price: "Menú 10€",
     location: "Valencia",
@@ -234,7 +234,7 @@ userId: "user-11"
     category: "Formación",
     subcategory: "Certificaciones",
     description: "Preparación para exámenes DELE. Profesores nativos con amplia experiencia.",
-    imagePath: "/placeholder.svg?height=300&width=400",
+    imagePath: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80", // Spanish language learning
     badge: "Certificado",
     price: "200€/curso",
     location: "Málaga",

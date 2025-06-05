@@ -170,7 +170,11 @@ export function AdCard({
           userId={userId}
           title={title}
           initialPrimaryImageUrl={imagePath ? (() => {
-            // Try to get public URL for initial image
+            // If it's a full URL (from mock data), use it directly
+            if (imagePath.startsWith('http')) {
+              return imagePath;
+            }
+            // Otherwise try to get public URL from Supabase storage
             const { data: imageData } = supabase.storage.from('service-listings').getPublicUrl(imagePath);
             return imageData?.publicUrl || undefined;
           })() : undefined}

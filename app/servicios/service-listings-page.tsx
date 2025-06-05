@@ -1014,7 +1014,7 @@ export function ServiceListingsPage() {
                 <Tabs value={activeTab} onValueChange={handleTabChange}>
                   <TabsList className="w-full justify-start overflow-auto">
                     <TabsTrigger value="todos">Todos</TabsTrigger>
-                    <TabsTrigger value="restaurantes">Restaurantes</TabsTrigger>
+                    <TabsTrigger value="restaurantes">Restaurantes</TabsTrigger>  
                     <TabsTrigger value="servicios">Servicios</TabsTrigger>
                     <TabsTrigger value="empleo">Empleo</TabsTrigger>
                     <TabsTrigger value="formacion">Formación</TabsTrigger>
