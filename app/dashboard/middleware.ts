@@ -4,7 +4,7 @@ import { createServerClient } from "@/lib/supabase-server"
 
 export async function middleware(request: NextRequest) {
   // Create a Supabase client
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   // Check if the user is authenticated
   const {
