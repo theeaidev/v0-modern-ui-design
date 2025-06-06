@@ -49,6 +49,7 @@ interface FilterState {
 
 interface Servicio {
   id: string
+  userId: string; // Added userId
   title: string
   category: string
   subcategory: string
@@ -845,6 +846,7 @@ function ServiceListingsPageContent() {
                     <AdCard
                       key={servicio.id}
                       id={servicio.id}
+                      userId={servicio.userId} // Added userId
                       title={servicio.title}
                       category={servicio.category}
                       subcategory={servicio.subcategory}
@@ -952,6 +954,7 @@ function ServiceListingsPageContent() {
 const serviciosData: Servicio[] = [
   {
     id: "1",
+    userId: "user-1-placeholder",
     title: "Restaurante El Sabor Latino",
     category: "Restaurantes",
     subcategory: "Comida colombiana",
@@ -973,6 +976,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "2",
+    userId: "user-2-placeholder",
     title: "Peluquería Latina Style",
     category: "Servicios",
     subcategory: "Peluquería",
@@ -994,6 +998,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "3",
+    userId: "user-3-placeholder",
     title: "Asesoría de Extranjería",
     category: "Servicios",
     subcategory: "Extranjería",
@@ -1014,6 +1019,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "4",
+    userId: "user-4-placeholder",
     title: "Empleo: Camarero/a",
     category: "Empleo",
     subcategory: "Tiempo completo",
@@ -1033,6 +1039,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "5",
+    userId: "user-5-placeholder",
     title: "Curso de Cocina Dominicana",
     category: "Formación",
     subcategory: "Cursos",
@@ -1053,6 +1060,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "6",
+    userId: "user-6-placeholder",
     title: "Productos Típicos Mexicanos",
     category: "Productos",
     subcategory: "Alimentos",
@@ -1071,6 +1079,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "7",
+    userId: "user-7-placeholder",
     title: "Masajes Terapéuticos",
     category: "Servicios",
     subcategory: "Masajes",
@@ -1091,6 +1100,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "8",
+    userId: "user-8-placeholder",
     title: "Empleo: Limpieza de Hogar",
     category: "Empleo",
     subcategory: "Por horas",
@@ -1109,6 +1119,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "9",
+    userId: "user-9-placeholder",
     title: "Taller de Baile Latino",
     category: "Formación",
     subcategory: "Talleres",
@@ -1129,6 +1140,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "10",
+    userId: "user-10-placeholder",
     title: "Artesanía Peruana",
     category: "Productos",
     subcategory: "Artesanía",
@@ -1149,6 +1161,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "11",
+    userId: "user-11-placeholder",
     title: "Restaurante Sabor Venezolano",
     category: "Restaurantes",
     subcategory: "Comida venezolana",
@@ -1169,6 +1182,7 @@ const serviciosData: Servicio[] = [
   },
   {
     id: "12",
+    userId: "user-12-placeholder",
     title: "Certificación de Español",
     category: "Formación",
     subcategory: "Certificaciones",
