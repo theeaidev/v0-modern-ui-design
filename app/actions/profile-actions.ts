@@ -5,11 +5,11 @@ import { createServerClient as createServerClientSupabase } from "@supabase/ssr"
 import type { Database } from "@/types/supabase"
 
 // Create a server client directly in the action file to avoid import issues
-function createActionServerClient() {
+async function createActionServerClient() {
   console.log("[SERVER ACTION] Creating server client")
 
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     console.log("[SERVER ACTION] Cookie store created")
 
     // Log available cookies for debugging
@@ -60,7 +60,7 @@ export async function getProfileData(userId: string) {
 
   try {
     console.log("[SERVER ACTION] Creating Supabase client")
-    const supabase = createActionServerClient()
+    const supabase = await createActionServerClient()
     console.log("[SERVER ACTION] Supabase client created")
 
     console.log("[SERVER ACTION] Fetching profile for user:", userId)
@@ -94,7 +94,7 @@ export async function updateProfileData(userId: string, profileData: any) {
 
   try {
     console.log("[SERVER ACTION] Creating Supabase client")
-    const supabase = createActionServerClient()
+    const supabase = await createActionServerClient()
     console.log("[SERVER ACTION] Supabase client created")
 
     console.log("[SERVER ACTION] Updating profile for user:", userId)
