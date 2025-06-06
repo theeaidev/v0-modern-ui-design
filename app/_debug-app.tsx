@@ -14,14 +14,14 @@ export default function DebugApp({ children }: { children: React.ReactNode }) {
     const originalOnError = window.onerror
     window.onerror = (message, source, lineno, colno, error) => {
       debugLog("Unhandled error", { message, source, lineno, colno, error })
-      return originalOnError ? originalOnError(message, source, lineno, colno, error) : false
+      return originalOnError ? originalOnError.call(window, message, source, lineno, colno, error) : false
     }
 
     // Log any unhandled promise rejections
     const originalOnUnhandledRejection = window.onunhandledrejection
     window.onunhandledrejection = (event) => {
       debugLog("Unhandled promise rejection", event.reason)
-      return originalOnUnhandledRejection ? originalOnUnhandledRejection(event) : false
+      return originalOnUnhandledRejection ? originalOnUnhandledRejection.call(window, event) : false
     }
 
     return () => {
