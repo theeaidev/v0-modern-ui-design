@@ -68,8 +68,8 @@ export function UserDropdown() {
     if (nameForInitials) {
       return nameForInitials
         .split(" ")
-        .filter(n => n)
-        .map((n) => n[0])
+        .filter((n: string) => n)
+        .map((n: string) => n[0])
         .join("")
         .toUpperCase()
         .substring(0, 2);
