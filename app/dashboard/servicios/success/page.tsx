@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, ArrowRight, Clock } from "lucide-react"
 
-export default async function SuccessPage({
-  searchParams,
-}: {
-  searchParams: { id?: string }
-}) {
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Anuncio creado con éxito",
+  description: "Tu anuncio ha sido creado y está pendiente de revisión.",
+}
+
+interface SuccessPageProps {
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const supabase = await createServerClient() // Added await
   const id = searchParams.id
 
