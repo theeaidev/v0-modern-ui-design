@@ -3,9 +3,12 @@
 import type React from "react"
 import { Switch } from "@/components/ui/switch";
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 import {
   Check,
   Upload,
@@ -45,15 +48,37 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { SiteFooter } from "@/components/site-footer"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Loader2 } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 export default function TiendaPage() {
   const router = useRouter()
+  const { toast } = useToast()
+  const { user, session, isLoading } = useAuth()
+  
+  // Initialize Supabase client for database operations
+  const supabase = createClientComponentClient()
+  
   const [isGoldPlan, setIsGoldPlan] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<string>("bizum")
   const [externalPaymentInitiated, setExternalPaymentInitiated] = useState(false);
+  const [isAnnualBilling, setIsAnnualBilling] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -72,19 +97,123 @@ export default function TiendaPage() {
     setPaymentProof(null);
   };
 
-  const handlePaymentConfirm = () => {
+  // Check if the user is authenticated - using the AuthContext
+  const isAuthenticated = !!user;
+
+  // Save subscription to Supabase using server API endpoint
+  const saveSubscription = async () => {
+    if (!selectedPlan) {
+      console.error('No plan selected');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Por favor, selecciona un plan antes de continuar."
+      });
+      return false;
+    }
+    
+    if (!user?.id) {
+      console.error('User not authenticated');
+      setShowLoginModal(true);
+      return false;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Map selected plan to the proper format for database
+      const planMapping: Record<string, string> = {
+        "basica": "Basica",
+        "premium": "Premium",
+        "gold": "Premium Gold"
+      };
+      
+      const subscriptionTier = planMapping[selectedPlan];
+      const userId = user.id;
+      
+      console.log('[DEBUG] Saving subscription data via API:', {
+        userId,
+        subscriptionTier, 
+        paymentMethod,
+        selectedPlan
+      });
+      
+      // Call our server API endpoint to update subscription
+      const response = await fetch('/api/subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          subscriptionTier,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save subscription');
+      }
+      
+      // Detailed logging of API response
+      console.log('[DEBUG] API response status:', response.status);
+      console.log('[DEBUG] API response full:', JSON.stringify(result, null, 2));
+      
+      setPaymentSuccess(true);
+      toast({
+        title: "¡Pago recibido!", 
+        description: "Tu suscripción ha sido registrada y está pendiente de validación."
+      });
+      return true;
+    } catch (error) {
+      console.error('[DEBUG] Error in saveSubscription:', error);
+      toast({
+        variant: "destructive",
+        title: "Error guardando la suscripción",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error al procesar tu suscripción."
+      });
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePaymentConfirm = async () => {
+    // Verify we have a selected plan
+    if (!selectedPlan) {
+      toast({
+        variant: "destructive",
+        title: "Selecciona un plan",
+        description: "Por favor selecciona un plan antes de continuar."
+      });
+      return;
+    }
+    
+    // Check if user is logged in with the Auth context
+    if (!user?.id) {
+      console.log('User not authenticated, showing login modal');
+      setShowLoginModal(true);
+      return;
+    }
+    
     if (paymentMethod === "subscription") {
       // Redirect to specific payment links based on the selected plan
       if (selectedPlan === "basica") {
-         window.open("https://checkout.revolut.com/pay/14122323-e9b3-47f2-8ca6-02b7fd3d3da5", "_blank", "noopener noreferrer")
+         window.open("https://checkout.revolut.com/pay/14122323-e9b3-47f2-8ca6-02b7fd3d3da5", "_blank", "noopener noreferrer");
+         setExternalPaymentInitiated(true);
       } else if (selectedPlan === "premium") {
-         window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer")
+         window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer");
+         setExternalPaymentInitiated(true);
       } else if (selectedPlan === "gold") {
-         window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer") // Using same link for now
+         window.open("https://checkout.revolut.com/payment-link/0519d26a-d794-42bd-bb29-e7498a2726de", "_blank", "noopener noreferrer"); // Using same link for now
+         setExternalPaymentInitiated(true);
       }
     } else {
-      // For other payment methods, just confirm payment
-      setPaymentConfirmed(true)
+      // For other payment methods, save subscription to database
+      console.log('Processing non-subscription payment, saving to database');
+      setPaymentConfirmed(true);
+      await saveSubscription();
     }
   }
 
@@ -412,6 +541,50 @@ export default function TiendaPage() {
             </div>
           </div>
         </section>
+        
+        {/* FAQ Section */}
+        <section className="py-8 bg-muted/30">
+          <div className="container max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-6">Preguntas frecuentes</h2>
+            
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>¿Cuándo se activa mi suscripción?</AccordionTrigger>
+                <AccordionContent>
+                  Tu suscripción se activa una vez que validemos el pago. Esto suele tardar entre 24-48 horas laborables.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-2">
+                <AccordionTrigger>¿Puedo cambiar de plan más adelante?</AccordionTrigger>
+                <AccordionContent>
+                  Sí, puedes actualizar o cambiar tu plan en cualquier momento. Si cambias a un plan superior, se te cobrará la diferencia prorrateada.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-3">
+                <AccordionTrigger>¿Qué ocurre cuando finaliza mi suscripción?</AccordionTrigger>
+                <AccordionContent>
+                  Cuando finaliza el período de tu suscripción, tu anuncio permanecerá visible durante un mes adicional. Pasado ese tiempo, si no has renovado, el anuncio se eliminará automáticamente.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-4">
+                <AccordionTrigger>¿Cómo funciona la promoción en redes sociales?</AccordionTrigger>
+                <AccordionContent>
+                  Con el plan Premium Gold, promocionaremos tu anuncio en nuestras redes sociales oficiales. Esto incluye una mención destacada con imágenes de tu anuncio y enlaces directos.
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="item-5">
+                <AccordionTrigger>¿Puedo solicitar un reembolso?</AccordionTrigger>
+                <AccordionContent>
+                  Ofrecemos reembolsos dentro de los primeros 7 días desde la activación de tu suscripción si no estás satisfecho con el servicio. Contacta con nuestro equipo de soporte para más información.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </section>
 
         {/* Comparison Table (Mobile Friendly) */}
         <section className="py-8 bg-muted/30">
@@ -699,6 +872,20 @@ export default function TiendaPage() {
             <div className="max-w-3xl mx-auto">
               <div className="bg-muted/30 rounded-lg p-6 border">
                 <h2 className="text-2xl font-bold mb-4">Método de pago</h2>
+                
+                {/* Annual Billing Toggle */}
+                {selectedPlan && (
+                  <div className="flex items-center justify-between p-3 mb-4 bg-background rounded border">
+                    <div>
+                      <h3 className="font-medium">Facturación anual</h3>
+                      <p className="text-sm text-muted-foreground">Ahorra un 15% con facturación anual</p>
+                    </div>
+                    <Switch
+                      checked={isAnnualBilling}
+                      onCheckedChange={setIsAnnualBilling}
+                    />
+                  </div>
+                )}
 
                 {selectedPlan && (
                   <div className="bg-background rounded-lg p-6 border mb-6">
@@ -724,10 +911,10 @@ export default function TiendaPage() {
                         <span>Importe:</span>
                         <span className="font-medium">
                           {selectedPlan === "basica"
-                            ? "5 € / mes"
+                            ? isAnnualBilling ? "51 € / año" : "5 € / mes"
                             : selectedPlan === "gold"
-                              ? "25 € / 6 meses"
-                              : "10 € / mes"}
+                              ? isAnnualBilling ? "255 € / año" : "25 € / 6 meses"
+                              : isAnnualBilling ? "102 € / año" : "10 € / mes"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -744,10 +931,11 @@ export default function TiendaPage() {
                         <span>Total a pagar:</span>
                         <span className="font-bold text-lg">
                           {selectedPlan === "basica"
-                            ? "5 €"
+                            ? isAnnualBilling ? "51 €" : "5 €"
                             : selectedPlan === "gold"
-                              ? "25 €"
-                              : "10 €"}
+                              ? isAnnualBilling ? "255 €" : "25 €"
+                              : isAnnualBilling ? "102 €" : "10 €"}
+                          {isAnnualBilling && <span className="ml-1 text-xs bg-green-100 text-green-700 px-1 py-0.5 rounded">-15%</span>}
                         </span>
                       </div>
                       <Separator />
@@ -777,7 +965,7 @@ export default function TiendaPage() {
                               >
                                 <path d="M7.074 21.427c.726 0 1.32-.262 1.787-.785.425-.492.638-1.11.638-1.856 0-.316-.035-.632-.106-.948-.07-.316-.176-.597-.317-.843-.14-.246-.328-.444-.563-.597-.235-.152-.52-.228-.854-.228-.828 0-1.524.29-2.087.87-.563.58-.844 1.324-.844 2.232 0 .316.035.632.106.948.07.316.176.597.317.843.14.246.328.444.563.597.235.152.52.228.854.228zm7.313-11.32c-.035-.188-.106-.376-.212-.563-.106-.188-.283-.34-.53-.457-.246-.117-.53-.176-.854-.176-.39 0-.745.07-1.062.211-.316.14-.58.34-.786.597-.205.257-.357.538-.456.843-.1.305-.15.597-.15.87 0 .389.07.744.212.965.14.305.352.526.637.667.282.14.6.211.953.211.07 0 .176 0 .282-.035l.247-.07c.035-.035.106-.07.176-.14l.177-.14c.637-.492 1.028-1.02 1.19-1.583zm-1.752 1.653c-.035.035-.07.07-.105.105-.106.106-.212.176-.317.212-.106.035-.212.07-.317.07-.282 0-.53-.07-.745-.211-.21-.14-.39-.34-.529-.597-.14-.257-.21-.538-.21-.843s.07-.58.21-.843c.14-.262.317-.475.53-.637.21-.163.456-.246.744-.246.355 0 .672.117.954.352.282.235.424.544.424.921 0 .21-.036.423-.106.636-.07.211-.176.389-.317.53zm4.184-1.583c-.035-.188-.106-.376-.212-.563-.106-.188-.282-.34-.53-.457-.246-.117-.53-.176-.854-.176-.39 0-.745.07-1.062.211-.316.14-.58.34-.786.597-.206.257-.357.538-.457.843-.1.305-.15.597-.15.87 0 .389.07.744.212.965.14.305.352.526.637.667.282.14.6.211.953.211.07 0 .176 0 .282-.035l.247-.07c.035-.035.106-.07.176-.14l.177-.14c.637-.492 1.028-1.02 1.19-1.583zm-1.752 1.653c-.035.035-.07.07-.106.105-.105.106-.21.176-.316.212-.106.035-.212.07-.317.07-.282 0-.53-.07-.744-.211-.211-.14-.39-.34-.53-.597-.14-.257-.21-.538-.21-.843s.07-.58.21-.843c.14-.262.317-.475.53-.637.21-.163.456-.246.744-.246.355 0 .672.117.953.352.282.235.425.544.425.921 0 .21-.036.423-.106.636-.071.211-.176.389-.317.53zm-7.77 8.93c-.247-.152-.459-.352-.637-.597s-.282-.526-.317-.843c-.035-.316-.035-.632-.035-.948 0-.908.282-1.652.844-2.232.563-.58 1.259-.87 2.087-.87.334 0 .62.076.854.228.235.152.423.351.563.597.14.246.246.527.317.843.07.316.105.632.105.948 0 .908-.282 1.652-.844 2.232-.563.58-1.259.87-2.087.87-.334 0-.62-.076-.854-.228zm11.02-12.063c-.39-.035-.78-.035-1.17-.035-1.878 0-3.403.563-4.574 1.689-1.17 1.126-1.753 2.642-1.753 4.546 0 1.306.317 2.436.953 3.39.317.492.745.877 1.286 1.158l-.457 1.82c-.035.152-.035.268.035.351.036.084.14.126.317.126h1.51c.176 0 .282-.042.317-.126l.07-.283c.106-.423.212-.843.317-1.26.106-.418.176-.799.212-1.144.282.07.563.105.844.105 1.913 0 3.458-.597 4.639-1.79 1.182-1.192 1.773-2.773 1.773-4.744 0-1.094-.21-2.087-.637-2.98-.424-.892-1.06-1.61-1.913-2.147-.853-.538-1.846-.807-2.978-.807zm-1.404 7.807c-.282-.14-.495-.352-.637-.637-.14-.282-.21-.597-.21-.953s.07-.67.21-.953c.14-.282.355-.495.637-.637.282-.14.597-.21.953-.21.355 0 .672.07.953.21.282.14.496.355.638.637.14.282.21.597.21.953s-.07.671-.21.953c-.14.282-.356.495-.638.637-.281.14-.598.21-.953.21-.356 0-.671-.07-.953-.21zM2.2 2H17.8C19.015 2 20 2.985 20 4.2V5H4C2.895 5 2 5.895 2 7V17C2 18.105 2.895 19 4 19H5V19.8C5 21.015 4.015 22 2.8 22H2.2C0.985 22 0 21.015 0 19.8V4.2C0 2.985 0.985 2 2.2 2Z"/>
                               </svg>
-                              <span>PayPal</span>
+                              <span className="text-sm font-medium">PayPal</span>
                             </Label>
                           </div>
 
@@ -793,7 +981,7 @@ export default function TiendaPage() {
                             <RadioGroupItem value="subscription" id="subscription" />
                             <Label htmlFor="subscription" className="flex items-center cursor-pointer">
                               <CreditCard className="h-5 w-5 mr-2 text-green-600" />
-                              <span>Suscripción automática (tarjeta)</span>
+                              <span>Tarjeta de crédito/débito</span>
                             </Label>
                           </div>
                         </RadioGroup>
@@ -815,7 +1003,7 @@ export default function TiendaPage() {
                                     : selectedPlan === "gold"
                                       ? "Premium Gold"
                                       : "Premium"}
-                                  "
+                                  {isAnnualBilling ? " Anual" : ""}
                                 </strong>
                               </p>
                             )}
@@ -823,11 +1011,11 @@ export default function TiendaPage() {
                               <p className="text-sm text-amber-800">
                                 Serás redirigido a PayPal para completar el pago de{" "}
                                 <strong>
-                                  {selectedPlan === "basica"
-                                    ? "5 €"
-                                    : selectedPlan === "gold"
-                                      ? "25 €"
-                                      : "10 €"}
+                                  {selectedPlan === "basica" ? 
+                                    (isAnnualBilling ? "51 €" : "5 €") 
+                                    : selectedPlan === "gold" ? 
+                                      (isAnnualBilling ? "255 €" : "25 €")
+                                      : (isAnnualBilling ? "102 €" : "10 €")}
                                 </strong>{" "}
                                 al confirmar.
                               </p>
@@ -847,7 +1035,16 @@ export default function TiendaPage() {
                                     : selectedPlan === "gold"
                                       ? "Premium Gold"
                                       : "Premium"}{" "}
-                                  - Tu nombre
+                                  {isAnnualBilling ? "Anual" : ""} - Tu nombre
+                                </strong>
+                                <br />
+                                Importe:{" "}
+                                <strong>
+                                  {selectedPlan === "basica" ? 
+                                    (isAnnualBilling ? "51 €" : "5 €") 
+                                    : selectedPlan === "gold" ? 
+                                      (isAnnualBilling ? "255 €" : "25 €")
+                                      : (isAnnualBilling ? "102 €" : "10 €")}
                                 </strong>
                               </p>
                             )}
@@ -855,14 +1052,13 @@ export default function TiendaPage() {
                               <p className="text-sm text-amber-800">
                                 Se realizará un cargo de{" "}
                                 <strong>
-                                  {selectedPlan === "basica"
-                                    ? "5 € / mes"
-                                    : selectedPlan === "gold"
-                                      ? "25 € (pago único por 6 meses)"
-                                      : "10 € / mes"}
+                                  {selectedPlan === "basica" ? 
+                                    (isAnnualBilling ? "51 € / año" : "5 € / mes") 
+                                    : selectedPlan === "gold" ? 
+                                      (isAnnualBilling ? "255 € (pago único por 1 año)" : "25 € (pago único por 6 meses)")
+                                      : (isAnnualBilling ? "102 € / año" : "10 € / mes")}
                                 </strong>{" "}
-                                {selectedPlan === "premium" ? "a tu tarjeta. Puedes " : selectedPlan === "gold" ? "a tu tarjeta. Puedes " : "mensual a tu tarjeta. Puedes "}
-                                cancelar la suscripción en cualquier momento desde tu perfil.
+                                a tu tarjeta. Puedes cancelar la suscripción en cualquier momento desde tu perfil.
                               </p>
                             )}
                           </div>
@@ -942,25 +1138,27 @@ export default function TiendaPage() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Confirmar pago</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {(paymentMethod === "subscription" || paymentMethod === "paypal") && !externalPaymentInitiated
-                              ? paymentMethod === "subscription"
-                                ? `¿Confirmas que deseas proceder con la suscripción del plan ${
-                                    selectedPlan === "basica"
-                                      ? "Básico"
-                                      : selectedPlan === "gold"
-                                        ? "Premium Gold"
-                                        : "Premium"
-                                  }? Serás redirigido a nuestra plataforma de pago seguro.`
-                                : "Serás redirigido a PayPal para completar el pago."
-                              : `¿Has realizado el pago por ${
-                                  paymentMethod === "bizum"
-                                    ? "Bizum"
-                                    : paymentMethod === "transferencia"
-                                      ? "transferencia bancaria"
-                                      : paymentMethod === "paypal"
-                                        ? "PayPal"
-                                        : "suscripción" // Default for subscription if externalPaymentInitiated is true
-                                }? Al confirmar, nuestro equipo verificará tu pago y activará tu anuncio lo antes posible.`}
+                            <span>
+                              {(paymentMethod === "subscription" || paymentMethod === "paypal") && !externalPaymentInitiated
+                                ? paymentMethod === "subscription"
+                                  ? `¿Confirmas que deseas proceder con la suscripción del plan ${
+                                      selectedPlan === "basica"
+                                        ? "Básico"
+                                        : selectedPlan === "gold"
+                                          ? "Premium Gold"
+                                          : "Premium"
+                                    }? Serás redirigido a nuestra plataforma de pago seguro.`
+                                  : "Serás redirigido a PayPal para completar el pago."
+                                : `¿Has realizado el pago por ${
+                                    paymentMethod === "bizum"
+                                      ? "Bizum"
+                                      : paymentMethod === "transferencia"
+                                        ? "transferencia bancaria"
+                                        : paymentMethod === "paypal"
+                                          ? "PayPal"
+                                          : "suscripción" // Default for subscription if externalPaymentInitiated is true
+                                  }? Al confirmar, nuestro equipo verificará tu pago y activará tu anuncio lo antes posible.`}
+                            </span>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -1004,7 +1202,7 @@ export default function TiendaPage() {
                       </AlertDialogContent>
                     </AlertDialog>
                   </div>
-                ) : selectedPlan && paymentConfirmed ? (
+                ) : selectedPlan && paymentConfirmed && !paymentSuccess ? (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Check className="h-6 w-6 text-green-500" />
@@ -1018,7 +1216,49 @@ export default function TiendaPage() {
                           : "Hemos recibido tu confirmación de pago. Tu anuncio será activado en breve."}
                     </p>
                     <Button variant="outline" asChild>
-                      <Link href="/servicios">Ver anuncios</Link>
+                      <Link href="/mis-anuncios">Ver mis anuncios</Link>
+                    </Button>
+                  </div>
+                ) : selectedPlan && paymentSuccess ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Check className="h-6 w-6 text-green-500" />
+                    </div>
+                    <h3 className="text-lg font-medium text-green-800 mb-2">¡Suscripción Registrada!</h3>
+                    <p className="text-green-700 mb-4">
+                      Tu suscripción ha sido registrada con éxito. Recibirás un correo de confirmación cuando se valide el pago.
+                    </p>
+                    <Button variant="outline" asChild>
+                      <Link href="/mis-anuncios">Ver mis anuncios</Link>
+                    </Button>
+                  </div>
+                ) : selectedPlan ? (
+                  <div className="space-y-6 mt-6">
+                    <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                      <div className="flex">
+                        <Check className="h-5 w-5 text-green-500 mr-2 shrink-0" />
+                        <div>
+                          <p className="text-sm text-green-800">
+                            Para activar tu plan, pulsa en "Realizar pago" y sigue las instrucciones.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handlePaymentConfirm}
+                      className="w-full" 
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Procesando
+                        </>
+                      ) : (
+                        paymentMethod === "bizum" || paymentMethod === "transfer" 
+                          ? "He realizado el pago" 
+                          : "Realizar pago"
+                      )}
                     </Button>
                   </div>
                 ) : (
@@ -1124,6 +1364,128 @@ export default function TiendaPage() {
 
       {/* Footer */}
       <SiteFooter />
+      {/* Payment confirmation and processing section */}
+      {paymentMethod !== "subscription" && (
+        <AlertDialog open={paymentConfirmed && !paymentSuccess} onOpenChange={setPaymentConfirmed}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar pago</AlertDialogTitle>
+              {isSubmitting ? (
+                <div className="py-4">
+                  <div className="flex flex-col items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="mt-2">Procesando tu pago...</span>
+                  </div>
+                </div>
+              ) : (
+                <AlertDialogDescription>
+                  <span className="block">¿Has realizado el pago para el plan {selectedPlan === "basica" ? "Básico" : selectedPlan === "premium" ? "Premium" : "Premium Gold"}?</span>
+                  <span className="block mt-2">Al confirmar, registraremos tu suscripción como pendiente de validación.</span>
+                </AlertDialogDescription>
+              )}
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={async (e) => {
+                  e.preventDefault();
+                  console.log('[DEBUG] Payment confirmation button clicked');
+                  await saveSubscription();
+                }} 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : "He realizado el pago"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+      
+      {/* Payment Success Dialog */}
+      <Dialog open={paymentSuccess} onOpenChange={setPaymentSuccess}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>¡Pago recibido!</DialogTitle>
+            <DialogDescription>
+              Tu suscripción ha sido registrada y está pendiente de validación.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-6">
+            <div className="rounded-full bg-green-100 p-3">
+              <Check className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+          <p className="text-center text-sm text-muted-foreground">Te notificaremos cuando tu suscripción haya sido validada y activada.</p>
+          <DialogFooter className="sm:justify-center">
+            <Button 
+              variant="default" 
+              onClick={() => {
+                setPaymentSuccess(false);
+                router.push("/mis-anuncios");
+              }}
+            >
+              Ver mis anuncios
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Login Modal */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Iniciar sesión requerido</DialogTitle>
+            <DialogDescription>
+              Debes iniciar sesión para continuar con el pago y activar los beneficios de tu suscripción.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center gap-4 py-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                router.push(`/auth/login?redirect=${encodeURIComponent('/tienda')}`)
+              }}
+            >
+              Iniciar sesión
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                router.push(`/auth/register?redirect=${encodeURIComponent('/tienda')}`)
+              }}
+            >
+              Registrarme
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* External payment reminder for subscription payment method */}
+      {paymentMethod === "subscription" && externalPaymentInitiated && (
+        <Dialog open={true} onOpenChange={() => setExternalPaymentInitiated(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>¿Completaste tu pago?</DialogTitle>
+              <DialogDescription>
+                Si has completado tu pago con tarjeta, confirma para registrar tu suscripción.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExternalPaymentInitiated(false)}>Aún no</Button>
+              <Button onClick={saveSubscription} disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando
+                  </>
+                ) : "Sí, he pagado"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
