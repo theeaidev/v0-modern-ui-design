@@ -491,27 +491,7 @@ setFilteredServices(
             </ul>
           </nav>
 
-          {/* Advertising Banners Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-            {[1, 2, 3].map((num) => (
-              <div key={num} className="aspect-[3/1] bg-muted/40 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-                <Image
-                  src={`https://placehold.co/600x200/e2e8f0/a0aec0?text=Publicidad+${num}`}
-                  alt={`Publicidad Banner ${num}`}
-                  width={600}
-                  height={200}
-                  className="object-cover w-full h-full"
-                  priority={num === 1}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* END: Added Menu and Banners */}
-
-   
-
-        {/* Search and Filter Bar */}
+                  {/* Search and Filter Bar */}
         <div className="border-b sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container py-4">
             <div className="flex flex-col md:flex-row gap-4">
@@ -693,6 +673,26 @@ setFilteredServices(
             </div>
           </div>
         </div>
+
+          {/* Advertising Banners Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-3">
+            {[1, 2, 3].map((num) => (
+              <div key={num} className="aspect-[3/1] bg-muted/40 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                <Image
+                  src={`https://placehold.co/600x200/e2e8f0/a0aec0?text=Publicidad+${num}`}
+                  alt={`Publicidad Banner ${num}`}
+                  width={600}
+                  height={200}
+                  className="object-cover w-full h-full"
+                  priority={num === 1}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* END: Added Menu and Banners */}
+
+  
 
         {/* Main Content */}
         <div className="container py-8">
