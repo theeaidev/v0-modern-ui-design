@@ -120,18 +120,7 @@ export async function updateProfile(formData: FormData) {
 
 // Upload avatar image
 export async function uploadAvatar(formData: FormData) {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    },
-  )
+  const supabase = await createServerClient()
 
   const {
     data: { user },
@@ -182,18 +171,7 @@ export async function uploadAvatar(formData: FormData) {
 
 // Upload business logo
 export async function uploadBusinessLogo(formData: FormData) {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    },
-  )
+  const supabase = await createServerClient()
 
   const {
     data: { user },
