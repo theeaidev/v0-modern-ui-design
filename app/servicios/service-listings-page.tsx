@@ -5,6 +5,7 @@ import type React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Check, ChevronDown, Filter, MapPin, Search, X } from "lucide-react"
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -115,13 +116,13 @@ export function ServiceListingsPage() {
         setAllServices(
   listings.map(servicio => ({
     ...servicio,
-    userId: servicio.userId || servicio.user_id || 'unknown',
+    userId: servicio.userId || (servicio as any).user_id || 'unknown',
   })) as ServiceListingItem[]
 )
 setFilteredServices(
   listings.map(servicio => ({
     ...servicio,
-    userId: servicio.userId || servicio.user_id || 'unknown',
+    userId: servicio.userId || (servicio as any).user_id || 'unknown',
   })) as ServiceListingItem[]
 )
         setTotalListings(total)
@@ -439,6 +440,35 @@ setFilteredServices(
       <MainNav />
 
       <main className="flex-1">
+      <div className="relative lg:flex lg:justify-center lg:gap-6 xl:gap-8 px-2 sm:px-4 lg:px-6">
+        {/* START: Left Vertical Banner */}
+        <aside className="hidden lg:block lg:w-40 xl:w-48 py-8 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar">
+          <div className="space-y-6">
+            <div className="aspect-[160/600] bg-muted/20 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+              <Image
+                src="https://placehold.co/160x600/e2e8f0/a0aec0?text=Anuncio+Vertical+1"
+                alt="Publicidad Vertical Izquierda"
+                width={160}
+                height={600}
+                className="object-cover w-full h-full"
+              />
+            </div>
+            {/* You can add more banners here if needed, e.g.: */}
+            {/* <div className="aspect-[160/300] bg-muted/20 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 mt-6">
+              <Image
+                src="https://placehold.co/160x300/e2e8f0/a0aec0?text=Anuncio+Pequeño"
+                alt="Publicidad Vertical Pequeña Izquierda"
+                width={160}
+                height={300}
+                className="object-cover w-full h-full"
+              />
+            </div> */}
+          </div>
+        </aside>
+        {/* END: Left Vertical Banner */}
+
+        {/* START: Central Content Column */}
+        <div className="flex-grow max-w-screen-xl w-full mx-auto">
         {/* Page Header */}
         <div className="bg-muted/30 border-b">
           <div className="container py-8">
@@ -449,6 +479,37 @@ setFilteredServices(
             </p>
           </div>
         </div>
+         {/* START: Added Menu and Banners */}
+        <div className="container py-6">
+          {/* Menu Section */}
+          <nav className="mb-6 border-b pb-6">
+            <ul className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-4">
+              <li><Button variant="ghost" asChild className="w-full sm:w-auto hover:bg-muted/50 px-4 py-2 text-sm font-medium"><a href="#" target="_blank" rel="noopener noreferrer">Amazon Local</a></Button></li>
+              <li><Button variant="ghost" asChild className="w-full sm:w-auto hover:bg-muted/50 px-4 py-2 text-sm font-medium"><a href="#" target="_blank" rel="noopener noreferrer">Just Eat Local</a></Button></li>
+              <li><Button variant="ghost" asChild className="w-full sm:w-auto hover:bg-muted/50 px-4 py-2 text-sm font-medium"><a href="#" target="_blank" rel="noopener noreferrer">Eventos en Mieres</a></Button></li>
+              <li><Button variant="ghost" asChild className="w-full sm:w-auto hover:bg-muted/50 px-4 py-2 text-sm font-medium"><a href="#" target="_blank" rel="noopener noreferrer">Farmacias de Guardia</a></Button></li>
+            </ul>
+          </nav>
+
+          {/* Advertising Banners Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+            {[1, 2, 3].map((num) => (
+              <div key={num} className="aspect-[3/1] bg-muted/40 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                <Image
+                  src={`https://placehold.co/600x200/e2e8f0/a0aec0?text=Publicidad+${num}`}
+                  alt={`Publicidad Banner ${num}`}
+                  width={600}
+                  height={200}
+                  className="object-cover w-full h-full"
+                  priority={num === 1}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* END: Added Menu and Banners */}
+
+   
 
         {/* Search and Filter Bar */}
         <div className="border-b sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -1012,7 +1073,36 @@ setFilteredServices(
             </div>
           </div>
         </div>
-      </main>
+              </div>
+        {/* END: Central Content Column */}
+
+        {/* START: Right Vertical Banner */}
+        <aside className="hidden lg:block lg:w-40 xl:w-48 py-8 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar">
+          <div className="space-y-6">
+            <div className="aspect-[160/600] bg-muted/20 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+              <Image
+                src="https://placehold.co/160x600/edf2f7/718096?text=Anuncio+Vertical+2"
+                alt="Publicidad Vertical Derecha"
+                width={160}
+                height={600}
+                className="object-cover w-full h-full"
+              />
+            </div>
+             {/* You can add more banners here if needed, e.g.: */}
+            {/* <div className="aspect-[160/300] bg-muted/20 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 mt-6">
+              <Image
+                src="https://placehold.co/160x300/edf2f7/718096?text=Anuncio+Pequeño+2"
+                alt="Publicidad Vertical Pequeña Derecha"
+                width={160}
+                height={300}
+                className="object-cover w-full h-full"
+              />
+            </div> */}
+          </div>
+        </aside>
+        {/* END: Right Vertical Banner */}
+      </div>
+    </main>
 
       {/* Footer */}
       <SiteFooter />
