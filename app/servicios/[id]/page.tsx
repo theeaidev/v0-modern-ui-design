@@ -20,6 +20,9 @@ import { ServiceAdvertiserInfo } from "@/components/service-advertiser-info";
 import { notFound } from "next/navigation";
 import { SanitizedHtml } from "@/components/sanitized-html";
 
+// Prevent prerendering during build for dynamic content
+export const dynamic = 'force-dynamic';
+
 // Define type for advertiser data within MappedServiceData
 interface MappedServiceAdvertiser {
   name: string;
@@ -197,7 +200,7 @@ async function fetchAndMapAdById(id: string): Promise<MappedServiceData | null> 
   return service;
 }
 
-export default async function ServicioDetailPage({ params }: { params: { id: string } }) {
+export default async function ServicioDetailPage({ params }: { params: any /* Using any due to potential Turbopack issue (Next.js >15) expecting Promise */ }) {
   const service: MappedServiceData | null = await fetchAndMapAdById(params.id);
   
 
