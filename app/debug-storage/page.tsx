@@ -30,8 +30,8 @@ export default async function DebugStoragePage() {
     await supabase.storage.from('service-listings').list(`${userId}`)
 
   // Try to get images and videos
-  let imageFiles = []
-  let videoFiles = []
+  let imageFiles: Array<{ name: string; url: string }> = []
+  let videoFiles: Array<{ name: string; url: string }> = []
   
   if (!userFolderError && userFolders) {
     // Check for images folder
