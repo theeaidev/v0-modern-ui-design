@@ -8,7 +8,12 @@ import { SiteFooter } from "@/components/site-footer"
 // Prevent prerendering during build
 export const dynamic = 'force-dynamic'
 
-export default async function EditServiceListingPage({ params }: { params: { id: string } }) {
+interface EditServiceListingPageProps {
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default async function EditServiceListingPage({ params }: EditServiceListingPageProps) {
   const supabase = await createServerClient()
   const {
     data: { session },
