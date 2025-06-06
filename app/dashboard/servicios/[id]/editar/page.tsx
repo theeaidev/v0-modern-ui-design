@@ -8,12 +8,12 @@ import { SiteFooter } from "@/components/site-footer"
 // Prevent prerendering during build
 export const dynamic = 'force-dynamic'
 
-interface EditServiceListingPageProps {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
+// Former EditServiceListingPageProps interface removed.
 
-export default async function EditServiceListingPage({ params }: EditServiceListingPageProps) {
+export default async function EditServiceListingPage({ params: rawParams }: { params: any /* TODO: Revisit due to potential Turbopack issue (Next.js >15) expecting Promise for params */ }) {
+  // Cast rawParams to expected shape. The 'any' type in signature is a workaround for a potential Turbopack/Next.js typing issue.
+  const params = rawParams as { id: string };
+
   const supabase = await createServerClient()
   const {
     data: { session },
