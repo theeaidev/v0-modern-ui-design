@@ -105,7 +105,15 @@ export async function getServiceListings({
     const { data, error, count } = await query
 
     if (error) {
-      throw new Error(error.message)
+      // Log Supabase specific error details before throwing
+      console.error("Supabase query error in getServiceListings:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        fullError: error
+      });
+      throw error; // Re-throw the original Supabase error object
     }
 
     // Process the results to include media URLs from storage
@@ -181,9 +189,17 @@ export async function getServiceListings({
       limit,
       totalPages: count ? Math.ceil(count / limit) : 0,
     }
-  } catch (error) {
-    console.error("Error fetching service listings:", error)
-    throw error
+  } catch (error: any) {
+    console.error("Detailed error fetching service listings:", {
+      message: error.message,
+      code: error.code,      // Supabase specific error code
+      details: error.details,  // Supabase specific error details
+      hint: error.hint,        // Supabase specific error hint
+      fullError: error         // The full error object
+    });
+    // Also log the parameters with which the function was called
+    console.error("getServiceListings called with params:", { page, limit, category_id, subcategory_id, city, search, sort, user_id, status, is_featured });
+    throw error; // Re-throw the original error or a new one with more context
   }
 }
 
@@ -784,13 +800,30 @@ export async function isFavorited(serviceId: string) {
       .maybeSingle()
 
     if (error) {
-      throw new Error(error.message)
+      console.error("Supabase error in isFavorited (query):", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        serviceId: serviceId,
+        userId: user?.id, // user might be null if auth failed earlier
+        fullError: error
+      });
+      throw error; // Re-throw the original Supabase error object to be caught by the outer catch
     }
 
     return { favorited: !!data }
-  } catch (error) {
-    console.error("Error checking if favorited:", error)
-    throw error
+  } catch (error: any) {
+    console.error("Overall error in isFavorited function:", {
+      message: error.message,
+      serviceId: serviceId, 
+      code: error.code,      // If the error object has Supabase specific fields
+      details: error.details,
+      hint: error.hint,
+      fullError: error
+    });
+    // For non-UUIDs or other errors, return a mock response as per existing logic
+    return { favorited: false, error: error.message || "Unknown error while checking favorite status." };
   }
 }
 
@@ -812,8 +845,15 @@ export async function getFavoritedServiceListings(): Promise<{ id: string; title
       .eq("user_id", user.id)
 
     if (favoritesError) {
-      console.error("Error fetching user favorites:", favoritesError)
-      throw new Error(favoritesError.message)
+      console.error("Supabase error in getFavoritedServiceListings (query):", {
+        message: favoritesError.message,
+        code: favoritesError.code,
+        details: favoritesError.details,
+        hint: favoritesError.hint,
+        userId: user?.id, // user might be null if auth failed earlier
+        fullError: favoritesError
+      });
+      throw favoritesError; // Re-throw the original Supabase error object to be caught by the outer catch
     }
 
     if (!favorites || favorites.length === 0) {
@@ -835,8 +875,14 @@ export async function getFavoritedServiceListings(): Promise<{ id: string; title
     }
 
     return listings || []
-  } catch (error) {
-    console.error("Error in getFavoritedServiceListings:", error)
+  } catch (error: any) {
+    console.error("Overall error in getFavoritedServiceListings function:", {
+      message: error.message,
+      code: error.code,      // If the error object has Supabase specific fields
+      details: error.details,
+      hint: error.hint,
+      fullError: error
+    });
     // Depending on your error handling strategy, you might re-throw, or return empty/error indicator
     return [] 
   }

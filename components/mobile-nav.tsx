@@ -120,10 +120,10 @@ export function MobileNav({ currentPath }: MobileNavProps) {
                   <div className="border-t border-gray-100 my-4 pt-4"></div>
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 flex items-center justify-center text-white font-medium">
-                      {user.email.charAt(0).toUpperCase()}
+                      {user.email && user.email.length > 0 ? user.email.charAt(0).toUpperCase() : '?'}
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-sm font-medium">{user.email}</p>
+                      <p className="text-sm font-medium">{user.email || "Usuario"}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <span className="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span>
                         Cuenta verificada
