@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
 
   try {
     // Log all cookies for debugging
-    console.log("[MIDDLEWARE] Cookies:", req.cookies ? Array.from(req.cookies.entries()) : "No cookies")
+    console.log("[MIDDLEWARE] Cookies:", req.cookies.getAll().length > 0 ? req.cookies.getAll() : "No cookies")
     // Create a Supabase client
     const supabase = createMiddlewareClient({ req, res })
 
