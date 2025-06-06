@@ -57,7 +57,8 @@ export default function LoginPage() {
         return
       }
 
-      // Redirect will happen automatically via the useEffect above
+      router.refresh(); // Refresh the current route, re-running middleware with the new session
+      router.push(redirectPath); // Proceed with client-side navigation
     } catch (err) {
       setError("An unexpected error occurred. Please try again.")
       console.error(err)
