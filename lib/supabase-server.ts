@@ -1,11 +1,10 @@
-import { createServerClient as createServerClientSupabase } from "@supabase/ssr"
+import { createServerClient as createServerClientSupabase, type CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import type { Database } from "@/types/supabase"
 
-// This function should ONLY be used in Server Components
-export async function createServerClient() {
-  // Next.js cookies() is async in newer versions, so we await it
-  const cookieStore = await cookies()
+// This function should ONLY be used in Server Components, Server Actions, and Route Handlers
+export async function createServerClient() { // Reverted to original name and made async
+  const cookieStore = await cookies() // Must await cookies()
 
   return createServerClientSupabase<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,14 +14,18 @@ export async function createServerClient() {
         get(name: string) {
           return cookieStore.get(name)?.value
         },
-        set(name: string, value: string, options: any) {
-          // This is only used for server components, which cannot set cookies
+        set(name: string, value: string, options: CookieOptions) {
+          // In Server Components/Actions, direct cookie setting to the browser response is not possible here.
+          // Middleware handles setting cookies on the response.
+          // This 'set' is for Supabase's internal use or if the underlying store was writable.
+          // console.log(`Supabase server client: 'set' called for cookie ${name}. This is a no-op in this context.`);
         },
-        remove(name: string, options: any) {
-          // This is only used for server components, which cannot remove cookies
+        remove(name: string, options: CookieOptions) {
+          // Similar to 'set', this is a no-op in this context for browser response.
+          // console.log(`Supabase server client: 'remove' called for cookie ${name}. This is a no-op in this context.`);
         },
       },
-    },
+    }
   )
 }
 
