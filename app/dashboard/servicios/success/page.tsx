@@ -12,11 +12,14 @@ export const metadata: Metadata = {
   description: "Tu anuncio ha sido creado y está pendiente de revisión.",
 }
 
-interface SuccessPageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
-}
+// Prevent prerendering during build for dynamic content
+export const dynamic = 'force-dynamic'
 
-export default async function SuccessPage({ searchParams }: SuccessPageProps) {
+export default async function SuccessPage({ 
+  searchParams 
+}: { 
+  searchParams: any /* Using any due to potential Turbopack issue (Next.js >15) expecting Promise */ 
+}) {
   const supabase = await createServerClient() // Added await
   const id = searchParams.id
 
