@@ -22,10 +22,12 @@ import { updateProfile, uploadAvatar, uploadBusinessLogo } from "@/app/actions/p
 import type { Profile, ProfileFormData } from "@/types/profile"
 
 interface ProfileFormProps {
-  profile: Profile
+  profile: Profile;
+  onSubmit: (formData: ProfileFormData) => Promise<void>;
+  isSubmitting: boolean;
 }
 
-export function ProfileForm({ profile }: ProfileFormProps) {
+export function ProfileForm({ profile, onSubmit, isSubmitting }: ProfileFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -63,29 +65,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-    setSuccess(false)
+    e.preventDefault();
+    // setError(null); // Error handling is now managed by the wrapper via its onSubmit
+    // setSuccess(false); // Success handling is now managed by the wrapper
 
-    try {
-      const { error, success } = await updateProfile(formData)
-
-      if (error) {
-        setError(error)
-        return
-      }
-
-      setSuccess(true)
-      // Refresh the page to show updated data
-      router.refresh()
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.")
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    // Delegate submission to the onSubmit prop from the wrapper
+    await onSubmit(formData);
+  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -547,8 +533,8 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Guardando..." : "Guardar cambios"}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Guardando..." : "Guardar cambios"}
         </Button>
       </div>
     </form>

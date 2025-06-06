@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-## ProjectSetup
+## Project Setup
 
 - Continue using pnpm for package management as per project convention.
 - Keep Next.js, TypeScript, and other key dependencies (Supabase, Tailwind CSS, shadcn/ui) updated to stable versions.
@@ -16,7 +16,7 @@ trigger: always_on
 - Utilize `middleware.ts` for cross-cutting concerns like authentication checks and request/response modifications.
 - Store utility functions in `lib/` and custom type definitions in `types/`.
 
-## CodeStyleAndConventions
+## CodeStyle And Conventions
 
 - Adhere to TypeScript best practices, including strong typing for all variables, function parameters, and return types. Maintain `strict: true` in `tsconfig.json`.
 - Follow the default Next.js ESLint configuration for code style and linting. Strive to resolve all linting errors and warnings.
@@ -26,7 +26,7 @@ trigger: always_on
 - Define explicit prop types for all React components using TypeScript interfaces or types.
 - Prefer functional components with React Hooks over class components.
 
-## SupabaseIntegration
+## Supabase Integration
 
 - Use the Supabase client libraries (`@supabase/supabase-js`, `@supabase/auth-helpers-nextjs`, `@supabase/ssr`) for all interactions with Supabase services (database, auth, storage).
 - Implement Row Level Security (RLS) policies in Supabase to enforce data access control at the database level.
@@ -41,7 +41,6 @@ trigger: always_on
 - Protect all sensitive API routes and Server Actions by robustly verifying user authentication and authorization using Supabase Auth.
 - Never hardcode secrets in the codebase.
 - Utilize parameterized queries or Supabase's query builders to prevent SQL injection vulnerabilities when interacting with the database.
-- Regularly audit and update dependencies to patch known security vulnerabilities. Use `pnpm audit` to identify issues.
 
 ## Performance
 
@@ -52,7 +51,7 @@ trigger: always_on
 - Optimize database queries by selecting only necessary columns, using appropriate filters, and ensuring relevant database indexes are in place.
 - Minimize layout shifts by providing explicit dimensions for images, ads, and other asynchronously loaded content.
 
-## MaintainabilityAndTesting
+## Maintainability And Testing
 
 - Write modular and reusable code. Decompose complex components and functions into smaller, single-responsibility units.
 - Strive to eliminate all TypeScript and ESLint build errors. 
@@ -62,11 +61,12 @@ trigger: always_on
 - Ensure consistent and robust error handling across the application. Log errors effectively for debugging and provide user-friendly feedback.
 - Use environment variables for all configurations that vary between deployment environments (development, staging, production).
 
-## UIAndUX
+## UI And UX
 
 - Leverage shadcn/ui components for building the user interface, customizing them with Tailwind CSS as needed, following established project patterns.
 - Ensure all UI components and user interactions are accessible (a11y compliant), using semantic HTML and ARIA attributes where necessary.
 - Provide clear visual feedback for user actions, loading states, and errors using components like `Sonner` for toasts.
+- Always ensure that every page created is fully responsive and optimized for mobile and tablet devices.
 
 ## AgentCollaboration
 
