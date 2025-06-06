@@ -318,9 +318,9 @@ export default function HomeClient() {
 
 
   /* Formulario de contacto */
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.target;
+    const form = e.currentTarget; // Use e.currentTarget
     const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: {
@@ -329,9 +329,9 @@ export default function HomeClient() {
         },
         body: JSON.stringify({
             access_key: "ebc84ac2-0f98-4711-9a30-db8f98345448",
-            name: e.target.name.value,
-            email: e.target.email.value,
-            message: e.target.message.value,
+            name: (form.elements.namedItem('name') as HTMLInputElement).value,
+            email: (form.elements.namedItem('email') as HTMLInputElement).value,
+            message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
             subject: "Mensaje del Formulario de Directorio Latinos",
         }),
     });
@@ -339,10 +339,10 @@ export default function HomeClient() {
     if (result.success) {
         console.log(result);
         setSuccess(true);
-        form.reset();
+        form.reset(); // This should now work correctly
 
-        // Oculta el mensaje después de unos segundos
-        setTimeout(() => setSuccess(false), 3000);
+    // Oculta el mensaje después de unos segundos
+    setTimeout(() => setSuccess(false), 1777);
     }
 
   }
@@ -381,7 +381,7 @@ export default function HomeClient() {
           const imageUrl =
             listing.images && listing.images.length > 0
               ? listing.images[0].url
-              : "/placeholder.svg?height=300&width=400"
+              : "placeholder.svg?height=300&width=400"
 
           return {
             id: id_processed, // Use the processed id
@@ -626,9 +626,9 @@ export default function HomeClient() {
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories.map((category) => (
+              {categories.map((category, index) => (
                 <Link
-                  key={category.name} 
+                  key={`${category.name}-${index}`} 
                   href={`/servicios?categoria=${category.name}`}
                   className="flex flex-col items-center p-4 rounded-lg bg-background hover:bg-primary/5 border transition-colors"
                 >

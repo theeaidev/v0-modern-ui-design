@@ -108,7 +108,7 @@ export default async function AdminDashboardPage() {
                   {/* Content for basic users can go here, e.g., a list. It will expand as needed. */}
                 </div>
                 <div> {/* Bottom content */}
-                  <Link href={`/admin/users?tier=basica`} className="text-sm text-blue-600 hover:underline block mb-1">
+                  <Link href={`/admin/user-overview`} className="text-sm text-blue-600 hover:underline block mb-1">
                     Ver Usuarios
                   </Link>
                   {(basicPendingPaymentCount ?? 0) > 0 ? (
@@ -133,7 +133,7 @@ export default async function AdminDashboardPage() {
                   {/* Content for premium users. It will expand as needed. */}
                 </div>
                 <div> {/* Bottom content */}
-                  <Link href={`/admin/users?tier=premium`} className="text-sm text-blue-600 hover:underline block mb-1">
+                  <Link href={`/admin/user-overview`} className="text-sm text-blue-600 hover:underline block mb-1">
                     Ver Usuarios
                   </Link>
                   {(premiumPendingPaymentCount ?? 0) > 0 ? (
@@ -158,7 +158,7 @@ export default async function AdminDashboardPage() {
                   {/* Content for premium gold users. It will expand as needed. */}
                 </div>
                 <div> {/* Bottom content */}
-                  <Link href={`/admin/users?tier=premium_gold`} className="text-sm text-blue-600 hover:underline block mb-1">
+                  <Link href={`/admin/user-overview`} className="text-sm text-blue-600 hover:underline block mb-1">
                     Ver Usuarios
                   </Link>
                   {(premiumGoldPendingPaymentCount ?? 0) > 0 ? (
